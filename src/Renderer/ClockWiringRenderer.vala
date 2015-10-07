@@ -11,9 +11,9 @@ public abstract class WordClock.ClockWiringRenderer : GLib.Object, FrameRenderer
 		this.wiring = wiring;
 	}
 	
-	public void render( Color[,] leds ) {
-		this.render_clock( wiring.getMatrix( leds ), wiring.getMinutes( leds ), wiring.getSeconds( leds ) );
+	public bool render( Color[,] leds ) {
+		return this.render_clock( wiring.getMatrix( leds ), wiring.getMinutes( leds ), wiring.getSeconds( leds ) );
 	}
 	
-	public abstract void render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds );
+	public abstract bool render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds );
 }

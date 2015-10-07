@@ -31,33 +31,34 @@ public class WordClock.Main : GLib.Object {
 			return 1;
 		}*/
 		
-		var rand = new GLib.Rand();
 		
 		Color test = new Color();
 		test.set_hsv(120,255,100);
 		stdout.printf("%u,%u,%u\n", test.r, test.g, test.b);
 		
-		MainLoop loop = new MainLoop();
 		
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
-		var frontpanel = new RhineRuhrGermanFrontPanel();
+		//var frontpanel = new RhineRuhrGermanFrontPanel();
 		var wiring = new MarkusClockWiring();
-		var renderer = new BigTimeRenderer(driver, wiring);
 		
 		try {
-			Thread<int> thread = new Thread<int>.try("REST-Server", () => { return driver.start(renderer); });
+			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new TestSequenceRenderer(driver, wiring)); });
+			thread.join();
+			
+			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new BigTimeRenderer(driver, wiring)); });
+			thread.join();
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
 			return 1;
 		}
 		
-		
-		
+		/*MainLoop loop = new MainLoop();
 		loop.run();
 		
 		//stdout.puts("Terminating. Waiting for threads...\n");
 		
-		//thread.join();
+		
+		*/
 		
 		stdout.puts("Bye!\n");
 		

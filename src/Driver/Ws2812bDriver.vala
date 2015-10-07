@@ -191,11 +191,10 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		var timer = new GLib.Timer();
 		timer.start();
 		
-		while(true) {
-			this.encodeToFb(bottom);
-			bottom = !bottom;
-			
-			renderer.render( this.leds );
+		var cont = true;
+		
+		while(cont) {
+			cont = renderer.render( this.leds );
 			
 			if(timer.elapsed() > 1) {
 				stdout.printf("%u fps\n", frame);
@@ -208,6 +207,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			// wait for vsync
 			var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
 			GLib.assert(ret==0); GLib.debug("wait for vsync");
+			
+			this.encodeToFb(bottom);
+			bottom = !bottom;
 		}
 		
 		return 0;

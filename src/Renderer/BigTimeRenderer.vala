@@ -19,8 +19,9 @@ public class WordClock.BigTimeRenderer : ClockWiringRenderer {
 	/**
 	 * Renders time
 	 * @param leds Array of LED RGB values
+	 * @return Continue
 	 */
-	public override void render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds ) {
+	public override bool render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds ) {
 		// clear
 		driver.clearLEDs();
 		
@@ -39,6 +40,8 @@ public class WordClock.BigTimeRenderer : ClockWiringRenderer {
 				leds_seconds[i].set_hsv( 0, 0, 20 );
 			}
 		}
+		
+		return true;
 	}
 	
 	public void render_number( Color[,] leds_matrix, uint8 number, uint8 x, uint8 y, uint16 h ){

@@ -17,8 +17,9 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 	/**
 	 * Renders time
 	 * @param leds Array of LED RGB values
+	 * @return Continue
 	 */
-	public override void render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds ) {
+	public override bool render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds ) {
 		// clear
 		driver.clearLEDs();
 		
@@ -59,5 +60,7 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 				leds_seconds[i].b = 20;
 			}
 		}
+		
+		return true;
 	}
 }
