@@ -36,29 +36,45 @@ public class WordClock.Main : GLib.Object {
 		test.set_hsv(120,255,100);
 		stdout.printf("%u,%u,%u\n", test.r, test.g, test.b);
 		
-		
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
-		//var frontpanel = new RhineRuhrGermanFrontPanel();
+		var frontpanel = new RhineRuhrGermanFrontPanel();
 		var wiring = new MarkusClockWiring();
+		
+		MainLoop loop = new MainLoop();
+		var buzzer = new Buzzer();
+		
+		try{
+			var context = new Lirc.Context("wordclock-remote");
+			var listener = new Lirc.Listener(context, loop.get_context());
+		
+			listener.button.connect((device_conf, interpreted_key_code, repetition_number) => {
+				buzzer.beep(2000,255,100);
+				stdout.printf("%s %s %u", device_conf, interpreted_key_code, repetition_number);
+			});
+		} catch( Error e) {
+			stderr.printf("Error: %s\n", e.message);
+			return 1;
+		}
 		
 		try {
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new TestSequenceRenderer(driver, wiring)); });
+			
+			buzzer.beep(2000,255,100);
+			buzzer.beep(4000,255,100);
+			
 			thread.join();
 			
-			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new BigTimeRenderer(driver, wiring)); });
-			thread.join();
+			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new TimeRenderer(frontpanel, driver, wiring)); });
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
 			return 1;
 		}
 		
-		/*MainLoop loop = new MainLoop();
+		
 		loop.run();
 		
 		//stdout.puts("Terminating. Waiting for threads...\n");
 		
-		
-		*/
 		
 		stdout.puts("Bye!\n");
 		
