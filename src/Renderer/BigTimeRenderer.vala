@@ -7,8 +7,11 @@ using WordClock;
 public class WordClock.BigTimeRenderer : ClockWiringRenderer {
 	private LedDriver driver;
 	
+	public uint8 brightness = 255;
+	public bool background = true;
+	
 	private uint16[] NUMBERS_35 = {
-		0x7B6F, 0x1749, 0x73E7, 0x73CF, 0x5BC9, 0x79CF, 0x79EF, 0x7294, 0x7BEF, 0x7BCF, 
+		0x7B6F, 0x1749, 0x73E7, 0x73CF, 0x5BC9, 0x79CF, 0x79EF, 0x7292, 0x7BEF, 0x7BCF, 
 	};
 	
 	public BigTimeRenderer( LedDriver driver, ClockWiring wiring ) {
@@ -35,9 +38,9 @@ public class WordClock.BigTimeRenderer : ClockWiringRenderer {
 		// seconds
 		for(int i=0;i<leds_seconds.length;i++) {
 			if(time.get_second() == i) {
-				leds_seconds[i].set_hsv( 0, 255, 255 );
+				leds_seconds[i].set_hsv( 0, 255, this.brightness );
 			}else{
-				leds_seconds[i].set_hsv( 0, 0, 20 );
+				leds_seconds[i].set_hsv( 0, 0, (background) ? this.brightness/10 : 0 );
 			}
 		}
 		
@@ -50,7 +53,7 @@ public class WordClock.BigTimeRenderer : ClockWiringRenderer {
 				int _x = x+(2-i%3);
 				int _y = y+(4-i/3);
 				if(_x < 0 || _x > 10 || _y < 0 || _y > 9) continue;
-				leds_matrix[ _x, _y ].set_hsv(h,255,100); 
+				leds_matrix[ _x, _y ].set_hsv(h,255,this.brightness); 
 			}
 		}
 	}

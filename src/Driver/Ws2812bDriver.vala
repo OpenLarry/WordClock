@@ -11,6 +11,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	private weak uint16 *fb;
 	private weak Linux.Framebuffer.VarScreenInfo fb_var; 
 	
+	private GLib.Cancellable? cancellable;
+	
 	private Color[,] leds;
 	private uint8[] ports;
 	
@@ -19,7 +21,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	 * @param ports Used display ports
 	 * @param leds Number of LEDs per strip
 	 */
-	public Ws2812bDriver( uint8[] ports, int leds, int fps ) {
+	public Ws2812bDriver( uint8[] ports, int leds, int fps, GLib.Cancellable? cancellable = null ) {
+		this.cancellable = cancellable;
+		
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
 		GLib.assert(this.fd>=0); GLib.debug("device opened");
 		
@@ -193,7 +197,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		
 		var cont = true;
 		
-		while(cont) {
+		while(cont && !this.cancellable.is_cancelled()) {
 			cont = renderer.render( this.leds );
 			
 			if(timer.elapsed() > 1) {

@@ -8,6 +8,9 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 	private LedDriver driver;
 	private FrontPanel frontpanel;
 	
+	public uint8 brightness = 255;
+	public bool background = true;
+	
 	public TimeRenderer( FrontPanel frontpanel, LedDriver driver, ClockWiring wiring ) {
 		base(wiring);
 		this.driver = driver;
@@ -29,14 +32,14 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 		var words = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
 		for(int i=0;i<words.length[0];i++) {
 			for(int j=0;j<words[i,2];j++) {
-				leds_matrix[words[i,0]+j,words[i,1]].set_hsv((uint16) time.get_hour()*24 + time.get_minute() / 4, 255, 255);
+				leds_matrix[words[i,0]+j,words[i,1]].set_hsv((uint16) time.get_hour()*24 + time.get_minute() / 4, 255, this.brightness);
 			}
 		}
 		
 		// minutes
 		for(int i=0;i<4;i++) {
 			if(i<time.get_minute()%5) {
-				leds_minutes[i].set_hsv((uint16) time.get_hour()*24 + time.get_minute() / 4, 255, 255);
+				leds_minutes[i].set_hsv((uint16) time.get_hour()*24 + time.get_minute() / 4, 255, this.brightness);
 			}else{
 				leds_minutes[i].set_hsv(0, 0, 0);
 			}
@@ -45,9 +48,9 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 		// seconds
 		for(int i=0;i<leds_seconds.length;i++) {
 			if(time.get_second() == i) {
-				leds_seconds[i].set_hsv((uint16) time.get_minute()*6 + time.get_second()/10, 255, 255);
+				leds_seconds[i].set_hsv((uint16) time.get_minute()*6 + time.get_second()/10, 255, this.brightness);
 			}else{
-				leds_seconds[i].set_hsv(0, 0, 20);
+				leds_seconds[i].set_hsv(0, 0, (background) ? this.brightness/10 : 0);
 			}
 		}
 		
