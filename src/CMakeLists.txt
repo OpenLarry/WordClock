@@ -1,0 +1,79 @@
+find_package(PkgConfig)
+pkg_check_modules(GOBJECT REQUIRED gobject-2.0)
+pkg_check_modules(LIBSOUP REQUIRED libsoup-2.4)
+
+
+set(CFLAGS
+	${GOBJECT_CFLAGS} ${GOBJECT_CFLAGS_OTHER}
+	${LIBSOUP_CFLAGS} ${LIBSOUP_CFLAGS_OTHER}
+)
+add_definitions(${CFLAGS})
+
+set(LIBS
+	${GOBJECT_LIBRARIES}
+	${LIBSOUP_LIBRARIES}
+)
+link_libraries(${LIBS})
+
+set(LIB_PATHS
+	${GOBJECT_LIBRARY_DIRS}
+	${LIBSOUP_LIBRARY_DIRS}
+)
+link_directories(${LIB_PATHS})
+
+set(VALA_SRC
+	Main.vala
+	RestServer.vala
+	Ws2812bDriver.vala
+	Color.vala
+	Wiring.vala
+	MarkusWiring.vala
+	FrontPanel.vala
+	GermanFrontPanel.vala
+	RhineRuhrGermanFrontPanel.vala
+	WestGermanFrontPanel.vala
+	EastGermanFrontPanel.vala
+	FrameRenderer.vala
+	ClockRenderer.vala
+)
+
+# Vala segfaults if its output dirs are not existant. Therefore make sure they
+# are there.
+macro(make_compile_directory directory)
+	if (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+		make_directory("${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+	endif (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+endmacro(make_compile_directory)
+
+vala_precompile(VALA_C
+	${VALA_SRC}
+PACKAGES 
+	libsoup-2.4
+#	gio-2.0
+#	poppler-glib
+#	gtk+-2.0
+	posix
+	linux
+OPTIONS 
+	--thread
+	--target-glib 2.42
+#	--debug
+#GENERATE_HEADER
+#	wordclock
+#GENERATE_VAPI
+#	wordclock
+)
+
+add_executable(wordclock
+  	${VALA_C}
+)
+
+# explicitly add libraries (needed e.g. for Fedora 13+)
+target_link_libraries(wordclock -lm)
+
+install(TARGETS 
+	wordclock
+RUNTIME
+DESTINATION
+	bin
+)
