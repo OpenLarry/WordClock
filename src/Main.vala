@@ -42,7 +42,7 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
 		var frontpanel = new RhineRuhrGermanFrontPanel();
 		var wiring = new MarkusClockWiring();
-		var renderer = new TimeRenderer(frontpanel, driver, wiring);
+		var renderer = new BigTimeRenderer(driver, wiring);
 		
 		try {
 			Thread<int> thread = new Thread<int>.try("REST-Server", () => { return driver.start(renderer); });

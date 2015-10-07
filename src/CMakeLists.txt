@@ -37,6 +37,7 @@ set(VALA_SRC
 	Renderer/FrameRenderer.vala
 	Renderer/TimeRenderer.vala
 	Renderer/ClockWiringRenderer.vala
+	Renderer/BigTimeRenderer.vala
 )
 
 # Vala segfaults if its output dirs are not existant. Therefore make sure they

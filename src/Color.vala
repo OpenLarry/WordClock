@@ -45,7 +45,8 @@ public class WordClock.Color : GLib.Object {
 	public void set_hsv( uint16? h, uint8? s, uint8? v ) {
 		if(h==null || s==null || v==null) this.to_hsv();
 		
-		this.h = h ?? this.h % 360;
+		this.h = h ?? this.h;
+		this.h = this.h % 360;
 		this.s = s ?? this.s;
 		this.v = v ?? this.v;
 		
