@@ -6,8 +6,10 @@ using WordClock;
  */
 public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 	private Wiring wiring;
+	private LedDriver driver;
 	
-	public ClockRenderer( Wiring wiring ) {
+	public ClockRenderer( LedDriver driver, Wiring wiring ) {
+		this.driver = driver;
 		this.wiring = wiring;
 	}
 	
@@ -17,6 +19,9 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 	 */
 	public void render( uint8[,,] leds ) {
 		var panel = new RhineRuhrGermanFrontPanel();
+		
+		// clear
+		driver.clearLEDs();
 		
 		// map wiring
 		var leds_matrix = wiring.getMatrix( leds );

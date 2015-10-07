@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Ws2812bDriver : GLib.Object {
+public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	const string DEVICE = "/dev/fb0";
 	
 	private int fd;
@@ -131,7 +131,10 @@ public class WordClock.Ws2812bDriver : GLib.Object {
 		}
 	}
 	
-	private void clearLEDs() {
+	/**
+	 * Set LEDs to black
+	 */
+	public void clearLEDs() {
 		for(int i=0;i<this.leds.length[0];i++) {
 			for(int j=0;j<this.leds.length[1];j++) {
 				for(int k=0;k<this.leds.length[2];k++) {
@@ -139,6 +142,25 @@ public class WordClock.Ws2812bDriver : GLib.Object {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Set framerate
+	 * @param fps Frames per second
+	 */
+	public void setFps( uint16 fps ) {
+		// get frambuffer settings
+		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
+		GLib.assert(ret==0); GLib.debug("got screeninfo");
+		
+		this.fb_var.vsync_len = (uint32)
+			(1000000000000/fps
+			/(this.fb_var.pixclock*(this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len))
+			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/50/(208333*144)-122
+		
+		// put frambuffer settings
+		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
+		GLib.assert(ret==0); GLib.debug("put screeninfo");
 	}
 	
 	/**
@@ -155,8 +177,6 @@ public class WordClock.Ws2812bDriver : GLib.Object {
 		while(true) {
 			this.encodeToFb(bottom);
 			bottom = !bottom;
-			
-			this.clearLEDs();
 			
 			renderer.render( this.leds );
 			

@@ -24,6 +24,7 @@ link_directories(${LIB_PATHS})
 set(VALA_SRC
 	Main.vala
 	RestServer.vala
+	LedDriver.vala
 	Ws2812bDriver.vala
 	Color.vala
 	Wiring.vala

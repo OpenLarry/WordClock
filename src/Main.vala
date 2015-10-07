@@ -32,12 +32,12 @@ public class WordClock.Main : GLib.Object {
 		}*/
 		
 		var rand = new GLib.Rand();
-		var wiring = new MarkusWiring();
-		var renderer = new ClockRenderer(wiring);
 		
 		MainLoop loop = new MainLoop();
 		
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
+		var wiring = new MarkusWiring();
+		var renderer = new ClockRenderer(driver, wiring);
 		
 		try {
 			Thread<int> thread = new Thread<int>.try("REST-Server", () => { return driver.start(renderer); });
