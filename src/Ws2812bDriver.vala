@@ -11,7 +11,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	private weak uint16 *fb;
 	private weak Linux.Framebuffer.VarScreenInfo fb_var; 
 	
-	private uint8[,,] leds;
+	private Color[,] leds;
 	private uint8[] ports;
 	
 	/**
@@ -61,8 +61,12 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.ports = ports;
 		
 		// init LED array
-		this.leds = new uint8[this.ports.length,leds,3];
-		this.clearLEDs();
+		this.leds = new Color[this.ports.length,leds];
+		for(int i=0;i<this.leds.length[0];i++) {
+			for(int j=0;j<this.leds.length[1];j++) {
+				this.leds[i,j] = new Color();
+			}
+		}
 		
 		// map framebuffer into memory
 		this.fb = Posix.mmap(null, this.fb_var.xres_virtual * this.fb_var.yres_virtual * sizeof(uint16), Posix.PROT_READ|Posix.PROT_WRITE, Posix.MAP_SHARED, this.fd, 0);
@@ -94,11 +98,24 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		
 		// fill framebuffer, generate LED timings
 		for(uint8 led=0; led<this.leds.length[1]; led++) {
-			for(uint8 color=0; color<this.leds.length[2]; color++) {
+			for(uint8 color=0; color<3; color++) {
 				for(int8 bit=7; bit>=0; bit--) {
 					uint16 pix = 0x0000;
 					for(int strip=0; strip<this.leds.length[0]; strip++) {
-						if((bool) this.leds[strip,led,color] & (1 << bit))
+						uint8 channel = 0;
+						switch(color) {
+							case 0:
+								channel = this.leds[strip,led].g;
+							break;
+							case 1:
+								channel = this.leds[strip,led].r;
+							break;
+							case 2:
+								channel = this.leds[strip,led].b;
+							break;
+						}
+						
+						if((bool) channel & (1 << bit))
 							pix |= (1 << this.ports[strip]);
 					}
 					
@@ -137,9 +154,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	public void clearLEDs() {
 		for(int i=0;i<this.leds.length[0];i++) {
 			for(int j=0;j<this.leds.length[1];j++) {
-				for(int k=0;k<this.leds.length[2];k++) {
-					this.leds[i,j,k] = 0;
-				}
+				this.leds[i,j].r = 0;
+				this.leds[i,j].g = 0;
+				this.leds[i,j].b = 0;
 			}
 		}
 	}

@@ -33,6 +33,10 @@ public class WordClock.Main : GLib.Object {
 		
 		var rand = new GLib.Rand();
 		
+		Color test = new Color();
+		test.set_hsv(120,255,100);
+		stdout.printf("%u,%u,%u\n", test.r, test.g, test.b);
+		
 		MainLoop loop = new MainLoop();
 		
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
