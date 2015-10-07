@@ -6,10 +6,12 @@ using WordClock;
  */
 public class WordClock.TimeRenderer : ClockWiringRenderer {
 	private LedDriver driver;
+	private FrontPanel frontpanel;
 	
-	public TimeRenderer( LedDriver driver, ClockWiring wiring ) {
+	public TimeRenderer( FrontPanel frontpanel, LedDriver driver, ClockWiring wiring ) {
 		base(wiring);
 		this.driver = driver;
+		this.frontpanel = frontpanel;
 	}
 	
 	/**
@@ -20,12 +22,10 @@ public class WordClock.TimeRenderer : ClockWiringRenderer {
 		// clear
 		driver.clearLEDs();
 		
-		var panel = new RhineRuhrGermanFrontPanel();
-		
 		var time = new DateTime.now_local();
 		
 		// words
-		var words = panel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
+		var words = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
 		for(int i=0;i<words.length[0];i++) {
 			for(int j=0;j<words[i,2];j++) {
 				leds_matrix[words[i,0]+j,words[i,1]].r = 100;
