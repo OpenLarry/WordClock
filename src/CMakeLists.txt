@@ -24,19 +24,19 @@ link_directories(${LIB_PATHS})
 set(VALA_SRC
 	Main.vala
 	RestServer.vala
-	LedDriver.vala
-	Ws2812bDriver.vala
 	Color.vala
-	ClockWiring.vala
-	MarkusClockWiring.vala
-	FrontPanel.vala
-	GermanFrontPanel.vala
-	RhineRuhrGermanFrontPanel.vala
-	WestGermanFrontPanel.vala
-	EastGermanFrontPanel.vala
-	FrameRenderer.vala
-	TimeRenderer.vala
-	ClockWiringRenderer.vala
+	Driver/LedDriver.vala
+	Driver/Ws2812bDriver.vala
+	Wiring/ClockWiring.vala
+	Wiring/MarkusClockWiring.vala
+	FrontPanel/FrontPanel.vala
+	FrontPanel/GermanFrontPanel.vala
+	FrontPanel/RhineRuhrGermanFrontPanel.vala
+	FrontPanel/WestGermanFrontPanel.vala
+	FrontPanel/EastGermanFrontPanel.vala
+	Renderer/FrameRenderer.vala
+	Renderer/TimeRenderer.vala
+	Renderer/ClockWiringRenderer.vala
 )
 
 # Vala segfaults if its output dirs are not existant. Therefore make sure they
