@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.MarkusWiring : GLib.Object, Wiring {
+public class WordClock.MarkusClockWiring : GLib.Object, ClockWiring {
 	
 	public Color[,] getMatrix( Color[,] leds ) {
 		return {

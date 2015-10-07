@@ -40,8 +40,8 @@ public class WordClock.Main : GLib.Object {
 		MainLoop loop = new MainLoop();
 		
 		var driver = new Ws2812bDriver( {4,5,6}, 60, 30 );
-		var wiring = new MarkusWiring();
-		var renderer = new ClockRenderer(driver, wiring);
+		var wiring = new MarkusClockWiring();
+		var renderer = new TimeRenderer(driver, wiring);
 		
 		try {
 			Thread<int> thread = new Thread<int>.try("REST-Server", () => { return driver.start(renderer); });

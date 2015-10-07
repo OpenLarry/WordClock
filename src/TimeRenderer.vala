@@ -4,27 +4,21 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
-	private Wiring wiring;
+public class WordClock.TimeRenderer : ClockWiringRenderer {
 	private LedDriver driver;
 	
-	public ClockRenderer( LedDriver driver, Wiring wiring ) {
+	public TimeRenderer( LedDriver driver, ClockWiring wiring ) {
+		base(wiring);
 		this.driver = driver;
-		this.wiring = wiring;
 	}
 	
 	/**
 	 * Renders time
 	 * @param leds Array of LED RGB values
 	 */
-	public void render( Color[,] leds ) {
+	public override void render_clock( Color[,] leds_matrix, Color[] leds_minutes, Color[] leds_seconds ) {
 		// clear
 		driver.clearLEDs();
-		
-		// map wiring
-		var leds_matrix = wiring.getMatrix( leds );
-		var leds_minutes = wiring.getMinutes( leds );
-		var leds_seconds = wiring.getSeconds( leds );
 		
 		var panel = new RhineRuhrGermanFrontPanel();
 		

@@ -27,15 +27,16 @@ set(VALA_SRC
 	LedDriver.vala
 	Ws2812bDriver.vala
 	Color.vala
-	Wiring.vala
-	MarkusWiring.vala
+	ClockWiring.vala
+	MarkusClockWiring.vala
 	FrontPanel.vala
 	GermanFrontPanel.vala
 	RhineRuhrGermanFrontPanel.vala
 	WestGermanFrontPanel.vala
 	EastGermanFrontPanel.vala
 	FrameRenderer.vala
-	ClockRenderer.vala
+	TimeRenderer.vala
+	ClockWiringRenderer.vala
 )
 
 # Vala segfaults if its output dirs are not existant. Therefore make sure they
