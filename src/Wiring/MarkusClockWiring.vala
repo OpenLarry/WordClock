@@ -6,7 +6,7 @@ using WordClock;
  */
 public class WordClock.MarkusClockWiring : GLib.Object, ClockWiring {
 	
-	public Color[,] getMatrix( Color[,] leds ) {
+	public Color[,] get_matrix( Color[,] leds ) {
 		return {
 			{ // col 00
 				leds[2,30], // row 0
@@ -133,7 +133,16 @@ public class WordClock.MarkusClockWiring : GLib.Object, ClockWiring {
 		};
 	}
 	
-	public Color[] getSeconds( Color[,] leds ) {
+	public Color[] get_dots( Color[,] leds ) {
+		return {
+			leds[0,3],
+			leds[0,2],
+			leds[0,1],
+			leds[0,0],
+		};
+	}
+	
+	public Color[] get_backlight( Color[,] leds ) {
 		return {
 			leds[1,22],
 			leds[1,21],
@@ -195,15 +204,6 @@ public class WordClock.MarkusClockWiring : GLib.Object, ClockWiring {
 			leds[1,25],
 			leds[1,24],
 			leds[1,23],
-		};
-	}
-	
-	public Color[] getMinutes( Color[,] leds ) {
-		return {
-			leds[0,3],
-			leds[0,2],
-			leds[0,1],
-			leds[0,0],
 		};
 	}
 }

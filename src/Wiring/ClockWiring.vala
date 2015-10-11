@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public interface WordClock.ClockWiring : GLib.Object {
-	public abstract Color[,] getMatrix( Color[,] leds );
-	public abstract Color[] getMinutes( Color[,] leds );
-	public abstract Color[] getSeconds( Color[,] leds );
+	public abstract Color[,] get_matrix( Color[,] leds );
+	public abstract Color[] get_dots( Color[,] leds );
+	public abstract Color[] get_backlight( Color[,] leds );
 }

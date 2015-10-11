@@ -13,6 +13,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	
 	private GLib.Cancellable? cancellable;
 	
+	private uint8 fps = 30;
 	private Color[,] leds;
 	private uint8[] ports;
 	
@@ -21,7 +22,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	 * @param ports Used display ports
 	 * @param leds Number of LEDs per strip
 	 */
-	public Ws2812bDriver( uint8[] ports, int leds, int fps, GLib.Cancellable? cancellable = null ) {
+	public Ws2812bDriver( uint8[] ports, int leds, GLib.Cancellable? cancellable = null ) {
 		this.cancellable = cancellable;
 		
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
@@ -54,7 +55,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.fb_var.lower_margin = 1; // can not be 0
 		this.fb_var.hsync_len = 1; // can not be 0
 		this.fb_var.vsync_len = (uint32)
-			(1000000000000/fps
+			(1000000000000/this.fps
 			/(this.fb_var.pixclock*(this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len))
 			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/50/(208333*144)-122
 		
@@ -76,20 +77,20 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.fb = Posix.mmap(null, this.fb_var.xres_virtual * this.fb_var.yres_virtual * sizeof(uint16), Posix.PROT_READ|Posix.PROT_WRITE, Posix.MAP_SHARED, this.fd, 0);
 		GLib.assert(this.fb!=null); GLib.debug("mmap framebuffer");
 		
-		this.clearFb();
+		this.clear_fb();
 		
 		// unblank screen
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 0 /*FB_BLANK_UNBLANK const missing in vala*/);
 		GLib.assert(ret==0); GLib.debug("unblank screen");
 		
-		this.encodeToFb(false);
+		this.encode_to_fb(false);
 	}
 	
 	/**
 	 * Encode LED array into framebuffer LED timings
 	 * @param bottom top or bottom part of framebuffer (for vsync)
 	 */
-	private void encodeToFb(bool bottom) {
+	private void encode_to_fb(bool bottom) {
 		/*
 		 * Every display pixel (16 bit) is _part_ of one WS2812b bit for all 16 LED strips
 		 * Every WS2812b bit needs 6 pixels:
@@ -146,22 +147,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	/**
 	 * Clear framebuffer
 	 */
-	private void clearFb() {
+	private void clear_fb() {
 		for(uint i=0;i < this.fb_var.xres_virtual * this.fb_var.yres_virtual;i++) {
 			this.fb[i] = 0x0000;
-		}
-	}
-	
-	/**
-	 * Set LEDs to black
-	 */
-	public void clearLEDs() {
-		for(int i=0;i<this.leds.length[0];i++) {
-			for(int j=0;j<this.leds.length[1];j++) {
-				this.leds[i,j].r = 0;
-				this.leds[i,j].g = 0;
-				this.leds[i,j].b = 0;
-			}
 		}
 	}
 	
@@ -169,7 +157,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	 * Set framerate
 	 * @param fps Frames per second
 	 */
-	public void setFps( uint16 fps ) {
+	public void set_fps( uint8 fps ) {
+		this.fps = fps;
+		
 		// get frambuffer settings
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
 		GLib.assert(ret==0); GLib.debug("got screeninfo");
@@ -212,7 +202,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
 			GLib.assert(ret==0); GLib.debug("wait for vsync");
 			
-			this.encodeToFb(bottom);
+			this.encode_to_fb(bottom);
 			bottom = !bottom;
 		}
 		

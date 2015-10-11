@@ -37,13 +37,24 @@ public class WordClock.Main : GLib.Object {
 		stdout.printf("%u,%u,%u\n", test.r, test.g, test.b);
 		
 		var cancellable = new Cancellable();
-		var driver = new Ws2812bDriver( {4,5,6}, 60, 30, cancellable );
+		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
+		var renderer = new ClockRenderer(new MarkusClockWiring(),driver);
+		
 		var frontpanel = new RhineRuhrGermanFrontPanel();
-		var wiring = new MarkusClockWiring();
+		var time = new TimeRenderer(frontpanel);
+		renderer.add_matrix_renderer("Time", time);
+		renderer.add_dots_renderer("Time", time);
 		
-		var time = new TimeRenderer(frontpanel, driver, wiring);
-		var bigtime = new BigTimeRenderer(driver, wiring);
+		var seconds = new SecondsRenderer();
+		renderer.add_backlight_renderer("Seconds", seconds);
 		
+		var bigtime = new BigTimeRenderer();
+		renderer.add_matrix_renderer("BigTime", bigtime);
+		
+		var testseq = new TestSequenceRenderer();
+		renderer.add_matrix_renderer("TestSequence", testseq);
+		renderer.add_dots_renderer("TestSequence", testseq);
+		renderer.add_backlight_renderer("TestSequence", testseq);
 		
 		MainLoop loop = new MainLoop();
 		
@@ -56,8 +67,7 @@ public class WordClock.Main : GLib.Object {
 				
 				if(interpreted_key_code == "STROBE" && repetition_number == 0) cancellable.cancel();
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
-					time.background = !time.background;
-					bigtime.background = !bigtime.background;
+					seconds.background = !seconds.background;
 				}
 				
 				if(interpreted_key_code == "UP") {
@@ -77,20 +87,26 @@ public class WordClock.Main : GLib.Object {
 		try {
 			Thread<int> mainThread = new Thread<int>.try("MainLoop", () => { loop.run(); return 0; });
 			
-			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new TestSequenceRenderer(driver, wiring)); });
+			renderer.activate("TestSequence");
+			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
-			Buzzer.beep(100,2000);
-			Buzzer.beep(100,4000);
+			
+			//Buzzer.beep(100,2000);
+			//Buzzer.beep(400,4000);
 			
 			thread.join();
 			
+			renderer.activate("Seconds");
+			
 			while(true) {
 				cancellable.reset();
-				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(time); });
+				renderer.activate("Time");
+				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 				thread.join();
 				
 				cancellable.reset();
-				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(bigtime); });
+				renderer.activate("BigTime");
+				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 				thread.join();
 			}
 			
