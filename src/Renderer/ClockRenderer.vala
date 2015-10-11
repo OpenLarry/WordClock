@@ -4,10 +4,10 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public abstract class WordClock.ClockWiringRenderer : GLib.Object, FrameRenderer {
+public abstract class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 	private ClockWiring wiring;
 	
-	public ClockWiringRenderer( ClockWiring wiring ) {
+	public ClockRenderer( ClockWiring wiring ) {
 		this.wiring = wiring;
 	}
 	

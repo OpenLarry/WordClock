@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.BigTimeRenderer : ClockWiringRenderer {
+public class WordClock.BigTimeRenderer : ClockRenderer {
 	private LedDriver driver;
 	
 	public uint8 brightness = 255;

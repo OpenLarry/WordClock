@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TestSequenceRenderer : ClockWiringRenderer {
+public class WordClock.TestSequenceRenderer : ClockRenderer {
 	private LedDriver driver;
 	
 	private uint8 i=0;

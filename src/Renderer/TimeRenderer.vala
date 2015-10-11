@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TimeRenderer : ClockWiringRenderer {
+public class WordClock.TimeRenderer : ClockRenderer {
 	private LedDriver driver;
 	private FrontPanel frontpanel;
 	

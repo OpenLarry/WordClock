@@ -41,7 +41,7 @@ set(VALA_SRC
 	FrontPanel/EastGermanFrontPanel.vala
 	Renderer/FrameRenderer.vala
 	Renderer/TimeRenderer.vala
-	Renderer/ClockWiringRenderer.vala
+	Renderer/ClockRenderer.vala
 	Renderer/BigTimeRenderer.vala
 	Renderer/TestSequenceRenderer.vala
 )
