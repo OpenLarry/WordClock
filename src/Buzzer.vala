@@ -13,23 +13,22 @@ public class WordClock.Buzzer : GLib.Object {
 	const string PWM_PATH_DUTY_CYCLE = "/sys/class/pwm/pwmchip%u/pwm%u/duty_cycle";
 	const string PWM_PATH_ENABLE = "/sys/class/pwm/pwmchip%u/pwm%u/enable";
 	
-	
-	public Buzzer( ) {
-		try {
-			var file = GLib.File.new_for_path( PWM_PATH_EXPORT.printf(PWM_CHIP) );
-			var ostream = file.append_to(FileCreateFlags.NONE);
-			var dostream = new GLib.DataOutputStream( ostream );
-			dostream.put_string("%u\n".printf(PWM_PORT));
-		} catch( Error e ) {
-			// ignore error if pwm port is already exported
-		}
-	}
-	
-	
-	public void beep( uint16 freq, uint8 volume, uint16 msec ) {
+	public static void beep( uint16 msec = 250, uint16 freq = 2000, uint8 volume = 255 ) {
 		try {
 			var file = GLib.File.new_for_path( PWM_PATH_PERIOD.printf(PWM_CHIP,PWM_PORT) );
-			var ostream = file.append_to(FileCreateFlags.NONE);
+			GLib.FileOutputStream ostream;
+			try{
+				ostream = file.append_to(FileCreateFlags.NONE);
+			} catch( GLib.FileError e ) {
+				if( e is FileError.NOENT ) {
+					var dos = new GLib.DataOutputStream( GLib.File.new_for_path( PWM_PATH_EXPORT.printf(PWM_CHIP) ).append_to(FileCreateFlags.NONE) );
+					dos.put_string("%u\n".printf(PWM_PORT));
+					
+					ostream = file.append_to(FileCreateFlags.NONE);
+				}else{
+					throw e;
+				}
+			}
 			var dostream = new GLib.DataOutputStream( ostream );
 			dostream.put_string("%u\n".printf(1000000000/freq));
 			

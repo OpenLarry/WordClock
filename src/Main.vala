@@ -46,14 +46,13 @@ public class WordClock.Main : GLib.Object {
 		
 		
 		MainLoop loop = new MainLoop();
-		var buzzer = new Buzzer();
 		
 		try{
 			var context = new Lirc.Context("wordclock-remote");
 			var listener = new Lirc.Listener(context, loop.get_context());
 		
 			listener.button.connect((device_conf, interpreted_key_code, repetition_number) => {
-				if(repetition_number == 0) buzzer.beep(2000,255,10);
+				if(repetition_number == 0) Buzzer.beep(10);
 				
 				if(interpreted_key_code == "STROBE" && repetition_number == 0) cancellable.cancel();
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
@@ -80,8 +79,8 @@ public class WordClock.Main : GLib.Object {
 			
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(new TestSequenceRenderer(driver, wiring)); });
 			
-			buzzer.beep(2000,255,100);
-			buzzer.beep(4000,255,100);
+			Buzzer.beep(100,2000);
+			Buzzer.beep(100,4000);
 			
 			thread.join();
 			
