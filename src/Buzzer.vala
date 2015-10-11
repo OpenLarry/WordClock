@@ -19,8 +19,8 @@ public class WordClock.Buzzer : GLib.Object {
 			GLib.FileOutputStream ostream;
 			try{
 				ostream = file.append_to(FileCreateFlags.NONE);
-			} catch( GLib.FileError e ) {
-				if( e is FileError.NOENT ) {
+			} catch( IOError e ) {
+				if( e is IOError.NOT_FOUND ) {
 					var dos = new GLib.DataOutputStream( GLib.File.new_for_path( PWM_PATH_EXPORT.printf(PWM_CHIP) ).append_to(FileCreateFlags.NONE) );
 					dos.put_string("%u\n".printf(PWM_PORT));
 					
