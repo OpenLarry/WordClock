@@ -71,10 +71,10 @@ public class WordClock.Main : GLib.Object {
 				}*/
 				
 				if(interpreted_key_code == "UP") {
-					bigtime.brightness += 10;
+					//bigtime.brightness += 10;
 				}
 				if(interpreted_key_code == "DOWN") {
-					bigtime.brightness -= 10;
+					//bigtime.brightness -= 10;
 				}
 			});
 		} catch( Error e) {
