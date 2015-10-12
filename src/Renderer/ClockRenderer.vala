@@ -33,34 +33,34 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 		this.backlight_renderers.set( name, renderer );
 	}
 	
-	public bool activate( string name ) {
-		var ret = false;
+	public bool activate( string? matrix_name, string? dots_name, string? backlight_name ) {
+		var ret = true;
 		
 		uint8 min = 2;
 		uint8 max = uint8.MAX;
 		
-		if(this.matrix_renderers.has_key( name )) {
-			var matrix = this.matrix_renderers.get( name );
+		if(this.matrix_renderers.has_key( matrix_name )) {
+			var matrix = this.matrix_renderers.get( matrix_name );
 			matrix.activate();
 			this.matrix = matrix;
-			
-			ret = true;
+		}else{
+			ret = false;
 		}
 		
-		if(this.dots_renderers.has_key( name )) {
-			var dots = this.dots_renderers.get( name );
+		if(this.dots_renderers.has_key( dots_name )) {
+			var dots = this.dots_renderers.get( dots_name );
 			dots.activate();
 			this.dots = dots;
-			
-			ret = true;
+		}else{
+			ret = false;
 		}
 		
-		if(this.backlight_renderers.has_key( name )) {
-			var backlight = this.backlight_renderers.get( name );
+		if(this.backlight_renderers.has_key( backlight_name )) {
+			var backlight = this.backlight_renderers.get( backlight_name );
 			backlight.activate();
 			this.backlight = backlight;
-			
-			ret = true;
+		}else{
+			ret = false;
 		}
 		
 		uint8[] range = this.matrix.get_fps_range();
@@ -75,7 +75,7 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 		min = uint8.max( min, range[0] );
 		max = uint8.min( max, range[1] );
 		
-		if(min > max) stderr.printf("min FPS > max FPS ! \n");
+		if(min > max) stderr.printf("min FPS > max FPS !\n");
 		
 		driver.set_fps(min);
 		

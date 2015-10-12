@@ -56,6 +56,11 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("TestSequence", testseq);
 		renderer.add_backlight_renderer("TestSequence", testseq);
 		
+		var black = new ColorRenderer();
+		renderer.add_matrix_renderer("Black", black);
+		renderer.add_dots_renderer("Black", black);
+		renderer.add_backlight_renderer("Black", black);
+		
 		MainLoop loop = new MainLoop();
 		
 		try{
@@ -85,7 +90,7 @@ public class WordClock.Main : GLib.Object {
 		try {
 			Thread<int> mainThread = new Thread<int>.try("MainLoop", () => { loop.run(); return 0; });
 			
-			renderer.activate("TestSequence");
+			renderer.activate("TestSequence","TestSequence","TestSequence");
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			
@@ -94,16 +99,14 @@ public class WordClock.Main : GLib.Object {
 			
 			thread.join();
 			
-			renderer.activate("Seconds");
-			
 			while(true) {
 				cancellable.reset();
-				renderer.activate("Time");
+				renderer.activate("Time","Time","Seconds");
 				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 				thread.join();
 				
 				cancellable.reset();
-				renderer.activate("BigTime");
+				renderer.activate("BigTime","Black","Seconds");
 				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 				thread.join();
 			}
