@@ -142,4 +142,29 @@ public class WordClock.Color : GLib.Object {
 		
 		return this;
 	}
+	
+	public Color clone() {
+		return new Color.from_rgb( this.r, this.g, this.b );
+	}
+	
+	public Color add_hue( int16 h ) {
+		this.to_hsv();
+		
+		this.h = (this.h + h) % 360;
+		
+		this.to_rgb();
+		
+		return this;
+	}
+	
+	public Color add_hue_by_time( DateTime time, uint timespan ) {
+		uint seconds = time.get_hour() * 60 * 60 + time.get_minute() * 60 + time.get_second();
+		
+		uint offset = 0;
+		if( (360/timespan) > 1 ) {
+			offset = 360 * time.get_microsecond() / timespan / 1000000;
+		}
+		
+		return this.add_hue( (int16) (((seconds%timespan) * 360)/timespan + offset) );
+	}
 }
