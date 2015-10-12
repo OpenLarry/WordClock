@@ -66,9 +66,9 @@ public class WordClock.Main : GLib.Object {
 				if(repetition_number == 0) Buzzer.beep(10);
 				
 				if(interpreted_key_code == "STROBE" && repetition_number == 0) cancellable.cancel();
-				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
+				/*if(interpreted_key_code == "FLASH" && repetition_number == 0) {
 					seconds.background = !seconds.background;
-				}
+				}*/
 				
 				if(interpreted_key_code == "UP") {
 					time.brightness += 10;
@@ -91,8 +91,8 @@ public class WordClock.Main : GLib.Object {
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			
-			//Buzzer.beep(100,2000);
-			//Buzzer.beep(400,4000);
+			Buzzer.beep(100,2000);
+			Buzzer.beep(400,4000);
 			
 			thread.join();
 			
