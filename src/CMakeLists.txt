@@ -53,6 +53,7 @@ set(VALA_SRC
 	Renderer/SecondsRenderer.vala
 	Renderer/BigTimeRenderer.vala
 	Renderer/TestSequenceRenderer.vala
+	Renderer/ColorRenderer.vala
 )
 
 # Vala segfaults if its output dirs are not existant. Therefore make sure they
