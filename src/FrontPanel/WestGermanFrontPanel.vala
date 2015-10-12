@@ -1,11 +1,11 @@
-using WordClock;
+using WordClock, Gee;
 
 /**
  * @author Aaron Larisch
  * @version 1.0
  */
 public class WordClock.WestGermanFrontPanel : GermanFrontPanel {
-	public override uint8[,] getTime( uint8 hour, uint8 minute ) {
+	public override HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute ) {
 		GermanFrontPanel.Word[] words = {};
 		
 		words += Word.ES;
@@ -81,11 +81,9 @@ public class WordClock.WestGermanFrontPanel : GermanFrontPanel {
 			words += Word.H_EIN + hour;
 		}
 		
-		uint8[,] ret = new uint8[words.length,3];
+		HashSet<FrontPanel.WordPosition> ret = new HashSet<FrontPanel.WordPosition>();
 		for(int i=0;i<words.length;i++) {
-			ret[i,0] = WORDS[words[i],0];
-			ret[i,1] = WORDS[words[i],1];
-			ret[i,2] = WORDS[words[i],2];
+			ret.add(WORDS[words[i]]);
 		}
 		
 		return ret;

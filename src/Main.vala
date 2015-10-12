@@ -71,11 +71,9 @@ public class WordClock.Main : GLib.Object {
 				}*/
 				
 				if(interpreted_key_code == "UP") {
-					time.brightness += 10;
 					bigtime.brightness += 10;
 				}
 				if(interpreted_key_code == "DOWN") {
-					time.brightness -= 10;
 					bigtime.brightness -= 10;
 				}
 			});
@@ -91,8 +89,8 @@ public class WordClock.Main : GLib.Object {
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			
-			Buzzer.beep(100,2000);
-			Buzzer.beep(400,4000);
+			Buzzer.beep(100,2000,10);
+			Buzzer.beep(400,4000,10);
 			
 			thread.join();
 			

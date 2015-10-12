@@ -1,4 +1,4 @@
-using WordClock;
+using WordClock, Gee;
 
 /**
  * @author Aaron Larisch
@@ -32,32 +32,32 @@ public abstract class WordClock.GermanFrontPanel : GLib.Object, FrontPanel {
 		UHR,
 	}
 	
-	protected static uint8[,] WORDS = {
-		{ 0,0 , 2 }, // 00 - ES
-		{ 3,0 , 3 }, // 01 - IST
-		{ 7,0 , 4 }, // 02 - FÜNF
-		{ 0,1 , 4 }, // 03 - ZEHN
-		{ 4,2 , 7 }, // 04 - VIERTEL
-		{ 4,1 , 7 }, // 05 - ZWANZIG
-		{ 0,4 , 4 }, // 06 - HALB
-		{ 0,2 ,11 }, // 07 - DREIVIERTEL
-		{ 6,3 , 3 }, // 08 - VOR
-		{ 2,3 , 4 }, // 09 - NACH
-		{ 2,5 , 3 }, // 10 - EIN
-		{ 2,5 , 4 }, // 11 - EINS
-		{ 0,5 , 4 }, // 12 - ZWEI
-		{ 1,6 , 4 }, // 13 - DREI
-		{ 7,7 , 4 }, // 14 - VIER
-		{ 7,6 , 4 }, // 15 - FÜNF
-		{ 1,9 , 5 }, // 16 - SECHS
-		{ 5,5 , 6 }, // 17 - SIEBEN
-		{ 1,8 , 4 }, // 18 - ACHT
-		{ 3,7 , 4 }, // 19 - NEUN
-		{ 5,8 , 4 }, // 20 - ZEHN
-		{ 0,7 , 3 }, // 21 - ELF
-		{ 5,4 , 5 }, // 22 - ZWÖLF
-		{ 8,9 , 3 }, // 23 - UHR
+	protected static FrontPanel.WordPosition[] WORDS = {
+		new FrontPanel.WordPosition() { x=0,y=0,length= 2 }, // 00 - ES
+		new FrontPanel.WordPosition() { x=3,y=0,length= 3 }, // 01 - IST
+		new FrontPanel.WordPosition() { x=7,y=0,length= 4 }, // 02 - FÜNF
+		new FrontPanel.WordPosition() { x=0,y=1,length= 4 }, // 03 - ZEHN
+		new FrontPanel.WordPosition() { x=4,y=2,length= 7 }, // 04 - VIERTEL
+		new FrontPanel.WordPosition() { x=4,y=1,length= 7 }, // 05 - ZWANZIG
+		new FrontPanel.WordPosition() { x=0,y=4,length= 4 }, // 06 - HALB
+		new FrontPanel.WordPosition() { x=0,y=2,length=11 }, // 07 - DREIVIERTEL
+		new FrontPanel.WordPosition() { x=6,y=3,length= 3 }, // 08 - VOR
+		new FrontPanel.WordPosition() { x=2,y=3,length= 4 }, // 09 - NACH
+		new FrontPanel.WordPosition() { x=2,y=5,length= 3 }, // 10 - EIN
+		new FrontPanel.WordPosition() { x=2,y=5,length= 4 }, // 11 - EINS
+		new FrontPanel.WordPosition() { x=0,y=5,length= 4 }, // 12 - ZWEI
+		new FrontPanel.WordPosition() { x=1,y=6,length= 4 }, // 13 - DREI
+		new FrontPanel.WordPosition() { x=7,y=7,length= 4 }, // 14 - VIER
+		new FrontPanel.WordPosition() { x=7,y=6,length= 4 }, // 15 - FÜNF
+		new FrontPanel.WordPosition() { x=1,y=9,length= 5 }, // 16 - SECHS
+		new FrontPanel.WordPosition() { x=5,y=5,length= 6 }, // 17 - SIEBEN
+		new FrontPanel.WordPosition() { x=1,y=8,length= 4 }, // 18 - ACHT
+		new FrontPanel.WordPosition() { x=3,y=7,length= 4 }, // 19 - NEUN
+		new FrontPanel.WordPosition() { x=5,y=8,length= 4 }, // 20 - ZEHN
+		new FrontPanel.WordPosition() { x=0,y=7,length= 3 }, // 21 - ELF
+		new FrontPanel.WordPosition() { x=5,y=4,length= 5 }, // 22 - ZWÖLF
+		new FrontPanel.WordPosition() { x=8,y=9,length= 3 }, // 23 - UHR
 	};
 	
-	public abstract uint8[,] getTime( uint8 hour, uint8 minute );
+	public abstract HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute );
 }
