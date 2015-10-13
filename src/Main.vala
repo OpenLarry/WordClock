@@ -15,6 +15,7 @@ public class WordClock.Main : GLib.Object {
 		stdout.puts("Wordclock 1.0\n\n");
 		
 		
+		
 		try{
 			stdout.puts("Starting REST server...\n");
 			new RestServer( );
@@ -30,11 +31,6 @@ public class WordClock.Main : GLib.Object {
 			stderr.printf("Thread error: %s", e.message);
 			return 1;
 		}*/
-		
-		
-		Color test = new Color();
-		test.set_hsv(120,255,100);
-		stdout.printf("%u,%u,%u\n", test.r, test.g, test.b);
 		
 		var cancellable = new Cancellable();
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
@@ -61,7 +57,17 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("Black", black);
 		renderer.add_backlight_renderer("Black", black);
 		
+		
+		var settings = new Settings(seconds);
+		settings.add_object( seconds, "default" );
+		settings.add_object( bigtime, "default" );
+		settings.add_object( time, "default" );
+		
 		MainLoop loop = new MainLoop();
+		
+		bool background = seconds.background_color.get_hsv()[2] > 0;
+		uint8 brightness = (uint8) seconds.seconds_color.get_hsv()[2];
+		bool toggle = true;
 		
 		try{
 			var context = new Lirc.Context("wordclock-remote");
@@ -70,17 +76,43 @@ public class WordClock.Main : GLib.Object {
 			listener.button.connect((device_conf, interpreted_key_code, repetition_number) => {
 				if(repetition_number == 0) Buzzer.beep(10);
 				
-				if(interpreted_key_code == "STROBE" && repetition_number == 0) cancellable.cancel();
-				/*if(interpreted_key_code == "FLASH" && repetition_number == 0) {
-					seconds.background = !seconds.background;
-				}*/
+				if(interpreted_key_code == "STROBE" && repetition_number == 0) {
+					if(toggle) {
+						renderer.activate("BigTime","Black","Seconds");
+					}else{
+						renderer.activate("Time","Time","Seconds");
+					}
+					toggle = !toggle;
+				}
+				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
+					background = !background;
+				}
 				
 				if(interpreted_key_code == "UP") {
-					//bigtime.brightness += 10;
+					brightness += 8;
 				}
 				if(interpreted_key_code == "DOWN") {
-					//bigtime.brightness -= 10;
+					brightness -= 8;
 				}
+				
+				
+				if(interpreted_key_code == "ON") {
+					seconds.width = (seconds.width + 1) % 60;
+				}
+				if(interpreted_key_code == "OFF") {
+					seconds.width = (seconds.width + 59) % 60;
+				}
+				
+				if(interpreted_key_code == "FADE") {
+					seconds.smooth = !seconds.smooth;
+				}
+				
+				seconds.seconds_color = new Color.from_hsv(0,255,brightness);
+				seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness/10 : 0);
+				bigtime.hours_color = new Color.from_hsv(100,255,brightness/2);
+				bigtime.minutes_color = new Color.from_hsv(140,255,brightness/2);
+				time.words_color = new Color.from_hsv(0,255,brightness/2);
+				time.dots_color = new Color.from_hsv(0,255,brightness/2);
 			});
 		} catch( Error e) {
 			stderr.printf("Error: %s\n", e.message);
@@ -102,11 +134,6 @@ public class WordClock.Main : GLib.Object {
 			while(true) {
 				cancellable.reset();
 				renderer.activate("Time","Time","Seconds");
-				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
-				thread.join();
-				
-				cancellable.reset();
-				renderer.activate("BigTime","Black","Seconds");
 				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 				thread.join();
 			}

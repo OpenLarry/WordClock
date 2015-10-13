@@ -9,5 +9,15 @@ include(FindVala)
 
 find_package(Vala "0.30" REQUIRED)
 
-add_subdirectory(src)
 
+macro(make_compile_directory directory)
+	if (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+		make_directory("${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+	endif (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${directory}")
+endmacro(make_compile_directory)
+
+make_compile_directory( "schemas" )
+
+execute_process (COMMAND glib-compile-schemas --targetdir=${CMAKE_CURRENT_BINARY_DIR}/schemas "${CMAKE_CURRENT_SOURCE_DIR}/schemas")
+
+add_subdirectory(src)

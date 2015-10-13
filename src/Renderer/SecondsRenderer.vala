@@ -4,15 +4,17 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer {
-	public bool smooth = true;
-	public uint8 width = 3;
+public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer, SettingsBindable {
+	public bool smooth { get; set; default = true; }
+	public uint8 width { get; set; default = 3; }
 	
-	public Color background_color = new Color.from_hsv( 0, 0, 25 );
-	public Color seconds_color = new Color.from_hsv( 0, 255, 255 );
+	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 25 ); }
+	public Color seconds_color { get; set; default = new Color.from_hsv( 0, 255, 255 ); }
 	
-	public uint background_rotate = 0;
-	public uint seconds_rotate = 3600;
+	public uint background_rotate { get; set; default = 0; }
+	public uint seconds_rotate { get; set; default = 3600; }
+	
+	protected GLib.Settings settings;
 	
 	public uint8[] get_fps_range() {
 		return {25,uint8.MAX};
@@ -61,5 +63,33 @@ public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, Backlight
 		}
 		
 		return true;
+	}
+	
+	public void bind_settings(GLib.SettingsSchemaSource sss, string name) {
+		GLib.SettingsSchema schema = sss.lookup ("de.wordclock.renderer.seconds", false);
+		if (sss.lookup == null) {
+			stderr.printf ("ID not found.");
+			return;
+		}
+		
+		name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
+		
+		this.settings = new GLib.Settings.full (schema, null, "/de/wordclock/renderer/seconds/"+name+"/");
+		
+		this.settings.bind("smooth", this, "smooth", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("width", this, "width", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind_with_mapping("background-color", this, "background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind_with_mapping("seconds-color", this, "seconds_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind("background-rotate", this, "background_rotate", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("seconds-rotate", this, "seconds_rotate", GLib.SettingsBindFlags.DEFAULT);
+	}
+	
+	public void unbind_settings() {
+		GLib.Settings.unbind(this, "smooth");
+		GLib.Settings.unbind(this, "width");
+		GLib.Settings.unbind(this, "background_color");
+		GLib.Settings.unbind(this, "seconds_color");
+		GLib.Settings.unbind(this, "background_rotate");
+		GLib.Settings.unbind(this, "seconds_rotate");
 	}
 }

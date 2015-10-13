@@ -167,4 +167,23 @@ public class WordClock.Color : GLib.Object {
 		
 		return this.add_hue( (int16) (((seconds%timespan) * 360)/timespan + offset) );
 	}
+	
+	public static bool get_mapping( GLib.Value value, GLib.Variant variant, void* user_data ) {
+		uint16 h=0;
+		uint8 s=0,v=0;
+		variant.get_child(0, "q", out h);
+		variant.get_child(1, "y", out s);
+		variant.get_child(2, "y", out v);
+		
+		value.set_object( new Color.from_hsv(h,s,v) );
+		
+		return true;
+	}
+	
+	public static GLib.Variant set_mapping( GLib.Value value, GLib.VariantType expected_type, void* user_data ) {
+		Color color = (Color) value.get_object();
+		color.to_hsv();
+		
+		return new GLib.Variant.tuple( { new GLib.Variant.uint16( color.h ), new GLib.Variant.byte( color.s ), new GLib.Variant.byte( color.v ) } );
+	}
 }

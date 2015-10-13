@@ -4,20 +4,22 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TimeRenderer : GLib.Object, ClockRenderable, MatrixRenderer, DotsRenderer {
+public class WordClock.TimeRenderer : GLib.Object, ClockRenderable, MatrixRenderer, DotsRenderer, SettingsBindable {
 	private FrontPanel frontpanel;
 	
-	public Color background_color = new Color.from_hsv( 0, 0, 0 );
-	public Color words_color = new Color.from_hsv( 0, 255, 150 );
-	public Color dots_background_color = new Color.from_hsv( 0, 0, 0 );
-	public Color dots_color = new Color.from_hsv( 0, 255, 150 );
+	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
+	public Color words_color { get; set; default =  new Color.from_hsv( 0, 255, 150 ); }
+	public Color dots_background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
+	public Color dots_color { get; set; default = new Color.from_hsv( 0, 255, 150 ); }
 	
-	public uint background_rotate = 0;
-	public uint words_rotate = 86400;
-	public uint dots_background_rotate = 0;
-	public uint dots_rotate = 86400;
+	public uint background_rotate { get; set; default = 0; }
+	public uint words_rotate { get; set; default = 86400; }
+	public uint dots_background_rotate { get; set; default = 0; }
+	public uint dots_rotate { get; set; default = 86400; }
 	
-	public double fade_secs = 1.0;
+	public double fade_secs { get; set; default = 1.0; }
+	
+	protected GLib.Settings settings;
 	
 	public TimeRenderer( FrontPanel frontpanel ) {
 		this.frontpanel = frontpanel;
@@ -155,5 +157,39 @@ public class WordClock.TimeRenderer : GLib.Object, ClockRenderable, MatrixRender
 		}
 		
 		return true;
+	}
+	
+	public void bind_settings(GLib.SettingsSchemaSource sss, string name) {
+		GLib.SettingsSchema schema = sss.lookup ("de.wordclock.renderer.time", false);
+		if (sss.lookup == null) {
+			stderr.printf ("ID not found.");
+			return;
+		}
+		
+		name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
+		
+		this.settings = new GLib.Settings.full (schema, null, "/de/wordclock/renderer/time/"+name+"/");
+		
+		this.settings.bind_with_mapping("background-color", this, "background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind_with_mapping("words-color", this, "words_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind_with_mapping("dots-background-color", this, "dots_background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind_with_mapping("dots-color", this, "dots_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+		this.settings.bind("background-rotate", this, "background_rotate", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("words-rotate", this, "words_rotate", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("dots-background-rotate", this, "dots_background_rotate", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("dots-rotate", this, "dots_rotate", GLib.SettingsBindFlags.DEFAULT);
+		this.settings.bind("fade-secs", this, "fade_secs", GLib.SettingsBindFlags.DEFAULT);
+	}
+	
+	public void unbind_settings() {
+		GLib.Settings.unbind(this, "background_color");
+		GLib.Settings.unbind(this, "words_color");
+		GLib.Settings.unbind(this, "dots_background_color");
+		GLib.Settings.unbind(this, "dots_color");
+		GLib.Settings.unbind(this, "background_rotate");
+		GLib.Settings.unbind(this, "words_rotate");
+		GLib.Settings.unbind(this, "dots_background_rotate");
+		GLib.Settings.unbind(this, "dots_rotate");
+		GLib.Settings.unbind(this, "fade_secs");
 	}
 }

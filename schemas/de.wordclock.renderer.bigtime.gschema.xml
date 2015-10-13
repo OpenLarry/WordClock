@@ -1,0 +1,13 @@
+<schemalist>
+	<schema id="de.wordclock.renderer.bigtime">
+		<key name="background-color" type="(qyy)">
+			<default>(0,0,0)</default>
+		</key>
+		<key name="hours-color" type="(qyy)">
+			<default>(100,255,150)</default>
+		</key>
+		<key name="minutes-color" type="(qyy)">
+			<default>(140,255,150)</default>
+		</key>
+	</schema>
+</schemalist>

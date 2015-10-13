@@ -1,0 +1,31 @@
+<schemalist>
+	<schema id="de.wordclock.renderer.time">
+		<key name="background-color" type="(qyy)">
+			<default>(0,0,0)</default>
+		</key>
+		<key name="words-color" type="(qyy)">
+			<default>(0,255,150)</default>
+		</key>
+		<key name="dots-background-color" type="(qyy)">
+			<default>(0,0,0)</default>
+		</key>
+		<key name="dots-color" type="(qyy)">
+			<default>(0,255,150)</default>
+		</key>
+		<key name="background-rotate" type="u">
+			<default>0</default>
+		</key>
+		<key name="words-rotate" type="u">
+			<default>86400</default>
+		</key>
+		<key name="dots-background-rotate" type="u">
+			<default>0</default>
+		</key>
+		<key name="dots-rotate" type="u">
+			<default>86400</default>
+		</key>
+		<key name="fade-secs" type="d">
+			<default>1.0</default>
+		</key>
+	</schema>
+</schemalist>
