@@ -206,6 +206,14 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			bottom = !bottom;
 		}
 		
+		if(this.cancellable.is_cancelled()) {
+			this.clear_fb();
+			
+			// blank screen
+			var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
+			GLib.assert(ret==0); GLib.debug("blank screen");
+		}
+		
 		return 0;
 	}
 } 

@@ -10,6 +10,10 @@ public class WordClock.Main : GLib.Object {
 	public static Gpio button2;
 	public static Gpio pir;
 	
+	private static ClockRenderer renderer;
+	private static Cancellable cancellable;
+	private static MainLoop loop;
+	
     public static int main(string[] args) {
 		if( !Thread.supported() ) {
 			stderr.printf("Cannot run without threads.\n");
@@ -36,9 +40,9 @@ public class WordClock.Main : GLib.Object {
 			return 1;
 		}*/
 		
-		var cancellable = new Cancellable();
+		cancellable = new Cancellable();
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
-		var renderer = new ClockRenderer(new MarkusClockWiring(),driver);
+		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
 		var frontpanel = new RhineRuhrGermanFrontPanel();
 		var time = new TimeRenderer(frontpanel);
@@ -67,7 +71,19 @@ public class WordClock.Main : GLib.Object {
 		settings.add_object( bigtime, "default" );
 		settings.add_object( time, "default" );
 		
-		MainLoop loop = new MainLoop();
+		loop = new MainLoop();
+		
+		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
+		signalsource.set_callback(Main.shutdown);
+		signalsource.attach( loop.get_context() );
+		
+		signalsource = new Unix.SignalSource( Posix.SIGHUP );
+		signalsource.set_callback(Main.shutdown);
+		signalsource.attach( loop.get_context() );
+		
+		signalsource = new Unix.SignalSource( Posix.SIGINT );
+		signalsource.set_callback(Main.shutdown);
+		signalsource.attach( loop.get_context() );
 		
 		button0 = new Gpio(4);
 		button1 = new Gpio(5);
@@ -160,8 +176,6 @@ public class WordClock.Main : GLib.Object {
 		}
 		
 		try {
-			Thread<int> mainThread = new Thread<int>.try("MainLoop", () => { loop.run(); return 0; });
-			
 			renderer.activate("TestSequence","TestSequence","TestSequence");
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
@@ -171,25 +185,34 @@ public class WordClock.Main : GLib.Object {
 			
 			thread.join();
 			
-			while(true) {
-				cancellable.reset();
-				renderer.activate("Time","Time","Seconds");
-				thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
-				thread.join();
-			}
+			renderer.activate("Time","Time","Seconds");
+			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
-			mainThread.join();
+			loop.run();
+			
+			stdout.puts("Terminating. Waiting for threads...\n");
+			
+			Buzzer.beep(100,4000,10);
+			Buzzer.beep(100,2000,10);
+			
+			thread.join();
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
 			return 1;
 		}
 		
-		//stdout.puts("Terminating. Waiting for threads...\n");
-		
-		
 		stdout.puts("Bye!\n");
 		
 		return 0;
     }
+	
+	public static bool shutdown() {
+		renderer.activate("Black","Black","Black");
+		Thread.usleep(1000000);
+		cancellable.cancel();
+		loop.quit();
+		
+		return Source.REMOVE;
+	}
 }
 
