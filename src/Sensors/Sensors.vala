@@ -11,6 +11,9 @@ public struct WordClock.Sensors {
 	public float temp;
 	public float brightness;
 	public bool motion;
+	public bool button0;
+	public bool button1;
+	public bool button2;
 	
 	public static Json.Node serialize_func (void* _boxed) {
 		assert (_boxed != null);
@@ -25,11 +28,14 @@ public struct WordClock.Sensors {
 		obj.set_double_member("temp", boxed.temp);
 		obj.set_double_member("brightness", boxed.brightness);
 		obj.set_boolean_member("motion", boxed.motion);
+		obj.set_boolean_member("button0", boxed.button0);
+		obj.set_boolean_member("button1", boxed.button1);
+		obj.set_boolean_member("button2", boxed.button2);
 		node.set_object (obj);
 		return node;
 	}
 	
 	public static Sensors get_readings() {
-		return { Lradc.get_vdd5v(), Lradc.get_vddio(), Lradc.get_battery(), Lradc.get_temp(), Lradc.get_brightness(), false };
+		return { Lradc.get_vdd5v(), Lradc.get_vddio(), Lradc.get_battery(), Lradc.get_temp(), Lradc.get_brightness(), Main.pir.value, Main.button0.value, Main.button1.value, Main.button2.value };
 	}
 }

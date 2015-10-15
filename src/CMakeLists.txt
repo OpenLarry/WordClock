@@ -66,6 +66,7 @@ set(VALA_SRC
 	Renderer/ColorRenderer.vala
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala
+	Sensors/Gpio.vala
 )
 
 

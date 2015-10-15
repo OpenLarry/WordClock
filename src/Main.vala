@@ -5,7 +5,11 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Main : GLib.Object {
-
+	public static Gpio button0;
+	public static Gpio button1;
+	public static Gpio button2;
+	public static Gpio pir;
+	
     public static int main(string[] args) {
 		if( !Thread.supported() ) {
 			stderr.printf("Cannot run without threads.\n");
@@ -65,6 +69,24 @@ public class WordClock.Main : GLib.Object {
 		
 		MainLoop loop = new MainLoop();
 		
+		button0 = new Gpio(4);
+		button1 = new Gpio(5);
+		button2 = new Gpio(6);
+		pir = new Gpio(7);
+		
+		button0.update.connect((value) => {
+			Buzzer.beep(100,(value)?2500:1500,255);
+		});
+		button1.update.connect((value) => {
+			Buzzer.beep(100,(value)?2500:1500,255);
+		});
+		button2.update.connect((value) => {
+			Buzzer.beep(100,(value)?2500:1500,255);
+		});
+		pir.update.connect((value) => {
+			Buzzer.beep(100,(value)?2500:1500,255);
+		});
+		
 		bool background = seconds.background_color.get_hsv()[2] > 0;
 		uint8 brightness = (uint8) seconds.seconds_color.get_hsv()[2];
 		bool toggle = true;
@@ -86,13 +108,37 @@ public class WordClock.Main : GLib.Object {
 				}
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
 					background = !background;
+					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);
 				}
 				
 				if(interpreted_key_code == "UP") {
-					brightness += 8;
+					if(brightness + repetition_number+1 > 255) {
+						brightness = 255;
+					}else{
+						brightness += repetition_number+1;
+					}
+					
+					
+					seconds.seconds_color = new Color.from_hsv(0,255,brightness);
+					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);
+					bigtime.hours_color = new Color.from_hsv(100,255,brightness);
+					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
+					time.words_color = new Color.from_hsv(0,255,brightness);
+					time.dots_color = new Color.from_hsv(0,255,brightness);
 				}
 				if(interpreted_key_code == "DOWN") {
-					brightness -= 8;
+					if(brightness - repetition_number-1 < 0) {
+						brightness = 0;
+					}else{
+						brightness -= repetition_number+1;
+					}
+					
+					seconds.seconds_color = new Color.from_hsv(0,255,brightness);
+					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);
+					bigtime.hours_color = new Color.from_hsv(100,255,brightness);
+					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
+					time.words_color = new Color.from_hsv(0,255,brightness);
+					time.dots_color = new Color.from_hsv(0,255,brightness);
 				}
 				
 				
@@ -103,16 +149,10 @@ public class WordClock.Main : GLib.Object {
 					seconds.width = (seconds.width + 59) % 60;
 				}
 				
-				if(interpreted_key_code == "FADE") {
+				if(interpreted_key_code == "FADE" && repetition_number == 0) {
 					seconds.smooth = !seconds.smooth;
 				}
 				
-				seconds.seconds_color = new Color.from_hsv(0,255,brightness);
-				seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness/10 : 0);
-				bigtime.hours_color = new Color.from_hsv(100,255,brightness/2);
-				bigtime.minutes_color = new Color.from_hsv(140,255,brightness/2);
-				time.words_color = new Color.from_hsv(0,255,brightness/2);
-				time.dots_color = new Color.from_hsv(0,255,brightness/2);
 			});
 		} catch( Error e) {
 			stderr.printf("Error: %s\n", e.message);
