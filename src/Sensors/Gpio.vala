@@ -17,8 +17,9 @@ public class WordClock.Gpio : GLib.Object {
 	
 	public signal void update( bool value );
 	
+	private bool first = true;
+	
 	public Gpio( uint8 pin ) {
-		IOChannel channel;
 		try {
 			var file = GLib.File.new_for_path( GPIO_DIRECTION.printf(pin) );
 			GLib.FileOutputStream ostream;
@@ -42,7 +43,7 @@ public class WordClock.Gpio : GLib.Object {
 			dostream = new GLib.DataOutputStream( ostream );
 			dostream.put_string("both\n");
 			
-			channel = new IOChannel.file(GPIO_VALUE.printf(pin), "r");
+			var channel = new IOChannel.file(GPIO_VALUE.printf(pin), "r");
 			
 			uint stat = channel.add_watch(IOCondition.PRI, (source,condition) => {
 				size_t terminator_pos = -1;
@@ -62,12 +63,13 @@ public class WordClock.Gpio : GLib.Object {
 						return false;
 					}
 					
-					if(str_return == "1\n") {
-						this.value = true;
-						this.update(true);
+					this.value = str_return == "1\n";
+					
+					// don't fire signal after initializiation
+					if(!this.first) {
+						this.update(this.value);
 					}else{
-						this.value = false;
-						this.update(false);
+						this.first = false;
 					}
 					
 					return true;
