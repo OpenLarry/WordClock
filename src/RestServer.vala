@@ -16,6 +16,8 @@ public class WordClock.RestServer : Soup.Server {
 		this.add_handler("/", request);
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
+		
+		Json.boxed_register_serialize_func (typeof(Sensors), Json.NodeType.OBJECT, Sensors.serialize_func);
 	}
 	
 	
@@ -44,20 +46,18 @@ public class WordClock.RestServer : Soup.Server {
 					msg.set_status(405);
 				break;
 			}
-		}else if( path == "/vdd5v" ) {
+		}else if( path == "/sensors" ) {
 			switch(msg.method) {
 				case "GET":
-					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.get_vdd5v().to_string().data);
-					msg.set_status(200);
-				break;
-				default:
-					msg.set_status(405);
-				break;
-			}
-		}else if( path == "/temp" ) {
-			switch(msg.method) {
-				case "GET":
-					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.get_temp().to_string().data);
+					
+					Sensors sensors = Sensors.get_readings();
+					Json.Node root = Json.boxed_serialize (typeof(Sensors), &sensors);
+					
+					Json.Generator generator = new Json.Generator ();
+					generator.set_root(root);
+					string data = generator.to_data (null);
+					
+					msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 					msg.set_status(200);
 				break;
 				default:
