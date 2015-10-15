@@ -5,7 +5,6 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.RestServer : Soup.Server {
-	const string PATH = "/LEDControl";
 	const uint16 PORT = 8080;
 	
 	/**
@@ -14,7 +13,7 @@ public class WordClock.RestServer : Soup.Server {
 	 * @param control LEDControl object which parses the request
 	 */
 	public RestServer( ) throws GLib.Error {
-		this.add_handler(PATH, request);
+		this.add_handler("/", request);
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
 	}
@@ -33,10 +32,42 @@ public class WordClock.RestServer : Soup.Server {
 		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
 		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 		
-		if(path == PATH || path == PATH+"/") {
+		string subpath = "";
+		
+		if(path == "/") {
 			switch(msg.method) {
 				case "GET":
-					msg.set_response("application/json", Soup.MemoryUse.COPY, "<h1>It works</h1>!".data);
+					msg.set_response("text/html", Soup.MemoryUse.COPY, "<h1>It works</h1>!".data);
+					msg.set_status(200);
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path == "/vdd5v" ) {
+			switch(msg.method) {
+				case "GET":
+					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.get_vdd5v().to_string().data);
+					msg.set_status(200);
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path == "/temp" ) {
+			switch(msg.method) {
+				case "GET":
+					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.get_temp().to_string().data);
+					msg.set_status(200);
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path.scanf("/lradc/%s", subpath) == 1 ) {
+			switch(msg.method) {
+				case "GET":
+					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.read(subpath).to_string().data);
 					msg.set_status(200);
 				break;
 				default:
