@@ -65,11 +65,14 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("Black", black);
 		renderer.add_backlight_renderer("Black", black);
 		
+		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerif());
+		renderer.add_matrix_renderer("String", str);
 		
 		var settings = new Settings(seconds);
 		settings.add_object( seconds, "default" );
 		settings.add_object( bigtime, "default" );
 		settings.add_object( time, "default" );
+		settings.add_object( str, "default" );
 		
 		loop = new MainLoop();
 		
@@ -105,7 +108,7 @@ public class WordClock.Main : GLib.Object {
 		
 		bool background = seconds.background_color.get_hsv()[2] > 0;
 		uint8 brightness = (uint8) seconds.seconds_color.get_hsv()[2];
-		bool toggle = true;
+		uint8 toggle = 0;
 		
 		try{
 			var context = new Lirc.Context("wordclock-remote");
@@ -115,12 +118,18 @@ public class WordClock.Main : GLib.Object {
 				if(repetition_number == 0) Buzzer.beep(10);
 				
 				if(interpreted_key_code == "STROBE" && repetition_number == 0) {
-					if(toggle) {
-						renderer.activate("BigTime","Black","Seconds");
-					}else{
-						renderer.activate("Time","Time","Seconds");
+					switch(toggle%3) {
+						case 0:
+							renderer.activate("BigTime","Black","Seconds");
+						break;
+						case 1:
+							renderer.activate("Time","Time","Seconds");
+						break;
+						case 2:
+							renderer.activate("String","Black","Seconds");
+						break;
 					}
-					toggle = !toggle;
+					toggle += 1;
 				}
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
 					background = !background;
@@ -141,6 +150,8 @@ public class WordClock.Main : GLib.Object {
 					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
 					time.words_color = new Color.from_hsv(0,255,brightness);
 					time.dots_color = new Color.from_hsv(0,255,brightness);
+					str.left_color = new Color.from_hsv(0,255,brightness);
+					str.right_color = new Color.from_hsv(120,255,brightness);
 				}
 				if(interpreted_key_code == "DOWN") {
 					if(brightness - repetition_number-1 < 0) {
@@ -155,8 +166,16 @@ public class WordClock.Main : GLib.Object {
 					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
 					time.words_color = new Color.from_hsv(0,255,brightness);
 					time.dots_color = new Color.from_hsv(0,255,brightness);
+					str.left_color = new Color.from_hsv(0,255,brightness);
+					str.right_color = new Color.from_hsv(120,255,brightness);
 				}
 				
+				if(interpreted_key_code == "R") {
+					str.speed -= 1;
+				}
+				if(interpreted_key_code == "G") {
+					str.speed += 1;
+				}
 				
 				if(interpreted_key_code == "ON") {
 					seconds.width = (seconds.width + 1) % 60;
@@ -185,8 +204,9 @@ public class WordClock.Main : GLib.Object {
 			
 			thread.join();
 			
-			renderer.activate("Time","Time","Seconds");
+			renderer.activate("String","Black","Seconds");
 			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
+			
 			
 			loop.run();
 			
