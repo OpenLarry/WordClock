@@ -78,4 +78,42 @@ public class WordClock.Buzzer : GLib.Object {
 			}
 		}
 	}
+	
+	public static void play_happy_birthday() {
+		uint16 speed = 500;
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed, 293); 
+		Buzzer.beep(speed, 261); 
+		Buzzer.beep(speed, 349); 
+		Buzzer.beep(speed, 329); 
+		Thread.usleep(speed*1000); 
+
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed, 293); 
+		Buzzer.beep(speed, 261); 
+		Buzzer.beep(speed, 392); 
+		Buzzer.beep(speed, 349); 
+		Thread.usleep(speed*1000); 
+
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed / 2, 261); 
+		Buzzer.beep(speed, 523); 
+		Buzzer.beep(speed, 440); 
+		Buzzer.beep(speed / 2, 349); 
+		Buzzer.beep(speed / 2, 349); 
+		Buzzer.beep(speed, 329); 
+		Buzzer.beep(speed, 293); 
+		Thread.usleep(speed*1000); 
+
+		Buzzer.beep(speed / 2, 466); 
+		Buzzer.beep(speed / 2, 466); 
+		Buzzer.beep(speed, 440); 
+		Buzzer.beep(speed, 349); 
+		Buzzer.beep(speed, 392); 
+		Buzzer.beep(speed, 349); 
+		Thread.usleep(speed*1000); 
+		Thread.usleep(speed*1000);
+	}
 } 
