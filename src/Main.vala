@@ -143,15 +143,22 @@ public class WordClock.Main : GLib.Object {
 						brightness += repetition_number+1;
 					}
 					
-					
-					seconds.seconds_color = new Color.from_hsv(0,255,brightness);
-					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);
-					bigtime.hours_color = new Color.from_hsv(100,255,brightness);
-					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
-					time.words_color = new Color.from_hsv(0,255,brightness);
-					time.dots_color = new Color.from_hsv(0,255,brightness);
-					str.left_color = new Color.from_hsv(0,255,brightness);
-					str.right_color = new Color.from_hsv(120,255,brightness);
+					seconds.seconds_color.set_hsv(null,null,brightness);
+					seconds.background_color.set_hsv(null,null,(background) ? brightness : 0);
+					bigtime.hours_color.set_hsv(null,null,brightness);
+					bigtime.minutes_color.set_hsv(null,null,brightness);
+					time.words_color.set_hsv(null,null,brightness);
+					time.dots_color.set_hsv(null,null,brightness);
+					str.left_color.set_hsv(null,null,brightness);
+					str.right_color.set_hsv(null,null,brightness);
+					seconds.notify_property("seconds_color");
+					seconds.notify_property("background_color");
+					bigtime.notify_property("hours_color");
+					bigtime.notify_property("minutes_color");
+					time.notify_property("words_color");
+					time.notify_property("dots_color");
+					str.notify_property("left_color");
+					str.notify_property("right_color");
 				}
 				if(interpreted_key_code == "DOWN") {
 					if(brightness - repetition_number-1 < 0) {
@@ -160,21 +167,66 @@ public class WordClock.Main : GLib.Object {
 						brightness -= repetition_number+1;
 					}
 					
-					seconds.seconds_color = new Color.from_hsv(0,255,brightness);
-					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);
-					bigtime.hours_color = new Color.from_hsv(100,255,brightness);
-					bigtime.minutes_color = new Color.from_hsv(140,255,brightness);
-					time.words_color = new Color.from_hsv(0,255,brightness);
-					time.dots_color = new Color.from_hsv(0,255,brightness);
-					str.left_color = new Color.from_hsv(0,255,brightness);
-					str.right_color = new Color.from_hsv(120,255,brightness);
+					seconds.seconds_color.set_hsv(null,null,brightness);
+					seconds.background_color.set_hsv(null,null,(background) ? brightness : 0);
+					bigtime.hours_color.set_hsv(null,null,brightness);
+					bigtime.minutes_color.set_hsv(null,null,brightness);
+					time.words_color.set_hsv(null,null,brightness);
+					time.dots_color.set_hsv(null,null,brightness);
+					str.left_color.set_hsv(null,null,brightness);
+					str.right_color.set_hsv(null,null,brightness);
+					seconds.notify_property("seconds_color");
+					seconds.notify_property("background_color");
+					bigtime.notify_property("hours_color");
+					bigtime.notify_property("minutes_color");
+					time.notify_property("words_color");
+					time.notify_property("dots_color");
+					str.notify_property("left_color");
+					str.notify_property("right_color");
 				}
 				
+				uint16 n = 0;
 				if(interpreted_key_code == "R") {
-					str.speed -= 1;
+					str.left_color.set_hsv(0,255,null);
+					str.right_color.set_hsv(0,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
+				}
+				if(interpreted_key_code.scanf("R%hu", &n) > 0) {
+					str.left_color.set_hsv(0+n*24,255,null);
+					str.right_color.set_hsv(0+n*24,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
 				}
 				if(interpreted_key_code == "G") {
-					str.speed += 1;
+					str.left_color.set_hsv(120,255,null);
+					str.right_color.set_hsv(120,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
+				}
+				if(interpreted_key_code.scanf("G%hu", &n) > 0) {
+					str.left_color.set_hsv(120+n*24,255,null);
+					str.right_color.set_hsv(120+n*24,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
+				}
+				if(interpreted_key_code == "B") {
+					str.left_color.set_hsv(240,255,null);
+					str.right_color.set_hsv(240,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
+				}
+				if(interpreted_key_code.scanf("B%hu", &n) > 0) {
+					str.left_color.set_hsv(240+n*24,255,null);
+					str.right_color.set_hsv(240+n*24,255,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
+				}
+				if(interpreted_key_code == "W") {
+					str.left_color.set_hsv(0,0,null);
+					str.right_color.set_hsv(0,0,null);
+					str.notify_property("left_color");
+					str.notify_property("right_color");
 				}
 				
 				if(interpreted_key_code == "ON") {
