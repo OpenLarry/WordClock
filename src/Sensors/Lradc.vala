@@ -11,17 +11,21 @@ public class WordClock.Lradc : GLib.Object {
 	private static float temp_scale = float.NAN;
 	private static float temp_offset = float.NAN;
 	
+	private static int lradc;
+	
 	public static float read( string name, string type = "raw" ) {
 		name.canon("abcdefghijklmnopqrstuvwxyz0123456789",'-');
 		float value = 0;
 		
-		try {
-			var file = GLib.File.new_for_path( LRADC_PATH.printf(LRADC_DEVICE,name,type) );
-			var istream = file.read();
-			var dis = new GLib.DataInputStream( istream );
-			dis.read_line().scanf("%f\n",&value);
-		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+		lock(lradc) {
+			try {
+				var file = GLib.File.new_for_path( LRADC_PATH.printf(LRADC_DEVICE,name,type) );
+				var istream = file.read();
+				var dis = new GLib.DataInputStream( istream );
+				dis.read_line().scanf("%f\n",&value);
+			} catch( Error e ) {
+				stderr.printf("Error: %s", e.message);
+			}
 		}
 		return value;
 	}
