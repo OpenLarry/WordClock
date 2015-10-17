@@ -3,7 +3,7 @@ pkg_check_modules(GOBJECT REQUIRED gobject-2.0)
 pkg_check_modules(LIBSOUP REQUIRED libsoup-2.4)
 pkg_check_modules(GIO_UNIX REQUIRED gio-unix-2.0)
 pkg_check_modules(GIO REQUIRED gio-2.0)
-pkg_check_modules(GEE REQUIRED gee-1.0)
+pkg_check_modules(GEE REQUIRED gee-0.8)
 pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
 
 set(CFLAGS
@@ -80,7 +80,7 @@ PACKAGES
 	libsoup-2.4
 	gio-unix-2.0
 	gio-2.0
-	gee-1.0
+	gee-0.8
 	json-glib-1.0
 #	poppler-glib
 #	gtk+-2.0
@@ -99,6 +99,8 @@ OPTIONS
 add_executable(wordclock
   	${VALA_C}
 )
+
+add_definitions(-w)
 
 # explicitly add libraries (needed e.g. for Fedora 13+)
 target_link_libraries(wordclock -lm)

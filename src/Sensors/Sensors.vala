@@ -1,41 +1,81 @@
-using WordClock;
+using WordClock, Gee;
 
 /**
  * @author Aaron Larisch
  * @version 1.0
  */
-public struct WordClock.Sensors {
-	public float vdd5v;
-	public float vddio;
-	public float battery;
-	public float temp;
-	public float brightness;
-	public bool motion;
-	public bool button0;
-	public bool button1;
-	public bool button2;
+public class WordClock.Sensors : GLib.Object, Json.Serializable {
+	private LinkedList<float?> vdd5v_vals = new LinkedList<float?>();
+	private LinkedList<float?> vddio_vals = new LinkedList<float?>();
+	private LinkedList<float?> battery_vals = new LinkedList<float?>();
+	private LinkedList<float?> temp_vals = new LinkedList<float?>();
+	private LinkedList<float?> brightness_vals = new LinkedList<float?>();
 	
-	public static Json.Node serialize_func (void* _boxed) {
-		assert (_boxed != null);
-
-		Sensors* boxed = (Sensors*) _boxed;
-
-		Json.Node node = new Json.Node(Json.NodeType.OBJECT);
-		Json.Object obj = new Json.Object ();
-		obj.set_double_member("vdd5v", boxed.vdd5v);
-		obj.set_double_member("vddio", boxed.vddio);
-		obj.set_double_member("battery", boxed.battery);
-		obj.set_double_member("temp", boxed.temp);
-		obj.set_double_member("brightness", boxed.brightness);
-		obj.set_boolean_member("motion", boxed.motion);
-		obj.set_boolean_member("button0", boxed.button0);
-		obj.set_boolean_member("button1", boxed.button1);
-		obj.set_boolean_member("button2", boxed.button2);
-		node.set_object (obj);
-		return node;
+	public float vdd5v {
+		get { return mean(this.vdd5v_vals); }
+	}
+	public float vddio {
+		get { return mean(this.vddio_vals); }
+	}
+	public float battery {
+		get { return mean(this.battery_vals); }
+	}
+	public float temp {
+		get { return mean(this.temp_vals); }
+	}
+	public float brightness {
+		get { return mean(this.brightness_vals); }
 	}
 	
-	public static Sensors get_readings() {
-		return { Lradc.get_vdd5v(), Lradc.get_vddio(), Lradc.get_battery(), Lradc.get_temp(), Lradc.get_brightness(), Main.pir.value, Main.button0.value, Main.button1.value, Main.button2.value };
+	public bool motion { get; set; }
+	public bool button0 { get; set; }
+	public bool button1 { get; set; }
+	public bool button2 { get; set; }
+	
+	const uint8 SIZE = 10;
+	
+	private static float mean(LinkedList<float?> list) {
+		float? sum = list.fold<float?>( (a,b) => { return a+b; }, 0f );
+		if(sum == null || list.size == 0) {
+			return 0;
+		}else{
+			return sum / list.size;
+		}
+	}
+	
+	public void read() {
+		this.vdd5v_vals.offer_tail( Lradc.get_vdd5v() );
+		this.vddio_vals.offer_tail( Lradc.get_vddio() );
+		this.battery_vals.offer_tail( Lradc.get_battery() );
+		this.temp_vals.offer_tail( Lradc.get_temp() );
+		this.brightness_vals.offer_tail( Lradc.get_brightness() );
+		
+		if(this.vdd5v_vals.size > SIZE) this.vdd5v_vals.poll_head();
+		if(this.vddio_vals.size > SIZE) this.vddio_vals.poll_head();
+		if(this.battery_vals.size > SIZE) this.battery_vals.poll_head();
+		if(this.temp_vals.size > SIZE) this.temp_vals.poll_head();
+		if(this.brightness_vals.size > SIZE) this.brightness_vals.poll_head();
+		
+		this.motion = Main.pir.value;
+		this.button0 = Main.button0.value;
+		this.button1 = Main.button1.value;
+		this.button2 = Main.button2.value;
+	}
+	
+	/** WORKAROUND - serialize defualt values of properties! */
+	public Json.Node serialize_property(string property_name, Value value, ParamSpec pspec) {
+		Json.Node node = this.default_serialize_property( property_name, value, pspec );
+		if(node == null) {
+			return new Json.Node( Json.NodeType.NULL );
+		}else{
+			return this.default_serialize_property( property_name, value, pspec );
+		}
+	}
+	public bool deserialize_property(string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+		value = Value(pspec.value_type);
+		return this.default_deserialize_property(property_name, value, pspec, property_node);
+	}
+	public unowned ParamSpec find_property(string name) {
+		return this.get_class().find_property(name);
 	}
 }

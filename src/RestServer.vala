@@ -6,6 +6,7 @@ using WordClock;
  */
 public class WordClock.RestServer : Soup.Server {
 	const uint16 PORT = 8080;
+	static Sensors sensors = new Sensors();
 	
 	/**
 	 * Creates a new HTTP REST server instance with JSON interface
@@ -17,7 +18,7 @@ public class WordClock.RestServer : Soup.Server {
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
 		
-		Json.boxed_register_serialize_func (typeof(Sensors), Json.NodeType.OBJECT, Sensors.serialize_func);
+		//Json.boxed_register_serialize_func (typeof(Sensors), Json.NodeType.OBJECT, Sensors.serialize_func);
 	}
 	
 	
@@ -34,7 +35,7 @@ public class WordClock.RestServer : Soup.Server {
 		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
 		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 		
-		string subpath = "";
+		//string subpath = "";
 		
 		if(path == "/") {
 			switch(msg.method) {
@@ -50,24 +51,10 @@ public class WordClock.RestServer : Soup.Server {
 			switch(msg.method) {
 				case "GET":
 					
-					Sensors sensors = Sensors.get_readings();
-					Json.Node root = Json.boxed_serialize (typeof(Sensors), &sensors);
-					
-					Json.Generator generator = new Json.Generator ();
-					generator.set_root(root);
-					string data = generator.to_data (null);
+					sensors.read();
+					string data = Json.gobject_to_data(sensors, null);
 					
 					msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
-					msg.set_status(200);
-				break;
-				default:
-					msg.set_status(405);
-				break;
-			}
-		}else if( path.scanf("/lradc/%s", subpath) == 1 ) {
-			switch(msg.method) {
-				case "GET":
-					msg.set_response("text/plain", Soup.MemoryUse.COPY, Lradc.read(subpath).to_string().data);
 					msg.set_status(200);
 				break;
 				default:
