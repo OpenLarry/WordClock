@@ -186,4 +186,18 @@ public class WordClock.Color : GLib.Object {
 		
 		return new GLib.Variant.tuple( { new GLib.Variant.uint16( color.h ), new GLib.Variant.byte( color.s ), new GLib.Variant.byte( color.v ) } );
 	}
+	
+	
+	private uint8 log_light( uint8 x ) {
+		if(x == 255) return 255;
+		else if(x == 0) return 0;
+		//else return (uint) Math.floor(x * STEPS);
+		else return (uint8) Math.floor(((Math.pow( LOG_BASE , x/255.0 ) - 1) / ( LOG_BASE - 1 )) * 255);
+	}
+	
+	private uint8 log_light_inv( uint8 x ) {
+		if(x == 255) return 255;
+		else if(x == 0) return 0;
+		else return (uint8) Math.floor( 255 * Math.log((LOG_BASE-1)*(x/255.0)+1)/Math.log(LOG_BASE) );
+	}
 }
