@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer, SettingsBindable {
+public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer {
 	public bool smooth { get; set; default = true; }
 	public uint8 width { get; set; default = 3; }
 	
@@ -63,33 +63,5 @@ public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, Backlight
 		}
 		
 		return true;
-	}
-	
-	public void bind_settings(GLib.SettingsSchemaSource sss, string name) {
-		GLib.SettingsSchema schema = sss.lookup ("de.wordclock.renderer.seconds", false);
-		if (sss.lookup == null) {
-			stderr.printf ("ID not found.");
-			return;
-		}
-		
-		name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
-		
-		this.settings = new GLib.Settings.full (schema, null, "/de/wordclock/renderer/seconds/"+name+"/");
-		
-		this.settings.bind("smooth", this, "smooth", GLib.SettingsBindFlags.DEFAULT);
-		this.settings.bind("width", this, "width", GLib.SettingsBindFlags.DEFAULT);
-		this.settings.bind_with_mapping("background-color", this, "background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind_with_mapping("seconds-color", this, "seconds_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind("background-rotate", this, "background_rotate", GLib.SettingsBindFlags.DEFAULT);
-		this.settings.bind("seconds-rotate", this, "seconds_rotate", GLib.SettingsBindFlags.DEFAULT);
-	}
-	
-	public void unbind_settings() {
-		GLib.Settings.unbind(this, "smooth");
-		GLib.Settings.unbind(this, "width");
-		GLib.Settings.unbind(this, "background_color");
-		GLib.Settings.unbind(this, "seconds_color");
-		GLib.Settings.unbind(this, "background_rotate");
-		GLib.Settings.unbind(this, "seconds_rotate");
 	}
 }

@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.BigTimeRenderer : GLib.Object, ClockRenderable, MatrixRenderer, SettingsBindable {
+public class WordClock.BigTimeRenderer : GLib.Object, ClockRenderable, MatrixRenderer {
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color hours_color { get; set; default = new Color.from_hsv( 100, 255, 150 ); }
 	public Color minutes_color { get; set; default = new Color.from_hsv( 140, 255, 150 ); }
@@ -46,27 +46,5 @@ public class WordClock.BigTimeRenderer : GLib.Object, ClockRenderable, MatrixRen
 				leds_matrix[ _x, _y ].mix_with(color, 255); 
 			}
 		}
-	}
-	
-	public void bind_settings(GLib.SettingsSchemaSource sss, string name) {
-		GLib.SettingsSchema schema = sss.lookup ("de.wordclock.renderer.bigtime", false);
-		if (sss.lookup == null) {
-			stderr.printf ("ID not found.");
-			return;
-		}
-		
-		name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
-		
-		this.settings = new GLib.Settings.full (schema, null, "/de/wordclock/renderer/bigtime/"+name+"/");
-		
-		this.settings.bind_with_mapping("background-color", this, "background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind_with_mapping("hours-color", this, "hours_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind_with_mapping("minutes-color", this, "minutes_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-	}
-	
-	public void unbind_settings() {;
-		GLib.Settings.unbind(this, "background_color");
-		GLib.Settings.unbind(this, "hours_color");
-		GLib.Settings.unbind(this, "minutes_color");
 	}
 }

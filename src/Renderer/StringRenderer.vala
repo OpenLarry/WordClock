@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRenderer, SettingsBindable {
+public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRenderer {
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color left_color { get; set; default = new Color.from_hsv( 0, 255, 35 ); }
 	public Color right_color { get; set; default = new Color.from_hsv( 120, 255, 35 ); }
@@ -129,29 +129,5 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 		}
 		
 		return r;
-	}
-	
-	public void bind_settings(GLib.SettingsSchemaSource sss, string name) {
-		GLib.SettingsSchema schema = sss.lookup ("de.wordclock.renderer.string", false);
-		if (sss.lookup == null) {
-			stderr.printf ("ID not found.");
-			return;
-		}
-		
-		name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
-		
-		this.settings = new GLib.Settings.full (schema, null, "/de/wordclock/renderer/string/"+name+"/");
-		
-		this.settings.bind_with_mapping("background-color", this, "background_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind_with_mapping("left-color", this, "left_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind_with_mapping("right-color", this, "right_color", GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
-		this.settings.bind("speed", this, "speed", GLib.SettingsBindFlags.DEFAULT);
-	}
-	
-	public void unbind_settings() {;
-		GLib.Settings.unbind(this, "background_color");
-		GLib.Settings.unbind(this, "left_color");
-		GLib.Settings.unbind(this, "right_color");
-		GLib.Settings.unbind(this, "speed");
 	}
 }
