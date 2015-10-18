@@ -27,7 +27,7 @@ public class WordClock.Settings : GLib.Object {
 			return;
 		}
 		
-		var settings = new GLib.Settings.full (sschema, null, "/"+schema.replace(".","/")+"/"+settings_name+"/");
+		var settings = new GLib.Settings.full (sschema, null, "/"+(PREFIX+schema).replace(".","/")+"/"+settings_name+"/");
 		
 		foreach(ParamSpec p in obj.get_class().list_properties()) {
 			var name = p.name;
