@@ -13,6 +13,8 @@ public class WordClock.Color : GLib.Object {
 	private uint8 s;
 	private uint8 v;
 	
+	const uint8 LOG_BASE = 10;
+	
 	/**
 	 * Create a new instance for representing any colors
 	 */
