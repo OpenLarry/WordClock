@@ -4,7 +4,7 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Sensors : GLib.Object, Json.Serializable {
+public class WordClock.Sensors : GLib.Object {
 	private LinkedList<float?> vdd5v_vals = new LinkedList<float?>();
 	private LinkedList<float?> vddio_vals = new LinkedList<float?>();
 	private LinkedList<float?> battery_vals = new LinkedList<float?>();
@@ -60,22 +60,5 @@ public class WordClock.Sensors : GLib.Object, Json.Serializable {
 		this.button0 = Main.button0.value;
 		this.button1 = Main.button1.value;
 		this.button2 = Main.button2.value;
-	}
-	
-	/** WORKAROUND - serialize defualt values of properties! */
-	public Json.Node serialize_property(string property_name, Value value, ParamSpec pspec) {
-		Json.Node node = this.default_serialize_property( property_name, value, pspec );
-		if(node == null) {
-			return new Json.Node( Json.NodeType.NULL );
-		}else{
-			return this.default_serialize_property( property_name, value, pspec );
-		}
-	}
-	public bool deserialize_property(string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
-		value = Value(pspec.value_type);
-		return this.default_deserialize_property(property_name, value, pspec, property_node);
-	}
-	public unowned ParamSpec find_property(string name) {
-		return this.get_class().find_property(name);
 	}
 }
