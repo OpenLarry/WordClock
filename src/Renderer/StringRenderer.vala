@@ -16,6 +16,7 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 	protected uint16[,] descriptors;
 	protected uint8 height;
 	protected uint8 offset;
+	protected uint8 spacing;
 	
 	protected uint16[] rendered_str;
 	protected string str;
@@ -30,6 +31,7 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 		this.descriptors = font.get_descriptors();
 		this.height = font.get_height();
 		this.offset = font.get_offset();
+		this.spacing = font.get_character_spacing();
 	}
 	
 	public uint8[] get_fps_range() {
@@ -88,7 +90,7 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 				r += 0x0000;
 				r += 0x0000;
 				r += 0x0000;
-				r += 0x0000;
+				if(space) for(int e=0;e<this.spacing;e++) r += 0x0000;
 				continue;
 			}
 			if( str.@get(i) < 33 || str.@get(i)-33 >= this.descriptors.length[0] ) continue;
@@ -119,9 +121,7 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 				}
 			}
 			
-			if(space) {
-				r += 0x0000;
-			}
+			if(space) for(int e=0;e<this.spacing;e++) r += 0x0000;
 		}
 		
 		for(int i=r.length;i<(constwidth ?? 0);i++) {

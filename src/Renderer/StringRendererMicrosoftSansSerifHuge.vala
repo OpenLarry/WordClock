@@ -12,14 +12,14 @@ public class WordClock.StringRendererMicrosoftSansSerifHuge : GLib.Object, Strin
 		return microsoftSansSerif_10ptDescriptors;
 	}
 	public uint8 get_height() {
-		return HEIGHT;
+		return 16;
 	}
 	public uint8 get_offset() {
-		return OFFSET;
+		return 3;
 	}
-	
-	private const uint8 HEIGHT = 16;
-	private const uint8 OFFSET = 3;
+	public uint8 get_character_spacing() {
+		return 2;
+	}
 	
 	// http://www.eran.io/the-dot-factory-an-lcd-font-and-image-generator/
 	// 

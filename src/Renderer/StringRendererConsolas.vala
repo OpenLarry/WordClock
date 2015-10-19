@@ -12,14 +12,14 @@ public class WordClock.StringRendererConsolas : GLib.Object, StringRendererFont 
 		return consolas_7ptDescriptors;
 	}
 	public uint8 get_height() {
-		return HEIGHT;
+		return 10;
 	}
 	public uint8 get_offset() {
-		return OFFSET;
+		return 0;
 	}
-	
-	private const uint8 HEIGHT = 10;
-	private const uint8 OFFSET = 0;
+	public uint8 get_character_spacing() {
+		return 1;
+	}
 	
 	// http://www.eran.io/the-dot-factory-an-lcd-font-and-image-generator/
 	// 

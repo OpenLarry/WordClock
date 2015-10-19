@@ -9,4 +9,5 @@ public interface WordClock.StringRendererFont {
 	public abstract uint16[,] get_descriptors();
 	public abstract uint8 get_height();
 	public abstract uint8 get_offset();
+	public abstract uint8 get_character_spacing();
 }
