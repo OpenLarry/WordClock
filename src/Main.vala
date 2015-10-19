@@ -68,6 +68,11 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("Black", black);
 		renderer.add_backlight_renderer("Black", black);
 		
+		var gammatest = new GammaTestRenderer();
+		renderer.add_matrix_renderer("GammaTest", gammatest);
+		renderer.add_dots_renderer("GammaTest", gammatest);
+		renderer.add_backlight_renderer("GammaTest", gammatest);
+		
 		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerifHuge());
 		renderer.add_matrix_renderer("String", str);
 		
@@ -139,6 +144,10 @@ public class WordClock.Main : GLib.Object {
 						break;
 					}
 				}
+				if(interpreted_key_code == "STROBE" && repetition_number == 20) {
+					renderer.activate("GammaTest","GammaTest","GammaTest");
+				}
+				
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
 					background = !background;
 					seconds.background_color = new Color.from_hsv(0,0,(background) ? brightness : 0);

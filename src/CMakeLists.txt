@@ -63,6 +63,7 @@ set(VALA_SRC
 	Renderer/BigTimeRenderer.vala
 	Renderer/TestSequenceRenderer.vala
 	Renderer/ColorRenderer.vala
+	Renderer/GammaTestRenderer.vala
 	Renderer/StringRenderer.vala
 	Renderer/StringRendererFont.vala
 	Renderer/StringRendererMicrosoftSansSerif.vala

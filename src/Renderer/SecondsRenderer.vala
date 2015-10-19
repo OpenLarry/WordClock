@@ -55,11 +55,11 @@ public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, Backlight
 			var fade = (uint8) (time.get_microsecond() / 3907);
 			
 			// mix with seconds color, do fading
-			leds_backlight[(time.get_second()-this.width/2+60          )%60].mix_with( seconds_color, 255-fade);
+			leds_backlight[(time.get_second()-this.width/2+60          )%60].mix_with( seconds_color, 255-fade, false);
 			for(int i=1;i<this.width;i++) {
 				leds_backlight[(time.get_second()-this.width/2+60+i)%60].mix_with( seconds_color, 255 );
 			}
-			leds_backlight[(time.get_second()+this.width/2+this.width%2)%60].mix_with( seconds_color, fade);
+			leds_backlight[(time.get_second()+this.width/2+this.width%2)%60].mix_with( seconds_color, fade, false);
 		}
 		
 		return true;

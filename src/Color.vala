@@ -5,21 +5,29 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Color : GLib.Object {
+	/* MUST NOT BE MODIFIED, properties are public for performance reasons ! */
 	public uint8 r = 0;
 	public uint8 g = 0;
 	public uint8 b = 0;
 	
-	private uint16 h;
-	private uint8 s;
-	private uint8 v;
 	
-	const uint8 LOG_BASE = 10;
+	private uint8 r_no_gamma = 0;
+	private uint8 g_no_gamma = 0;
+	private uint8 b_no_gamma = 0;
+	
+	private uint16 h = 0;
+	private uint8 s = 0;
+	private uint8 v = 0;
+	
+	private static uint8[] gamma_correction = {};
+	
+	const double GAMMA = 2.2;
 	
 	/**
 	 * Create a new instance for representing any colors
 	 */
 	public Color( ) {
-		
+		if(gamma_correction.length == 0) init_gamma_correction();
 	}
 	
 	/**
@@ -29,9 +37,14 @@ public class WordClock.Color : GLib.Object {
 	 * @param blue Blue channel brightness
 	 */
 	public Color.from_rgb( uint8 r, uint8 g, uint8 b ) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
+		if(gamma_correction.length == 0) init_gamma_correction();
+		
+		this.r_no_gamma = r;
+		this.g_no_gamma = g;
+		this.b_no_gamma = b;
+		
+		this.to_hsv();
+		this.do_gamma_correction();
 	}
 	
 	/**
@@ -41,22 +54,33 @@ public class WordClock.Color : GLib.Object {
 	 * @param blue Blue channel brightness
 	 */
 	public Color.from_hsv( uint16 h, uint8 s, uint8 v ) {
+		if(gamma_correction.length == 0) init_gamma_correction();
+		
 		this.set_hsv(h,s,v);
 	}
 	
-	public void set_hsv( uint16? h, uint8? s, uint8? v ) {
-		if(h==null || s==null || v==null) this.to_hsv();
-		
+	public Color set_hsv( uint16? h, uint8? s, uint8? v ) {
 		this.h = h ?? this.h;
 		this.h = this.h % 360;
 		this.s = s ?? this.s;
 		this.v = v ?? this.v;
 		
 		this.to_rgb();
+		this.do_gamma_correction();
+		return this;
+	}
+	
+	public Color set_rgb( uint8? r, uint8? g, uint8? b ) {
+		this.r_no_gamma = r ?? this.r_no_gamma;
+		this.g_no_gamma = g ?? this.g_no_gamma;
+		this.b_no_gamma = b ?? this.b_no_gamma;
+		
+		this.to_hsv();
+		this.do_gamma_correction();
+		return this;
 	}
 	
 	public uint16[] get_hsv() {
-		this.to_hsv();
 		return { this.h, this.s, this.v };
 	}
 	
@@ -67,8 +91,8 @@ public class WordClock.Color : GLib.Object {
 	private void to_hsv() {
 		uint8 rgbMin, rgbMax;
 
-		rgbMin = uint8.min(this.r,uint8.min(this.g,this.b));
-		rgbMax = uint8.max(this.r,uint8.max(this.g,this.b));
+		rgbMin = uint8.min(this.r_no_gamma,uint8.min(this.g_no_gamma,this.b_no_gamma));
+		rgbMax = uint8.max(this.r_no_gamma,uint8.max(this.g_no_gamma,this.b_no_gamma));
 
 		this.v = rgbMax;
 		if (this.v == 0)
@@ -85,12 +109,12 @@ public class WordClock.Color : GLib.Object {
 			return;
 		}
 
-		if (rgbMax == this.r)
-			this.h = 0 + 60 * (this.g - this.b) / (rgbMax - rgbMin);
-		else if (rgbMax == this.g)
-			this.h = 120 + 60 * (this.b - this.r) / (rgbMax - rgbMin);
+		if (rgbMax == this.r_no_gamma)
+			this.h = 0 + 60 * (this.g_no_gamma - this.b_no_gamma) / (rgbMax - rgbMin);
+		else if (rgbMax == this.g_no_gamma)
+			this.h = 120 + 60 * (this.b_no_gamma - this.r_no_gamma) / (rgbMax - rgbMin);
 		else
-			this.h = 240 + 60 * (this.r - this.g) / (rgbMax - rgbMin);
+			this.h = 240 + 60 * (this.r_no_gamma - this.g_no_gamma) / (rgbMax - rgbMin);
 
 	}
 	
@@ -102,7 +126,7 @@ public class WordClock.Color : GLib.Object {
 		uint8 region, fpart, p, q, t;
 		
 		if(this.s == 0) {
-			this.r = this.g = this.b = v;
+			this.r_no_gamma = this.g_no_gamma = this.b_no_gamma = v;
 			return;
 		}
 		
@@ -115,17 +139,17 @@ public class WordClock.Color : GLib.Object {
 			
 		switch(region) {
 			case 0:
-				this.r = this.v; this.g = t; this.b = p; break;
+				this.r_no_gamma = this.v; this.g_no_gamma = t; this.b_no_gamma = p; break;
 			case 1:
-				this.r = q; this.g = this.v; this.b = p; break;
+				this.r_no_gamma = q; this.g_no_gamma = this.v; this.b_no_gamma = p; break;
 			case 2:
-				this.r = p; this.g = this.v; this.b = t; break;
+				this.r_no_gamma = p; this.g_no_gamma = this.v; this.b_no_gamma = t; break;
 			case 3:
-				this.r = p; this.g = q; this.b = this.v; break;
+				this.r_no_gamma = p; this.g_no_gamma = q; this.b_no_gamma = this.v; break;
 			case 4:
-				this.r = t; this.g = p; this.b = this.v; break;
+				this.r_no_gamma = t; this.g_no_gamma = p; this.b_no_gamma = this.v; break;
 			default:
-				this.r = this.v; this.g = p; this.b = q; break;
+				this.r_no_gamma = this.v; this.g_no_gamma = p; this.b_no_gamma = q; break;
 		}
 		
 		return;
@@ -137,24 +161,54 @@ public class WordClock.Color : GLib.Object {
 	 * @param percent Mixing factor between 0 (this color) and 255 (param color)
 	 * @return this color
 	 */
-	public Color mix_with( Color color, uint8 percent = 127 ) {
-		this.r = (uint8) ( (((uint16) this.r)*(255-percent) + ((uint16) color.r)*percent) / 255 );
-		this.g = (uint8) ( (((uint16) this.g)*(255-percent) + ((uint16) color.g)*percent) / 255 );
-		this.b = (uint8) ( (((uint16) this.b)*(255-percent) + ((uint16) color.b)*percent) / 255 );
+	public Color mix_with( Color color, uint8 percent = 127, bool gamma_fade = true ) {
+		if(percent == 0) {
+			return this;
+		}else if(percent == 255) {
+			this.r = color.r;
+			this.g = color.g;
+			this.b = color.b;
+			this.r_no_gamma = color.r_no_gamma;
+			this.g_no_gamma = color.g_no_gamma;
+			this.b_no_gamma = color.b_no_gamma;
+			this.h = color.h;
+			this.s = color.s;
+			this.v = color.v;
+		}else if(gamma_fade) {
+			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) color.r_no_gamma)*percent) / 255 );
+			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
+			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) color.b_no_gamma)*percent) / 255 );
+			this.do_gamma_correction();
+		}else{
+			this.r = (uint8) ( (((uint16) this.r)*(255-percent) + ((uint16) color.r)*percent) / 255 );
+			this.g = (uint8) ( (((uint16) this.g)*(255-percent) + ((uint16) color.g)*percent) / 255 );
+			this.b = (uint8) ( (((uint16) this.b)*(255-percent) + ((uint16) color.b)*percent) / 255 );
+		}
 		
 		return this;
 	}
 	
 	public Color clone() {
-		return new Color.from_rgb( this.r, this.g, this.b );
+		var ret = new Color();
+		
+		ret.r = this.r;
+		ret.g = this.g;
+		ret.b = this.b;
+		ret.r_no_gamma = this.r_no_gamma;
+		ret.g_no_gamma = this.g_no_gamma;
+		ret.b_no_gamma = this.b_no_gamma;
+		ret.h = this.h;
+		ret.s = this.s;
+		ret.v = this.v;
+		
+		return ret;
 	}
 	
 	public Color add_hue( int16 h ) {
-		this.to_hsv();
-		
 		this.h = (this.h + h) % 360;
 		
 		this.to_rgb();
+		this.do_gamma_correction();
 		
 		return this;
 	}
@@ -168,6 +222,19 @@ public class WordClock.Color : GLib.Object {
 		}
 		
 		return this.add_hue( (int16) (((seconds%timespan) * 360)/timespan + offset) );
+	}
+	
+	private void do_gamma_correction() {
+		this.r = gamma_correction[this.r_no_gamma];
+		this.g = gamma_correction[this.g_no_gamma];
+		this.b = gamma_correction[this.b_no_gamma];
+	}
+	
+	private static void init_gamma_correction() {
+		gamma_correction = new uint8[256];
+		for(uint16 i=0;i<256;i++) {
+			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
+		}
 	}
 	
 	public static bool get_mapping( GLib.Value value, GLib.Variant variant, void* user_data ) {
@@ -184,22 +251,8 @@ public class WordClock.Color : GLib.Object {
 	
 	public static GLib.Variant set_mapping( GLib.Value value, GLib.VariantType expected_type, void* user_data ) {
 		Color color = (Color) value.get_object();
-		color.to_hsv();
 		
 		return new GLib.Variant.tuple( { new GLib.Variant.uint16( color.h ), new GLib.Variant.byte( color.s ), new GLib.Variant.byte( color.v ) } );
 	}
 	
-	
-	private uint8 log_light( uint8 x ) {
-		if(x == 255) return 255;
-		else if(x == 0) return 0;
-		//else return (uint) Math.floor(x * STEPS);
-		else return (uint8) Math.floor(((Math.pow( LOG_BASE , x/255.0 ) - 1) / ( LOG_BASE - 1 )) * 255);
-	}
-	
-	private uint8 log_light_inv( uint8 x ) {
-		if(x == 255) return 255;
-		else if(x == 0) return 0;
-		else return (uint8) Math.floor( 255 * Math.log((LOG_BASE-1)*(x/255.0)+1)/Math.log(LOG_BASE) );
-	}
 }
