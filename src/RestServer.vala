@@ -6,7 +6,6 @@ using WordClock;
  */
 public class WordClock.RestServer : Soup.Server {
 	const uint16 PORT = 8080;
-	static Sensors sensors = new Sensors();
 	
 	/**
 	 * Creates a new HTTP REST server instance with JSON interface
@@ -17,8 +16,6 @@ public class WordClock.RestServer : Soup.Server {
 		this.add_handler("/", request);
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
-		
-		//Json.boxed_register_serialize_func (typeof(Sensors), Json.NodeType.OBJECT, Sensors.serialize_func);
 	}
 	
 	
@@ -51,8 +48,7 @@ public class WordClock.RestServer : Soup.Server {
 			switch(msg.method) {
 				case "GET":
 					
-					sensors.read();
-					string data = Json.gobject_to_data(sensors, null);
+					string data = Json.gobject_to_data(Main.sensors, null);
 					
 					msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 					msg.set_status(200);

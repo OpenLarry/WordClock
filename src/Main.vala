@@ -8,7 +8,8 @@ public class WordClock.Main : GLib.Object {
 	public static Gpio button0;
 	public static Gpio button1;
 	public static Gpio button2;
-	public static Gpio pir;
+	public static Gpio motion;
+	public static Sensors sensors;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -44,6 +45,8 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
+		sensors = new Sensors();
+		
 		var frontpanel = new RhineRuhrGermanFrontPanel();
 		var time = new TimeRenderer(frontpanel);
 		renderer.add_matrix_renderer("Time", time);
@@ -76,6 +79,11 @@ public class WordClock.Main : GLib.Object {
 		
 		loop = new MainLoop();
 		
+		GLib.Timeout.add(500, () => {
+			sensors.read();
+			return true;
+		});
+		
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
@@ -91,7 +99,7 @@ public class WordClock.Main : GLib.Object {
 		button0 = new Gpio(4);
 		button1 = new Gpio(5);
 		button2 = new Gpio(6);
-		pir = new Gpio(7);
+		motion = new Gpio(7);
 		
 		button0.update.connect((value) => {
 			Buzzer.beep(100,(value)?2500:1500,255);
@@ -102,7 +110,7 @@ public class WordClock.Main : GLib.Object {
 		button2.update.connect((value) => {
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
-		pir.update.connect((value) => {
+		motion.update.connect((value) => {
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
 		
