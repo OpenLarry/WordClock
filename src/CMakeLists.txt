@@ -66,6 +66,7 @@ set(VALA_SRC
 	Renderer/StringRenderer.vala
 	Renderer/StringRendererFont.vala
 	Renderer/StringRendererMicrosoftSansSerif.vala
+	Renderer/StringRendererMicrosoftSansSerifHuge.vala
 	Renderer/StringRendererConsolas.vala
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala

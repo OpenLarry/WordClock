@@ -65,7 +65,7 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("Black", black);
 		renderer.add_backlight_renderer("Black", black);
 		
-		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerif());
+		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerifHuge());
 		renderer.add_matrix_renderer("String", str);
 		
 		var settings = new Settings(seconds);
@@ -118,18 +118,18 @@ public class WordClock.Main : GLib.Object {
 				if(repetition_number == 0) Buzzer.beep(10);
 				
 				if(interpreted_key_code == "STROBE" && repetition_number == 0) {
+					toggle += 1;
 					switch(toggle%3) {
 						case 0:
-							renderer.activate("BigTime","Black","Seconds");
+							renderer.activate("Time","Time","Seconds");
 						break;
 						case 1:
-							renderer.activate("Time","Time","Seconds");
+							renderer.activate("BigTime","Black","Seconds");
 						break;
 						case 2:
 							renderer.activate("String","Black","Seconds");
 						break;
 					}
-					toggle += 1;
 				}
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
 					background = !background;
@@ -256,7 +256,7 @@ public class WordClock.Main : GLib.Object {
 			
 			thread.join();
 			
-			renderer.activate("String","Black","Seconds");
+			renderer.activate("Time","Time","Seconds");
 			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			
