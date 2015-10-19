@@ -5,9 +5,8 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.GammaTestRenderer : GLib.Object, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
-	public Color color = new Color.from_hsv( 0, 0, 0 );
-	public Color color_left = new Color.from_hsv( 0, 0, 0 );
-	public Color color_right = new Color.from_hsv( 0, 0, 255 );
+	public Color color_dark = new Color.from_hsv( 0, 0, 0 );
+	public Color color_bright = new Color.from_hsv( 0, 0, 255 );
 	
 	public uint16 k = 0;
 	
@@ -23,11 +22,13 @@ public class WordClock.GammaTestRenderer : GLib.Object, ClockRenderable, MatrixR
 		for(int i=0;i<leds_matrix.length[0];i++) {
 			for(int j=0;j<leds_matrix.length[1];j++) {
 				if(j<4) {
-					leds_matrix[i,j].mix_with(this.color_left, 255).mix_with(color_right, (uint8) k*10+k/5);
+					leds_matrix[i,j].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) k*10+k/5);
 				}else if(j<8) {
-					leds_matrix[i,j].mix_with(this.color_left, 255).mix_with(color_right, (uint8) 255-k*10-k/5);
+					leds_matrix[i,j].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) 255-k*10-k/5);
+				}else if(j==8) {
+					leds_matrix[i,j].mix_with(this.color_dark, 255);
 				}else if(j>8) {
-					leds_matrix[i,j].mix_with(this.color_left, 255).mix_with(color_right, (uint8) i*25+i/2);
+					leds_matrix[i,j].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) i*25+i/2);
 				}
 			}
 		}
@@ -37,7 +38,7 @@ public class WordClock.GammaTestRenderer : GLib.Object, ClockRenderable, MatrixR
 	
 	public bool render_dots( Color[] leds_dots ) {
 		for(int i=0;i<leds_dots.length;i++) {
-			leds_dots[i].mix_with(this.color, 255);
+			leds_dots[i].mix_with(this.color_dark, 255);
 		}
 		
 		return true;
@@ -47,9 +48,9 @@ public class WordClock.GammaTestRenderer : GLib.Object, ClockRenderable, MatrixR
 		uint8 k = (uint8) (((this.k/25)%2 == 0) ? this.k % 25 : 25 - (this.k % 25));
 		for(int i=0;i<leds_backlight.length;i++) {
 			if(i%2 == 0) {
-				leds_backlight[i].mix_with(this.color_left, 255).mix_with(color_right, (uint8) k*10+k/5, false);
+				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) k*10+k/5, false);
 			}else{
-				leds_backlight[i].mix_with(this.color_left, 255).mix_with(color_right, (uint8) 255-k*10-k/5, false);
+				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) 255-k*10-k/5, false);
 			}
 		}
 		
