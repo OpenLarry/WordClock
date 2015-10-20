@@ -8,9 +8,9 @@ public class WordClock.Settings : GLib.Object {
 	const string PREFIX = "de.wordclock.";
 	
 	private GLib.SettingsSchemaSource sss;
-	private TreeMap<string,GLib.Settings> settings = new TreeMap<string,GLib.Settings>();
+	private TreeMap<GLib.Object,GLib.Settings> settings = new TreeMap<GLib.Object,GLib.Settings>();
 	
-	public Settings(SecondsRenderer r) {
+	public Settings() {
 		try {
 			this.sss = new GLib.SettingsSchemaSource.from_directory ("schemas/", GLib.SettingsSchemaSource.get_default(), false);
 		} catch( Error e ) {
@@ -18,13 +18,12 @@ public class WordClock.Settings : GLib.Object {
 		}
 	}
 	
-	public void add_object( GLib.Object obj, string schema, string settings_name ) {
+	public bool add_object( GLib.Object obj, string schema, string settings_name, GLib.SettingsBindFlags bind = GLib.SettingsBindFlags.DEFAULT ) {
 		settings_name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
 		
 		GLib.SettingsSchema sschema = sss.lookup (PREFIX+schema, false);
-		if (sss.lookup == null) {
-			stderr.printf ("ID not found.");
-			return;
+		if (sschema == null) {
+			return false;
 		}
 		
 		var settings = new GLib.Settings.full (sschema, null, "/"+(PREFIX+schema).replace(".","/")+"/"+settings_name+"/");
@@ -32,18 +31,25 @@ public class WordClock.Settings : GLib.Object {
 		foreach(ParamSpec p in obj.get_class().list_properties()) {
 			var name = p.name;
 			name.canon("abcdefghijklmnopqrstuvwxyz-",'-');
+			if(!sschema.has_key(name)) continue;
 			
 			if(p.value_type.is_a(typeof(Color))) {
-				settings.bind_with_mapping(name, obj, p.name, GLib.SettingsBindFlags.DEFAULT,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+				settings.bind_with_mapping(name, obj, p.name, bind,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
 			}else{
-				settings.bind(name, obj, p.name, GLib.SettingsBindFlags.DEFAULT);
+				settings.bind(name, obj, p.name, bind);
 			}
 		}
 		
-		this.settings.@set("/"+schema.replace(".","/")+"/"+settings_name+"/", settings);
+		this.settings.@set(obj, settings);
+		
+		return true;
 	}
 	
 	public void remove_object( GLib.Object obj ) {
-		//obj.unbind_settings( );
+		foreach(ParamSpec p in obj.get_class().list_properties()) {
+			GLib.Settings.unbind(obj, p.name);
+		}
+		
+		this.settings.unset(obj);
 	}
 }

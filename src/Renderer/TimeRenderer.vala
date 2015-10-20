@@ -5,7 +5,7 @@ using WordClock, Gee;
  * @version 1.0
  */
 public class WordClock.TimeRenderer : GLib.Object, ClockRenderable, MatrixRenderer, DotsRenderer {
-	private FrontPanel frontpanel;
+	private FrontPanel frontpanel = new WestGermanFrontPanel();
 	
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color words_color { get; set; default =  new Color.from_hsv( 0, 255, 150 ); }
@@ -19,10 +19,13 @@ public class WordClock.TimeRenderer : GLib.Object, ClockRenderable, MatrixRender
 	
 	public double fade_secs { get; set; default = 1.0; }
 	
-	protected GLib.Settings settings;
-	
-	public TimeRenderer( FrontPanel frontpanel ) {
-		this.frontpanel = frontpanel;
+	public string frontpanel_name {
+		owned get {
+			return frontpanel.get_class().get_type().name();
+		}
+		set {
+			this.frontpanel = (FrontPanel) Object.new( Type.from_name( value ) );
+		}
 	}
 	
 	/**

@@ -22,15 +22,15 @@ public class WordClock.Color : GLib.Object {
 	// uint16 not supported by json glib
 	public uint hue {
 		get { return this.h; }
-		set { this.h = (uint16) (hue % 360); to_rgb(); do_gamma_correction(); }
+		set { this.h = (uint16) (value % 360); to_rgb(); do_gamma_correction(); }
 	}
 	public uint8 sat {
 		get { return this.s; }
-		set { this.s = sat; to_rgb(); do_gamma_correction(); }
+		set { this.s = value; to_rgb(); do_gamma_correction(); }
 	}
 	public uint8 val {
 		get { return this.v; }
-		set { this.v = sat; to_rgb(); do_gamma_correction(); }
+		set { this.v = value; to_rgb(); do_gamma_correction(); }
 	}
 	
 	private static uint8[] gamma_correction = {};

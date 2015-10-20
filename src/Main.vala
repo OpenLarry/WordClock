@@ -25,13 +25,6 @@ public class WordClock.Main : GLib.Object {
 		
 		
 		
-		try{
-			stdout.puts("Starting REST server...\n");
-			new RestServer( );
-			stdout.puts("Running!\n");
-		} catch( Error e ) {
-			stdout.printf("Error %s\n", e.message);
-		}
 		
 		/*Thread<int> thread;
 		try {
@@ -47,8 +40,12 @@ public class WordClock.Main : GLib.Object {
 		
 		sensors = new Sensors();
 		
-		var frontpanel = new RhineRuhrGermanFrontPanel();
-		var time = new TimeRenderer(frontpanel);
+		// Register FrontPanels: http://valadoc.org/#!api=gobject-2.0/GLib.Type.from_name
+		Type? type = typeof(WestGermanFrontPanel);
+		type = typeof(EastGermanFrontPanel);
+		type = typeof(RhineRuhrGermanFrontPanel);
+		
+		var time = new TimeRenderer();
 		renderer.add_matrix_renderer("Time", time);
 		renderer.add_dots_renderer("Time", time);
 		
@@ -76,11 +73,20 @@ public class WordClock.Main : GLib.Object {
 		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerifHuge());
 		renderer.add_matrix_renderer("String", str);
 		
-		var settings = new Settings(seconds);
+		var settings = new Settings();
 		settings.add_object( seconds, "renderer.seconds", "default" );
 		settings.add_object( bigtime, "renderer.bigtime", "default" );
 		settings.add_object( time, "renderer.time", "default" );
 		settings.add_object( str, "renderer.string", "default" );
+		
+		
+		try{
+			stdout.puts("Starting REST server...\n");
+			new RestServer( settings );
+			stdout.puts("Running!\n");
+		} catch( Error e ) {
+			stdout.printf("Error %s\n", e.message);
+		}
 		
 		loop = new MainLoop();
 		

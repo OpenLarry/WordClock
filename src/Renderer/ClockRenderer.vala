@@ -33,6 +33,10 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer {
 		this.backlight_renderers.set( name, renderer );
 	}
 	
+	public MatrixRenderer get_matrix_renderer( string name ) {
+		return this.matrix_renderers.get( name );
+	}
+	
 	public bool activate( string? matrix_name, string? dots_name, string? backlight_name ) {
 		var ret = true;
 		

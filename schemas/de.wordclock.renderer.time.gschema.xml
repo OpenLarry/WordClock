@@ -27,5 +27,8 @@
 		<key name="fade-secs" type="d">
 			<default>1.0</default>
 		</key>
+		<key name="frontpanel-name" type="s">
+			<default>"WordClockWestGermanFrontPanel"</default>
+		</key>
 	</schema>
 </schemalist>
