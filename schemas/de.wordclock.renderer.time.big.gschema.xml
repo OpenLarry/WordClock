@@ -1,5 +1,5 @@
 <schemalist>
-	<schema id="de.wordclock.renderer.bigtime">
+	<schema id="de.wordclock.renderer.time.big">
 		<key name="background-color" type="(qyy)">
 			<default>(0,0,0)</default>
 		</key>

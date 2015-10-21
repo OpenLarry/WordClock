@@ -74,10 +74,10 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_matrix_renderer("String", str);
 		
 		var settings = new Settings();
-		settings.add_object( seconds, "renderer.seconds", "default" );
-		settings.add_object( bigtime, "renderer.bigtime", "default" );
-		settings.add_object( time, "renderer.time", "default" );
-		settings.add_object( str, "renderer.string", "default" );
+		settings.add_object( seconds, "default" );
+		settings.add_object( bigtime, "default" );
+		settings.add_object( time, "default" );
+		settings.add_object( str, "default" );
 		
 		
 		try{
