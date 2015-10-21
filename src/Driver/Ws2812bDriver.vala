@@ -158,6 +158,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	 * @param fps Frames per second
 	 */
 	public void set_fps( uint8 fps ) {
+		if(this.fps == fps) return;
+		
 		this.fps = fps;
 		
 		// get frambuffer settings
