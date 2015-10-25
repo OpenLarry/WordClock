@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.StringRendererConsolas : GLib.Object, StringRendererFont {
+public class WordClock.ConsolasFont : GLib.Object, Font {
 	public uint8[] get_bitmaps() {
 		return consolas_7ptBitmaps;
 	}

@@ -67,10 +67,10 @@ set(VALA_SRC
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala
 	Renderer/StringRenderer.vala
-	Renderer/StringRendererFont.vala
-	Renderer/StringRendererMicrosoftSansSerif.vala
-	Renderer/StringRendererMicrosoftSansSerifHuge.vala
-	Renderer/StringRendererConsolas.vala
+	Font/Font.vala
+	Font/MicrosoftSansSerifFont.vala
+	Font/HugeMicrosoftSansSerifFont.vala
+	Font/ConsolasFont.vala
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala
 	Sensors/Gpio.vala

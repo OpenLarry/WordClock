@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.StringRendererMicrosoftSansSerif : GLib.Object, StringRendererFont {
+public class WordClock.MicrosoftSansSerifFont : GLib.Object, Font {
 	public uint8[] get_bitmaps() {
 		return microsoftSansSerif_7ptBitmaps;
 	}

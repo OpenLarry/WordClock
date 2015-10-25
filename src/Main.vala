@@ -70,7 +70,7 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("GammaTest", gammatest);
 		renderer.add_backlight_renderer("GammaTest", gammatest);
 		
-		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new StringRendererMicrosoftSansSerifHuge());
+		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new HugeMicrosoftSansSerifFont());
 		renderer.add_matrix_renderer("String", str);
 		
 		var settings = new Settings();

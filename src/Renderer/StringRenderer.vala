@@ -24,7 +24,7 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 	public delegate string StringFunc();
 	protected StringFunc str_func;
 	
-	public StringRenderer( owned StringFunc str_func, StringRendererFont font ) {
+	public StringRenderer( owned StringFunc str_func, Font font ) {
 		this.str_func = (owned) str_func;
 		
 		this.bitmaps = font.get_bitmaps();
