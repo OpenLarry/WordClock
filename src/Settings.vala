@@ -4,7 +4,7 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Settings : GLib.Object, Json.Serializable {
+public class WordClock.Settings : GLib.Object, Json.Serializable, Serializable {
 	const string PREFIX = "de.wordclock";
 	
 	private GLib.SettingsSchemaSource sss;
@@ -32,34 +32,10 @@ public class WordClock.Settings : GLib.Object, Json.Serializable {
 			this,
 			"settings_paths",
 			GLib.SettingsBindFlags.DEFAULT,
-			get_mapping,
-			set_mapping,
+			(SettingsBindGetMappingShared) VariantMapper.settings_get_mapping,
+			(SettingsBindSetMappingShared) VariantMapper.settings_set_mapping,
 			null, null
 		);
-	}
-	
-	private static bool get_mapping( GLib.Value value, GLib.Variant variant, void* user_data ) {
-		TreeSet<string> settings_paths = new TreeSet<string>();
-		
-		for(int i=0;i<variant.n_children();i++) {
-			string path;
-			variant.get_child(i, "o", out path);
-			settings_paths.add(path);
-		}
-		
-		value.set_object( settings_paths );
-		
-		return true;
-	}
-	private static GLib.Variant set_mapping( GLib.Value value, GLib.VariantType expected_type, void* user_data ) {
-		TreeSet<string> settings_paths = (TreeSet<string>) value.get_object();
-		
-		Variant[] paths = {};
-		foreach(string path in settings_paths) {
-			paths += new Variant.object_path(path);
-		}
-		
-		return new Variant.array( VariantType.OBJECT_PATH, paths );
 	}
 	
 	public bool add_object( GLib.Object obj, string? settings_name = null, GLib.SettingsBindFlags bind = GLib.SettingsBindFlags.DEFAULT ) {
@@ -103,7 +79,7 @@ public class WordClock.Settings : GLib.Object, Json.Serializable {
 			if(!sschema.has_key(name)) continue;
 			
 			if(p.value_type.is_a(typeof(Color))) {
-				settings.bind_with_mapping(name, obj, p.name, bind,(SettingsBindGetMappingShared) Color.get_mapping,(SettingsBindSetMappingShared) Color.set_mapping, null, null);
+				settings.bind_with_mapping(name, obj, p.name, bind,(SettingsBindGetMappingShared) VariantMapper.color_get_mapping,(SettingsBindSetMappingShared) VariantMapper.color_set_mapping, null, null);
 			}else{
 				settings.bind(name, obj, p.name, bind);
 			}
@@ -125,30 +101,9 @@ public class WordClock.Settings : GLib.Object, Json.Serializable {
 		this.settings.unset(obj);
 	}
 	
-	
-	public Json.Node serialize_property(string property_name, Value value, ParamSpec pspec) {
-		if(pspec.value_type.is_a(typeof(Set))) {
-			Set<string> set = (Set<string>) value.get_object();
-			
-			var array = new Json.Array();
-			
-			foreach(string val in set) {
-				array.add_string_element(val);
-			}
-			
-			var root_node = new Json.Node( Json.NodeType.ARRAY );
-			root_node.set_array(array);
-			
-			return root_node;
-		}else{
-			return this.default_serialize_property( property_name, value, pspec );
-		}
-	}
-	public bool deserialize_property(string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
-		value = Value(pspec.value_type);
-		return this.default_deserialize_property(property_name, value, pspec, property_node);
-	}
-	public unowned ParamSpec find_property(string name) {
-		return this.get_class().find_property(name);
-	}
+	// workaround for multiple inheritance
+	// https://wiki.gnome.org/Projects/Vala/Tutorial#Mixins_and_Multiple_Inheritance
+	public Json.Node Json.Serializable.serialize_property(string property_name, Value value, ParamSpec pspec) { return Serializable.serialize_property(this,property_name,value,pspec); }
+	public bool Json.Serializable.deserialize_property(string property_name, out Value value, ParamSpec pspec, Json.Node property_node) { return Serializable.deserialize_property(this,property_name,out value,pspec,property_node); 	}
+	public unowned ParamSpec Json.Serializable.find_property(string name) { return Serializable.find_property(this,name); }
 }

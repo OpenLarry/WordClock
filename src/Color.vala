@@ -19,20 +19,6 @@ public class WordClock.Color : GLib.Object {
 	private uint8 s = 0;
 	private uint8 v = 0;
 	
-	// uint16 not supported by json glib
-	public uint hue {
-		get { return this.h; }
-		set { this.h = (uint16) (value % 360); to_rgb(); do_gamma_correction(); }
-	}
-	public uint8 sat {
-		get { return this.s; }
-		set { this.s = value; to_rgb(); do_gamma_correction(); }
-	}
-	public uint8 val {
-		get { return this.v; }
-		set { this.v = value; to_rgb(); do_gamma_correction(); }
-	}
-	
 	private static uint8[] gamma_correction = {};
 	
 	const double GAMMA = 2.2;
@@ -250,23 +236,4 @@ public class WordClock.Color : GLib.Object {
 			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
 		}
 	}
-	
-	public static bool get_mapping( GLib.Value value, GLib.Variant variant, void* user_data ) {
-		uint16 h=0;
-		uint8 s=0,v=0;
-		variant.get_child(0, "q", out h);
-		variant.get_child(1, "y", out s);
-		variant.get_child(2, "y", out v);
-		
-		value.set_object( new Color.from_hsv(h,s,v) );
-		
-		return true;
-	}
-	
-	public static GLib.Variant set_mapping( GLib.Value value, GLib.VariantType expected_type, void* user_data ) {
-		Color color = (Color) value.get_object();
-		
-		return new GLib.Variant.tuple( { new GLib.Variant.uint16( color.h ), new GLib.Variant.byte( color.s ), new GLib.Variant.byte( color.v ) } );
-	}
-	
 }

@@ -43,6 +43,8 @@ set(VALA_SRC
 	Lirc.vala
 	Buzzer.vala
 	Settings.vala
+	Serializable.vala
+	VariantMapper.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
 	Wiring/ClockWiring.vala

@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer {
+public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, BacklightRenderer, Json.Serializable, Serializable {
 	public bool smooth { get; set; default = true; }
 	public uint8 width { get; set; default = 3; }
 	
@@ -64,4 +64,11 @@ public class WordClock.SecondsRenderer : GLib.Object, ClockRenderable, Backlight
 		
 		return true;
 	}
+	
+	
+	// workaround for multiple inheritance
+	// https://wiki.gnome.org/Projects/Vala/Tutorial#Mixins_and_Multiple_Inheritance
+	public Json.Node Json.Serializable.serialize_property(string property_name, Value value, ParamSpec pspec) { return Serializable.serialize_property(this,property_name,value,pspec); }
+	public bool Json.Serializable.deserialize_property(string property_name, out Value value, ParamSpec pspec, Json.Node property_node) { return Serializable.deserialize_property(this,property_name,out value,pspec,property_node); 	}
+	public unowned ParamSpec Json.Serializable.find_property(string name) { return Serializable.find_property(this,name); }
 }
