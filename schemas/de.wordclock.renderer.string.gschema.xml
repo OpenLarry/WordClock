@@ -12,5 +12,14 @@
 		<key name="speed" type="y">
 			<default>10</default>
 		</key>
+		<key name="font-name" type="s">
+			<default>"WordClockMicrosoftSansSerifFont"</default>
+		</key>
+		<key name="string" type="s">
+			<default>"%k:%M "</default>
+		</key>
+		<key name="time-format" type="b">
+			<default>true</default>
+		</key>
 	</schema>
 </schemalist>

@@ -10,29 +10,34 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 	public Color right_color { get; set; default = new Color.from_hsv( 120, 255, 35 ); }
 	public uint8 speed { get; set; default = 10; }
 	
+	public string font_name {
+		owned get {
+			return this.font.get_class().get_type().name();
+		}
+		set {
+			this.font = (Font) Object.new( Type.from_name( value ) );
+			this.bitmaps = this.font.get_bitmaps();
+			this.descriptors = this.font.get_descriptors();
+			this.height = this.font.get_height();
+			this.offset = this.font.get_offset();
+			this.spacing = this.font.get_character_spacing();
+		}
+	}
+	
+	public bool time_format { get; set; default = true; }
+	public string string { get; set; default = "%k:%M "; }
+	
 	protected GLib.Settings settings;
 	
-	protected uint8[] bitmaps;
-	protected uint16[,] descriptors;
-	protected uint8 height;
-	protected uint8 offset;
-	protected uint8 spacing;
+	protected Font font = new MicrosoftSansSerifFont();
+	protected uint8[] bitmaps = new MicrosoftSansSerifFont().get_bitmaps();
+	protected uint16[,] descriptors = new MicrosoftSansSerifFont().get_descriptors();
+	protected uint8 height = new MicrosoftSansSerifFont().get_height();
+	protected uint8 offset = new MicrosoftSansSerifFont().get_offset();
+	protected uint8 spacing = new MicrosoftSansSerifFont().get_character_spacing();
 	
 	protected uint16[] rendered_str;
-	protected string str;
-	
-	public delegate string StringFunc();
-	protected StringFunc str_func;
-	
-	public StringRenderer( owned StringFunc str_func, Font font ) {
-		this.str_func = (owned) str_func;
-		
-		this.bitmaps = font.get_bitmaps();
-		this.descriptors = font.get_descriptors();
-		this.height = font.get_height();
-		this.offset = font.get_offset();
-		this.spacing = font.get_character_spacing();
-	}
+	protected string last_str;
 	
 	public uint8[] get_fps_range() {
 		return {this.speed,uint8.MAX};
@@ -54,10 +59,15 @@ public class WordClock.StringRenderer : GLib.Object, ClockRenderable, MatrixRend
 		
 		var time = new DateTime.now_local();
 		
-		string str = this.str_func();
+		string str;
+		if(this.time_format) {
+			str = time.format(this.string).chug();
+		}else{
+			str = this.string;
+		}
 		
-		if(str != this.str) {
-			this.str = str;
+		if(str != this.last_str) {
+			this.last_str = str;
 			this.rendered_str = render_str(str);
 		}
 		

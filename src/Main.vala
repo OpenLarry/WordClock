@@ -44,6 +44,9 @@ public class WordClock.Main : GLib.Object {
 		Type? type = typeof(WestGermanFrontPanel);
 		type = typeof(EastGermanFrontPanel);
 		type = typeof(RhineRuhrGermanFrontPanel);
+		type = typeof(MicrosoftSansSerifFont);
+		type = typeof(HugeMicrosoftSansSerifFont);
+		type = typeof(ConsolasFont);
 		
 		var time = new TimeRenderer();
 		renderer.add_matrix_renderer("Time", time);
@@ -70,7 +73,7 @@ public class WordClock.Main : GLib.Object {
 		renderer.add_dots_renderer("GammaTest", gammatest);
 		renderer.add_backlight_renderer("GammaTest", gammatest);
 		
-		var str = new StringRenderer(() => { return new DateTime.now_local().format("%k:%M ").chug(); }, new HugeMicrosoftSansSerifFont());
+		var str = new StringRenderer();
 		renderer.add_matrix_renderer("String", str);
 		
 		var settings = new Settings();
