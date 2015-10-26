@@ -37,6 +37,7 @@ public class WordClock.WestGermanFrontPanel : GermanFrontPanel {
 				words += Word.M_FUENF;
 				words += Word.VOR;
 				words += Word.M_HALB;
+				hour++;
 			break;
 			case 6: // 30
 				words += Word.M_HALB;
