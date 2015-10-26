@@ -54,9 +54,9 @@ public class WordClock.Main : GLib.Object {
 		
 		sensors = new Sensors();
 		
-		button0 = new Gpio(4);
-		button1 = new Gpio(5);
-		button2 = new Gpio(6);
+		button0 = new Gpio(92);
+		button1 = new Gpio(91);
+		button2 = new Gpio(23);
 		motion = new Gpio(7);
 		
 		var sensorsobserver = new SensorsObserver(sensors);
@@ -122,6 +122,11 @@ public class WordClock.Main : GLib.Object {
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
 		
+		
+		button0 = new Gpio(92);
+		button1 = new Gpio(91);
+		button2 = new Gpio(23);
+		motion = new Gpio(7);
 		
 		// button0.action.connect((value) => {
 			// if(value) {
