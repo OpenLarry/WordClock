@@ -116,12 +116,33 @@ public class WordClock.Main : GLib.Object {
 		motion = new Gpio(7);
 		
 		button0.update.connect((value) => {
+			if(value) {
+				try{
+					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_hours(1).format("%T") ));
+				}catch(Error e) {
+					stderr.printf("%s\n",e.message);
+				}
+			}
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
 		button1.update.connect((value) => {
+			if(value) {
+				try{
+					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_minutes(1).format("%T") ));
+				}catch(Error e) {
+					stderr.printf("%s\n",e.message);
+				}
+			}
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
 		button2.update.connect((value) => {
+			if(value) {
+				try{
+					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_seconds(1).format("%T") ));
+				}catch(Error e) {
+					stderr.printf("%s\n",e.message);
+				}
+			}
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
 		motion.update.connect((value) => {
