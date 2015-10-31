@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Color : GLib.Object, Serializable {
+public class WordClock.Color : GLib.Object, Jsonable {
 	/* MUST NOT BE MODIFIED, properties are public for performance reasons ! */
 	public uint8 r = 0;
 	public uint8 g = 0;
@@ -237,7 +237,7 @@ public class WordClock.Color : GLib.Object, Serializable {
 		}
 	}
 	
-	public Json.Node serialize() {
+	public Json.Node to_json() {
 		Json.Object obj = new Json.Object();
 		
 		obj.set_int_member( "h", this.h );
@@ -250,12 +250,12 @@ public class WordClock.Color : GLib.Object, Serializable {
 		return node;
 	}
 	
-	public void deserialize(Json.Node node) throws SerializeError {
-		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+	public void from_json(Json.Node node) throws JsonableError {
+		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
 		
 		Json.Object obj = node.get_object();
-		if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new SerializeError.INVALID_PROPERTY("Need properties h, s and v!");
-		if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
+		if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new JsonableError.INVALID_PROPERTY("Need properties h, s and v!");
+		if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
 		
 		this.set_hsv( (uint16) obj.get_int_member( "h" ), (uint8) obj.get_int_member( "s" ), (uint8) obj.get_int_member( "v" ) );
 	}

@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TestSequenceRenderer : GLib.Object, Serializable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
+public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
 	private uint8 i=0;
 	
 	public uint8[] get_fps_range() {

@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.StringRenderer : GLib.Object, Serializable, ClockRenderable, MatrixRenderer {
+public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color left_color { get; set; default = new Color.from_hsv( 0, 255, 35 ); }
 	public Color right_color { get; set; default = new Color.from_hsv( 120, 255, 35 ); }

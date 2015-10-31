@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.BigTimeRenderer : GLib.Object, Serializable, ClockRenderable, MatrixRenderer {
+public class WordClock.BigTimeRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color hours_color { get; set; default = new Color.from_hsv( 100, 255, 150 ); }
 	public Color minutes_color { get; set; default = new Color.from_hsv( 140, 255, 150 ); }

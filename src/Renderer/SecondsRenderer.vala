@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.SecondsRenderer : GLib.Object, Serializable, ClockRenderable, BacklightRenderer {
+public class WordClock.SecondsRenderer : GLib.Object, Jsonable, ClockRenderable, BacklightRenderer {
 	public bool smooth { get; set; default = true; }
 	public uint8 width { get; set; default = 3; }
 	

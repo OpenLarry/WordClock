@@ -1,51 +1,31 @@
-using WordClock, Gee;
+using WordClock;
 
 /**
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.JsonSettings : GLib.Object, Serializable {
-	public string path;
-	
-	public SerializableTreeMap<Serializable> objects { get; set; default = new SerializableTreeMap<Serializable>(); }
-	
-	public JsonSettings( string path ) {
-		this.path = path;
-	}
-	
-	public bool load_data( ) {
+namespace WordClock.JsonHelper {
+	public static void load( Jsonable obj, string path ) throws Error {
 		Json.Parser parser = new Json.Parser();
-		try{
-			parser.load_from_file(this.path);
-			this.deserialize(parser.get_root());
-			return true;
-		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
-			return false;
-		}
+		parser.load_from_file(path);
+		obj.from_json(parser.get_root());
 	}
 	
-	public bool save_data() {
-		Json.Generator generator = new Json.Generator();
-		generator.pretty = true;
-		try{
-			generator.set_root(this.serialize());
-			generator.to_file(this.path);
-			return true;
-		}catch( Error e ) {
-			stderr.printf("%s\n",e.message);
-			return false;
-		}
-	}
-	
-	public string get_json( string? jsonpath = null, bool pretty = false ) throws Error {
+	public static void save( Jsonable obj, string path, bool pretty = false ) throws Error {
 		Json.Generator generator = new Json.Generator();
 		generator.pretty = pretty;
-		Json.Node node = this.serialize();
+		generator.set_root(obj.to_json());
+		generator.to_file(path);
+	}
+	
+	public static string get( Jsonable obj, string? jsonpath = null, bool pretty = false ) throws Error {
+		Json.Generator generator = new Json.Generator();
+		generator.pretty = pretty;
+		Json.Node node = obj.to_json();
 		if(jsonpath != null) {
 			node = Json.Path.query(jsonpath, node);
-			if(node.get_array().get_length() > 1) throw new JsonSettingsError.AMBIGUOUS("JSONPath is ambiguous!\n");
-			if(node.get_array().get_length() == 0) throw new JsonSettingsError.NOT_FOUND("Node not found!\n");
+			if(node.get_array().get_length() > 1) throw new JsonHelperError.AMBIGUOUS("JSONPath is ambiguous!\n");
+			if(node.get_array().get_length() == 0) throw new JsonHelperError.NOT_FOUND("Node not found!\n");
 			generator.set_root(node.get_array().get_element(0));
 		}else{
 			generator.set_root(node);
@@ -53,17 +33,17 @@ public class WordClock.JsonSettings : GLib.Object, Serializable {
 		return generator.to_data(null);
 	}
 	
-	public void set_json( string data, string? jsonpath = null ) throws Error {
+	public static void set( Jsonable obj, string data, string? jsonpath = null ) throws Error {
 		Json.Parser parser = new Json.Parser();
 		parser.load_from_data(data);
 		Json.Node root = parser.get_root();
 		
 		if(jsonpath != null) {
-			Json.Node node = this.serialize();
+			Json.Node node = obj.to_json();
 			Json.Node subnode = Json.Path.query(jsonpath, node);
-			if(subnode.get_array().get_length() > 1) throw new JsonSettingsError.AMBIGUOUS("JSONPath is ambiguous!\n");
-			if(subnode.get_array().get_length() == 0) throw new JsonSettingsError.NOT_FOUND("Node not found!\n");
-			if(subnode.get_array().get_element(0).get_node_type() != root.get_node_type()) throw new JsonSettingsError.WRONG_TYPE("Wrong node type!\n");
+			if(subnode.get_array().get_length() > 1) throw new JsonHelperError.AMBIGUOUS("JSONPath is ambiguous!\n");
+			if(subnode.get_array().get_length() == 0) throw new JsonHelperError.NOT_FOUND("Node not found!\n");
+			if(subnode.get_array().get_element(0).get_node_type() != root.get_node_type()) throw new JsonHelperError.WRONG_TYPE("Wrong node type!\n");
 			
 			switch(subnode.get_array().get_element(0).get_node_type()) {
 				case Json.NodeType.OBJECT:
@@ -79,9 +59,9 @@ public class WordClock.JsonSettings : GLib.Object, Serializable {
 				break;
 			}
 			
-			this.deserialize(node);
+			obj.from_json(node);
 		}else{
-			this.deserialize(root);
+			obj.from_json(root);
 		}
 	}
 	
@@ -106,6 +86,6 @@ public class WordClock.JsonSettings : GLib.Object, Serializable {
 	}
 }
 
-errordomain JsonSettingsError {
+errordomain JsonHelperError {
 	AMBIGUOUS, NOT_FOUND, WRONG_TYPE
 }

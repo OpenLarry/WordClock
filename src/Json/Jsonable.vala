@@ -8,16 +8,16 @@ using WordClock, Gee;
  * (segfaults, null pointers, ...) and they are too unconvenient. => I do it by myself.
  */
 
-public interface WordClock.Serializable : GLib.Object {
+public interface WordClock.Jsonable : GLib.Object {
 	
-	public virtual Json.Node serialize() {
+	public virtual Json.Node to_json() {
 		Json.Object obj = new Json.Object();
 		
 		foreach(unowned ParamSpec pspec in this.get_class().list_properties()) {
 			Value val = Value(pspec.value_type);
 			this.get_property(pspec.get_name(), ref val);
 			
-			obj.set_member( pspec.get_name(), serialize_value( val ) );
+			obj.set_member( pspec.get_name(), value_to_json( val ) );
 		}
 		
 		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
@@ -26,31 +26,31 @@ public interface WordClock.Serializable : GLib.Object {
 		return node;
 	}
 	
-	public virtual void deserialize( Json.Node node ) throws SerializeError {
-		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+	public virtual void from_json( Json.Node node ) throws JsonableError {
+		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
 		
 		// Can not use Json.Object.foreach_member here, because we have to throw exceptions in case of error which are not supported by the delegate!
 		foreach(string name in node.get_object().get_members()) {
 			Json.Node member = node.get_object().get_member(name);
 			
 			ParamSpec? pspec = this.get_class().find_property(name.replace("-","_"));
-			if(pspec == null) throw new SerializeError.INVALID_PROPERTY("Invalid property '%s'!".printf(name.replace("-","_")));
+			if(pspec == null) throw new JsonableError.INVALID_PROPERTY("Invalid property '%s'!".printf(name.replace("-","_")));
 			
 			Value val = Value(pspec.value_type);
 			this.get_property(pspec.get_name(), ref val);
-			deserialize_value( member, ref val );
+			value_from_json( member, ref val );
 			this.set_property(pspec.get_name(), val);
 		}
 	}
 	
-	public static Json.Node serialize_value( Value val ) {
+	public static Json.Node value_to_json( Value val ) {
 		Json.Node node;
-		if(val.type().is_a(typeof(Serializable))) {
-			Serializable ser = (Serializable) val.get_object();
+		if(val.type().is_a(typeof(Jsonable))) {
+			Jsonable ser = (Jsonable) val.get_object();
 			if(ser == null){
 				node = new Json.Node( Json.NodeType.NULL );
 			}else{
-				node = ser.serialize();
+				node = ser.to_json();
 				if(node == null) node = new Json.Node( Json.NodeType.NULL );
 				if(node.get_node_type() == Json.NodeType.OBJECT) {
 					node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
@@ -99,23 +99,29 @@ public interface WordClock.Serializable : GLib.Object {
 		return node;
 	}
 	
-	public static void deserialize_value( Json.Node node, ref Value val ) throws SerializeError {
-		if(val.type().is_a(typeof(Serializable))) {
-			Serializable ser = (Serializable) val.get_object();
+	public static void value_from_json( Json.Node node, ref Value val ) throws JsonableError {
+		if(val.type().is_a(typeof(Jsonable))) {
+			Jsonable ser = (Jsonable) val.get_object();
 			if(ser == null) {
-				if(node.get_node_type() != Json.NodeType.OBJECT) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
-				if(!node.get_object().has_member("-type")) throw new SerializeError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
-				if(!Type.from_name( node.get_object().get_string_member("-type") ).is_a(typeof(Serializable)) ) throw new SerializeError.INVALID_CLASS_NAME("Class does not implement interface Serializable!");
-				ser = (Serializable) Object.new( Type.from_name( node.get_object().get_string_member("-type") ) );
+				if(node.get_node_type() != Json.NodeType.OBJECT) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+				if(!node.get_object().has_member("-type")) throw new JsonableError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
+				if(!Type.from_name( node.get_object().get_string_member("-type") ).is_a(typeof(Jsonable)) ) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
+				ser = (Jsonable) Object.new( Type.from_name( node.get_object().get_string_member("-type") ) );
 				
-				if(ser == null) throw new SerializeError.INVALID_CLASS_NAME("Can not instantiate class!\n");
+				if(ser == null) throw new JsonableError.INVALID_CLASS_NAME("Can not instantiate class!\n");
+				
+				
+				if(node.get_object().has_member("-type")) node.get_object().remove_member("-type");
+				ser.from_json(node);
+				val.take_object(ser);
+			}else{
+				if(node.get_object().has_member("-type")) node.get_object().remove_member("-type");
+				ser.from_json(node);
+				val.set_object(ser);
 			}
-			if(node.get_object().has_member("-type")) node.get_object().remove_member("-type");
-			ser.deserialize(node);
-			val.set_object(ser);
 		}else if(val.type().is_object()) {
-			if( node.get_node_type() != Json.NodeType.OBJECT ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
-			if( node.get_object().get_size() > 0 ) throw new SerializeError.INVALID_CLASS_NAME("Class does not implement interface Serializable!");
+			if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+			if( node.get_object().get_size() > 0 ) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
 		}else{
 			if(val.holds(typeof(bool))) {
 				val.set_boolean( node.get_boolean() );
@@ -142,12 +148,12 @@ public interface WordClock.Serializable : GLib.Object {
 			}else if(val.holds(typeof(string))) {
 				val.set_string( node.get_string() );
 			}else{
-				throw new SerializeError.INVALID_VALUE_TYPE("Invalid type: %s\n".printf(val.type().name()));
+				throw new JsonableError.INVALID_VALUE_TYPE("Invalid type: %s\n".printf(val.type().name()));
 			}
 		}
 	}
 }
 
-public errordomain WordClock.SerializeError {
+public errordomain WordClock.JsonableError {
 	INVALID_PROPERTY, INVALID_NODE_TYPE, UNKNOWN_CLASS_NAME, INVALID_CLASS_NAME, INVALID_VALUE_TYPE
 }

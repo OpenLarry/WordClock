@@ -4,7 +4,7 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TimeRenderer : GLib.Object, Serializable, ClockRenderable, MatrixRenderer, DotsRenderer {
+public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer {
 	private FrontPanel frontpanel = new WestGermanFrontPanel();
 	
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }

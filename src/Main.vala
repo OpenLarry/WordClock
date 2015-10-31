@@ -11,7 +11,7 @@ public class WordClock.Main : GLib.Object {
 	public static Gpio motion;
 	public static Sensors sensors;
 	
-	public static JsonSettings settings;
+	public static Settings settings;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -49,21 +49,25 @@ public class WordClock.Main : GLib.Object {
 		
 		sensors = new Sensors();
 		
-		settings = new JsonSettings("settings/settings.json");
+		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		
-		renderer.renderers["Time"] = new TimeRenderer();
-		renderer.renderers["BigTime"] = new BigTimeRenderer();
-		renderer.renderers["Test"] = new TestSequenceRenderer();
-		renderer.renderers["Color"] = new ColorRenderer();
-		renderer.renderers["GammaTest"] = new GammaTestRenderer();
-		renderer.renderers["Seconds"] = new SecondsRenderer();
+		// renderer.renderers["Time"] = new TimeRenderer();
+		// renderer.renderers["BigTime"] = new BigTimeRenderer();
+		// renderer.renderers["Test"] = new TestSequenceRenderer();
+		// renderer.renderers["Color"] = new ColorRenderer();
+		// renderer.renderers["GammaTest"] = new GammaTestRenderer();
+		// renderer.renderers["Seconds"] = new SecondsRenderer();
 		
-		renderer.configurations["default"] = new ClockConfiguration("Time","Time","Seconds");
-		renderer.active = "default";
+		// renderer.configurations["default"] = new ClockConfiguration("Time","Time","Seconds");
+		// renderer.active = "default";
 		
-		settings.load_data();
-		stdout.puts("Loaded!\n");
+		try{
+			settings.load();
+			stdout.puts("Settings loaded!\n");
+		} catch( Error e ) {
+			stderr.printf("Error: %s\n", e.message);
+		}
 		
 		
 		loop = new MainLoop();
@@ -75,6 +79,7 @@ public class WordClock.Main : GLib.Object {
 		} catch( Error e ) {
 			stdout.printf("Error %s\n", e.message);
 		}
+		
 		
 		/*
 		GLib.Timeout.add(500, () => {

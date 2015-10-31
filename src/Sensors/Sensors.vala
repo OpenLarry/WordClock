@@ -4,7 +4,7 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Sensors : GLib.Object {
+public class WordClock.Sensors : GLib.Object, Jsonable {
 	private LinkedList<float?> vdd5v_vals = new LinkedList<float?>();
 	private LinkedList<float?> vddio_vals = new LinkedList<float?>();
 	private LinkedList<float?> battery_vals = new LinkedList<float?>();

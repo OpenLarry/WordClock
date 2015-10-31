@@ -4,14 +4,14 @@ using WordClock, Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Serializable {
+public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	private LedDriver driver;
 	private ClockWiring wiring;
 	
 	public string active { get; set; default = ""; }
 	
-	public SerializableTreeMap<ClockConfiguration> configurations { get; set; default = new SerializableTreeMap<ClockConfiguration>(); }
-	public SerializableTreeMap<ClockRenderable> renderers { get; set; default = new SerializableTreeMap<ClockRenderable>(); }
+	public JsonableTreeMap<ClockConfiguration> configurations { get; set; default = new JsonableTreeMap<ClockConfiguration>(); }
+	public JsonableTreeMap<ClockRenderable> renderers { get; set; default = new JsonableTreeMap<ClockRenderable>(); }
 	
 	public ClockRenderer( ClockWiring wiring, LedDriver driver ) {
 		this.wiring = wiring;

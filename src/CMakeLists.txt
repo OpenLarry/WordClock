@@ -42,9 +42,10 @@ set(VALA_SRC
 	Color.vala
 	Lirc.vala
 	Buzzer.vala
-	Serializable.vala
-	SerializableTreeMap.vala
-	JsonSettings.vala
+	Settings.vala
+	Json/JsonableTreeMap.vala
+	Json/JsonHelper.vala
+	Json/Jsonable.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
 	Wiring/ClockWiring.vala
