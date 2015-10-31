@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.GammaTestRenderer : GLib.Object, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
+public class WordClock.GammaTestRenderer : GLib.Object, Serializable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
 	public Color color_dark = new Color.from_hsv( 0, 0, 0 );
 	public Color color_bright = new Color.from_hsv( 0, 0, 255 );
 	

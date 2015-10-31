@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Color : GLib.Object {
+public class WordClock.Color : GLib.Object, Serializable {
 	/* MUST NOT BE MODIFIED, properties are public for performance reasons ! */
 	public uint8 r = 0;
 	public uint8 g = 0;
@@ -235,5 +235,28 @@ public class WordClock.Color : GLib.Object {
 		for(uint16 i=0;i<256;i++) {
 			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
 		}
+	}
+	
+	public Json.Node serialize() {
+		Json.Object obj = new Json.Object();
+		
+		obj.set_int_member( "h", this.h );
+		obj.set_int_member( "s", this.s );
+		obj.set_int_member( "v", this.v );
+		
+		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
+		node.take_object(obj);
+		
+		return node;
+	}
+	
+	public void deserialize(Json.Node node) throws SerializeError {
+		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+		
+		Json.Object obj = node.get_object();
+		if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new SerializeError.INVALID_PROPERTY("Need properties h, s and v!");
+		if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new SerializeError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
+		
+		this.set_hsv( (uint16) obj.get_int_member( "h" ), (uint8) obj.get_int_member( "s" ), (uint8) obj.get_int_member( "v" ) );
 	}
 }

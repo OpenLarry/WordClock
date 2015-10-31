@@ -42,9 +42,9 @@ set(VALA_SRC
 	Color.vala
 	Lirc.vala
 	Buzzer.vala
-	Settings.vala
 	Serializable.vala
-	VariantMapper.vala
+	SerializableTreeMap.vala
+	JsonSettings.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
 	Wiring/ClockWiring.vala
@@ -57,6 +57,7 @@ set(VALA_SRC
 	Renderer/FrameRenderer.vala
 	Renderer/ClockRenderable.vala
 	Renderer/ClockRenderer.vala
+	Renderer/ClockConfiguration.vala
 	Renderer/MatrixRenderer.vala
 	Renderer/DotsRenderer.vala
 	Renderer/BacklightRenderer.vala

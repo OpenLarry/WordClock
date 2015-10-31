@@ -11,6 +11,8 @@ public class WordClock.Main : GLib.Object {
 	public static Gpio motion;
 	public static Sensors sensors;
 	
+	public static JsonSettings settings;
+	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
 	private static MainLoop loop;
@@ -21,25 +23,6 @@ public class WordClock.Main : GLib.Object {
 			return -1;
 		}
 		
-		stdout.puts("Wordclock 1.0\n\n");
-		
-		
-		
-		
-		/*Thread<int> thread;
-		try {
-			thread = new Thread<int>.try("REST-Server", rest.run);
-		} catch ( Error e ) {
-			stderr.printf("Thread error: %s", e.message);
-			return 1;
-		}*/
-		
-		cancellable = new Cancellable();
-		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
-		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
-		
-		sensors = new Sensors();
-		
 		// Register FrontPanels: http://valadoc.org/#!api=gobject-2.0/GLib.Type.from_name
 		Type? type = typeof(WestGermanFrontPanel);
 		type = typeof(EastGermanFrontPanel);
@@ -48,51 +31,52 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(HugeMicrosoftSansSerifFont);
 		type = typeof(ConsolasFont);
 		
-		var time = new TimeRenderer();
-		renderer.add_matrix_renderer("Time", time);
-		renderer.add_dots_renderer("Time", time);
+		type = typeof(ClockRenderer);
+		type = typeof(ClockConfiguration);
+		type = typeof(TimeRenderer);
+		type = typeof(BigTimeRenderer);
+		type = typeof(TestSequenceRenderer);
+		type = typeof(ColorRenderer);
+		type = typeof(GammaTestRenderer);
+		type = typeof(StringRenderer);
+		type = typeof(SecondsRenderer);
 		
-		var seconds = new SecondsRenderer();
-		renderer.add_backlight_renderer("Seconds", seconds);
+		stdout.puts("Wordclock 1.0\n\n");
 		
-		var bigtime = new BigTimeRenderer();
-		renderer.add_matrix_renderer("BigTime", bigtime);
+		cancellable = new Cancellable();
+		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
+		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
-		var testseq = new TestSequenceRenderer();
-		renderer.add_matrix_renderer("TestSequence", testseq);
-		renderer.add_dots_renderer("TestSequence", testseq);
-		renderer.add_backlight_renderer("TestSequence", testseq);
+		sensors = new Sensors();
 		
-		var black = new ColorRenderer();
-		renderer.add_matrix_renderer("Black", black);
-		renderer.add_dots_renderer("Black", black);
-		renderer.add_backlight_renderer("Black", black);
+		settings = new JsonSettings("settings/settings.json");
+		settings.objects["clockrenderer"] = renderer;
 		
-		var gammatest = new GammaTestRenderer();
-		renderer.add_matrix_renderer("GammaTest", gammatest);
-		renderer.add_dots_renderer("GammaTest", gammatest);
-		renderer.add_backlight_renderer("GammaTest", gammatest);
+		renderer.renderers["Time"] = new TimeRenderer();
+		renderer.renderers["BigTime"] = new BigTimeRenderer();
+		renderer.renderers["Test"] = new TestSequenceRenderer();
+		renderer.renderers["Color"] = new ColorRenderer();
+		renderer.renderers["GammaTest"] = new GammaTestRenderer();
+		renderer.renderers["Seconds"] = new SecondsRenderer();
 		
-		var str = new StringRenderer();
-		renderer.add_matrix_renderer("String", str);
+		renderer.configurations["default"] = new ClockConfiguration("Time","Time","Seconds");
+		renderer.active = "default";
 		
-		var settings = new Settings();
-		settings.add_object( seconds, "default" );
-		settings.add_object( bigtime, "default" );
-		settings.add_object( time, "default" );
-		settings.add_object( str, "default" );
+		settings.load_data();
+		stdout.puts("Loaded!\n");
 		
+		
+		loop = new MainLoop();
 		
 		try{
 			stdout.puts("Starting REST server...\n");
-			new RestServer( settings );
+			new RestServer();
 			stdout.puts("Running!\n");
 		} catch( Error e ) {
 			stdout.printf("Error %s\n", e.message);
 		}
 		
-		loop = new MainLoop();
-		
+		/*
 		GLib.Timeout.add(500, () => {
 			sensors.read();
 			return true;
@@ -164,18 +148,26 @@ public class WordClock.Main : GLib.Object {
 					toggle += 1;
 					switch(toggle%3) {
 						case 0:
-							renderer.activate("Time","Time","Seconds");
+							renderer.matrix = "Time";
+							renderer.dots = "Time";
+							renderer.backlight = "Seconds";
 						break;
 						case 1:
-							renderer.activate("BigTime","Black","Seconds");
+							renderer.matrix = "BigTime";
+							renderer.dots = "Black";
+							renderer.backlight = "Seconds";
 						break;
 						case 2:
-							renderer.activate("String","Black","Seconds");
+							renderer.matrix = "String";
+							renderer.dots = "Black";
+							renderer.backlight = "Seconds";
 						break;
 					}
 				}
 				if(interpreted_key_code == "STROBE" && repetition_number == 20) {
-					renderer.activate("GammaTest","GammaTest","GammaTest");
+					renderer.matrix = "GammaTest";
+					renderer.dots = "GammaTest";
+					renderer.backlight = "GammaTest";
 				}
 				
 				if(interpreted_key_code == "FLASH" && repetition_number == 0) {
@@ -292,29 +284,24 @@ public class WordClock.Main : GLib.Object {
 			stderr.printf("Error: %s\n", e.message);
 			return 1;
 		}
-		
+		*/
 		try {
-			renderer.activate("TestSequence","TestSequence","TestSequence");
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
-			
 			
 			Buzzer.beep(100,2000,10);
 			Buzzer.beep(400,4000,10);
 			
-			thread.join();
-			
-			renderer.activate("Time","Time","Seconds");
-			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
-			
 			
 			loop.run();
 			
+			
 			stdout.puts("Terminating. Waiting for threads...\n");
+			
+			thread.join();
 			
 			Buzzer.beep(100,4000,10);
 			Buzzer.beep(100,2000,10);
 			
-			thread.join();
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
 			return 1;
@@ -326,7 +313,6 @@ public class WordClock.Main : GLib.Object {
     }
 	
 	public static bool shutdown() {
-		renderer.activate("Black","Black","Black");
 		Thread.usleep(1000000);
 		cancellable.cancel();
 		loop.quit();
