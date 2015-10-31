@@ -46,11 +46,15 @@ public class WordClock.RestServer : Soup.Server {
 		}else if( path == "/sensors" ) {
 			switch(msg.method) {
 				case "GET":
-					
-					string data = Json.gobject_to_data(Main.sensors, null);
-					
-					msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
-					msg.set_status(200);
+					try{
+						string data = JsonHelper.get(Main.sensors);
+						
+						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
 				break;
 				default:
 					msg.set_status(405);

@@ -81,12 +81,12 @@ public class WordClock.Main : GLib.Object {
 		}
 		
 		
-		/*
+		
 		GLib.Timeout.add(500, () => {
 			sensors.read();
 			return true;
 		});
-		
+		/*
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
@@ -98,7 +98,7 @@ public class WordClock.Main : GLib.Object {
 		signalsource = new Unix.SignalSource( Posix.SIGINT );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
-		
+		*/
 		button0 = new Gpio(4);
 		button1 = new Gpio(5);
 		button2 = new Gpio(6);
@@ -137,7 +137,7 @@ public class WordClock.Main : GLib.Object {
 		motion.update.connect((value) => {
 			Buzzer.beep(100,(value)?2500:1500,255);
 		});
-		
+		/*
 		bool background = seconds.background_color.get_hsv()[2] > 0;
 		uint8 brightness = (uint8) seconds.seconds_color.get_hsv()[2];
 		uint8 toggle = 0;
