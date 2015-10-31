@@ -86,7 +86,7 @@ public class WordClock.Main : GLib.Object {
 			sensors.read();
 			return true;
 		});
-		/*
+		
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
@@ -98,7 +98,7 @@ public class WordClock.Main : GLib.Object {
 		signalsource = new Unix.SignalSource( Posix.SIGINT );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
-		*/
+		
 		button0 = new Gpio(4);
 		button1 = new Gpio(5);
 		button2 = new Gpio(6);
@@ -291,21 +291,27 @@ public class WordClock.Main : GLib.Object {
 		}
 		*/
 		try {
+			string active = renderer.active;
+			renderer.active = "on";
 			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			Buzzer.beep(100,2000,10);
 			Buzzer.beep(400,4000,10);
 			
+			thread.join();
+			
+			renderer.active = active;
+			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			loop.run();
 			
 			
 			stdout.puts("Terminating. Waiting for threads...\n");
 			
-			thread.join();
-			
 			Buzzer.beep(100,4000,10);
 			Buzzer.beep(100,2000,10);
+			
+			thread.join();
 			
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
@@ -318,6 +324,7 @@ public class WordClock.Main : GLib.Object {
     }
 	
 	public static bool shutdown() {
+		renderer.active = "off";
 		Thread.usleep(1000000);
 		cancellable.cancel();
 		loop.quit();
