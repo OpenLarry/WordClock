@@ -40,8 +40,6 @@ set(VALA_SRC
 	Main.vala
 	RestServer.vala
 	Color.vala
-	Lirc.vala
-	Buzzer.vala
 	Settings.vala
 	Json/JsonableTreeMap.vala
 	Json/JsonableArrayList.vala
@@ -49,6 +47,7 @@ set(VALA_SRC
 	Json/Jsonable.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
+	Driver/Buzzer.vala
 	Wiring/ClockWiring.vala
 	Wiring/MarkusClockWiring.vala
 	FrontPanel/FrontPanel.vala
@@ -77,6 +76,7 @@ set(VALA_SRC
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala
 	Sensors/Gpio.vala
+	Sensors/Lirc.vala
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
