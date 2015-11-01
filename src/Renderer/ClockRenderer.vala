@@ -19,9 +19,11 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	}
 	
 	public void update_fps() {
-		MatrixRenderer matrix = this.renderers[this.configurations[this.active].matrix] as MatrixRenderer;
-		DotsRenderer dots = this.renderers[this.configurations[this.active].dots] as DotsRenderer;
-		BacklightRenderer backlight = this.renderers[this.configurations[this.active].backlight] as BacklightRenderer;
+		ClockConfiguration config = this.configurations[this.active];
+		if(config == null) return;
+		MatrixRenderer matrix = this.renderers[config.matrix] as MatrixRenderer;
+		DotsRenderer dots = this.renderers[config.dots] as DotsRenderer;
+		BacklightRenderer backlight = this.renderers[config.backlight] as BacklightRenderer;
 		
 		uint8 min = 2;
 		uint8 max = uint8.MAX;
@@ -69,9 +71,12 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	}
 	
 	public bool render( Color[,] leds ) {
-		MatrixRenderer matrix = this.renderers[this.configurations[this.active].matrix] as MatrixRenderer;
-		DotsRenderer dots = this.renderers[this.configurations[this.active].dots] as DotsRenderer;
-		BacklightRenderer backlight = this.renderers[this.configurations[this.active].backlight] as BacklightRenderer;
+		ClockConfiguration config = this.configurations[this.active];
+		if(config == null) return true;
+		
+		MatrixRenderer matrix = this.renderers[config.matrix] as MatrixRenderer;
+		DotsRenderer dots = this.renderers[config.dots] as DotsRenderer;
+		BacklightRenderer backlight = this.renderers[config.backlight] as BacklightRenderer;
 		
 		bool ret = true;
 		if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;

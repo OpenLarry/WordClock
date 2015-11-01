@@ -6,7 +6,7 @@ using WordClock;
  *
  * https://www.linux.com/learn/tutorials/765810-beaglebone-black-how-to-get-interrupts-through-linux-gpio
  */
-public class WordClock.Gpio : GLib.Object {
+public class WordClock.Gpio : GLib.Object, SignalSource {
 	const string GPIO_EXPORT = "/sys/class/gpio/export";
 	
 	const string GPIO_DIRECTION = "/sys/class/gpio/gpio%u/direction";
@@ -14,8 +14,6 @@ public class WordClock.Gpio : GLib.Object {
 	const string GPIO_VALUE = "/sys/class/gpio/gpio%u/value";
 	
 	public bool value = false;
-	
-	public signal void update( bool value );
 	
 	private bool first = true;
 	
@@ -67,7 +65,7 @@ public class WordClock.Gpio : GLib.Object {
 					
 					// don't fire signal after initializiation
 					if(!this.first) {
-						this.update(this.value);
+						this.action((this.value)?"1":"0",0);
 					}else{
 						this.first = false;
 					}

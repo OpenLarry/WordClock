@@ -44,6 +44,7 @@ set(VALA_SRC
 	Buzzer.vala
 	Settings.vala
 	Json/JsonableTreeMap.vala
+	Json/JsonableArrayList.vala
 	Json/JsonHelper.vala
 	Json/Jsonable.vala
 	Driver/LedDriver.vala
@@ -76,6 +77,10 @@ set(VALA_SRC
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala
 	Sensors/Gpio.vala
+	SignalRouter/SignalRouter.vala
+	SignalRouter/SignalSource.vala
+	SignalRouter/SignalSink.vala
+	SignalRouter/JsonModifierSink.vala
 )
 
 

@@ -41,6 +41,10 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(StringRenderer);
 		type = typeof(SecondsRenderer);
 		
+		type = typeof(JsonableTreeMap);
+		type = typeof(JsonableArrayList);
+		type = typeof(JsonModifierSink);
+		
 		stdout.puts("Wordclock 1.0\n\n");
 		
 		cancellable = new Cancellable();
@@ -49,8 +53,20 @@ public class WordClock.Main : GLib.Object {
 		
 		sensors = new Sensors();
 		
+		button0 = new Gpio(4);
+		button1 = new Gpio(5);
+		button2 = new Gpio(6);
+		motion = new Gpio(7);
+		
+		var signalrouter = new SignalRouter();
+		signalrouter.add_source("button0", button0);
+		signalrouter.add_source("button1", button1);
+		signalrouter.add_source("button2", button2);
+		signalrouter.add_source("motion", motion);
+		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
+		settings.objects["signalrouter"] = signalrouter;
 		
 		// renderer.renderers["Time"] = new TimeRenderer();
 		// renderer.renderers["BigTime"] = new BigTimeRenderer();
@@ -99,43 +115,39 @@ public class WordClock.Main : GLib.Object {
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
 		
-		button0 = new Gpio(4);
-		button1 = new Gpio(5);
-		button2 = new Gpio(6);
-		motion = new Gpio(7);
 		
-		button0.update.connect((value) => {
-			if(value) {
-				try{
-					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_hours(1).format("%T") ));
-				}catch(Error e) {
-					stderr.printf("%s\n",e.message);
-				}
-			}
-			Buzzer.beep(100,(value)?2500:1500,255);
+		button0.action.connect((value) => {
+			// if(value) {
+				// try{
+					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_hours(1).format("%T") ));
+				// }catch(Error e) {
+					// stderr.printf("%s\n",e.message);
+				// }
+			// }
+			Buzzer.beep(100,(value=="1")?2500:1500,255);
 		});
-		button1.update.connect((value) => {
-			if(value) {
-				try{
-					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_minutes(1).format("%T") ));
-				}catch(Error e) {
-					stderr.printf("%s\n",e.message);
-				}
-			}
-			Buzzer.beep(100,(value)?2500:1500,255);
+		button1.action.connect((value) => {
+			// if(value) {
+				// try{
+					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_minutes(1).format("%T") ));
+				// }catch(Error e) {
+					// stderr.printf("%s\n",e.message);
+				// }
+			// }
+			Buzzer.beep(100,(value=="1")?2500:1500,255);
 		});
-		button2.update.connect((value) => {
-			if(value) {
-				try{
-					Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_seconds(1).format("%T") ));
-				}catch(Error e) {
-					stderr.printf("%s\n",e.message);
-				}
-			}
-			Buzzer.beep(100,(value)?2500:1500,255);
+		button2.action.connect((value) => {
+			// if(value) {
+				// try{
+					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_seconds(1).format("%T") ));
+				// }catch(Error e) {
+					// stderr.printf("%s\n",e.message);
+				// }
+			// }
+			Buzzer.beep(100,(value=="1")?2500:1500,255);
 		});
-		motion.update.connect((value) => {
-			Buzzer.beep(100,(value)?2500:1500,255);
+		motion.action.connect((value) => {
+			Buzzer.beep(100,(value=="1")?2500:1500,255);
 		});
 		/*
 		bool background = seconds.background_color.get_hsv()[2] > 0;
