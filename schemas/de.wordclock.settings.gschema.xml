@@ -1,7 +1,0 @@
-<schemalist>
-	<schema id="de.wordclock.settings" path="/de/wordclock/settings/">
-		<key name="settings-paths" type="ao">
-			<default>[]</default>
-		</key>
-	</schema>
-</schemalist>
