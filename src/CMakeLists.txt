@@ -76,6 +76,7 @@ set(VALA_SRC
 	Font/ConsolasFont.vala
 	Sensors/Lradc.vala
 	Sensors/Sensors.vala
+	Sensors/SensorsObserver.vala
 	Sensors/Gpio.vala
 	Sensors/Lirc.vala
 	Sensors/IrRemote.vala

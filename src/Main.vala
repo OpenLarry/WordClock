@@ -59,6 +59,8 @@ public class WordClock.Main : GLib.Object {
 		button2 = new Gpio(6);
 		motion = new Gpio(7);
 		
+		var sensorsobserver = new SensorsObserver(sensors);
+		
 		motion.action.connect((value) => {
 			Buzzer.beep(100,(value=="1")?2500:1500,255);
 		});
@@ -77,10 +79,12 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("button2", button2);
 		signalrouter.add_source("motion", motion);
 		signalrouter.add_source("remote", remote);
+		signalrouter.add_source("sensorsobserver", sensorsobserver);
 		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
+		settings.objects["sensorsobserver"] = sensorsobserver;
 		
 		try{
 			settings.load();
