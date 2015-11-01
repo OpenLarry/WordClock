@@ -16,8 +16,6 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	public ClockRenderer( ClockWiring wiring, LedDriver driver ) {
 		this.wiring = wiring;
 		this.driver = driver;
-		
-		this.notify["active"].connect(this.update_fps);
 	}
 	
 	public void update_fps() {
