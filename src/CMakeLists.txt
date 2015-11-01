@@ -43,6 +43,7 @@ set(VALA_SRC
 	Settings.vala
 	Json/JsonableTreeMap.vala
 	Json/JsonableArrayList.vala
+	Json/JsonableNode.vala
 	Json/JsonHelper.vala
 	Json/Jsonable.vala
 	Driver/LedDriver.vala

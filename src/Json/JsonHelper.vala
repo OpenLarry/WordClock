@@ -18,26 +18,34 @@ namespace WordClock.JsonHelper {
 		generator.to_file(path);
 	}
 	
-	public static string get( Jsonable obj, string? jsonpath = null, bool pretty = false ) throws Error {
+	public static string get_string( Jsonable obj, string? jsonpath = null, bool pretty = false ) throws Error {
 		Json.Generator generator = new Json.Generator();
 		generator.pretty = pretty;
+		generator.set_root(get_json(obj,jsonpath));
+		return generator.to_data(null);
+	}
+	
+	public static Json.Node get_json( Jsonable obj, string? jsonpath = null ) throws Error {
 		Json.Node node = obj.to_json();
 		if(jsonpath != null) {
 			node = Json.Path.query(jsonpath, node);
 			if(node.get_array().get_length() > 1) throw new JsonHelperError.AMBIGUOUS("JSONPath is ambiguous!\n");
 			if(node.get_array().get_length() == 0) throw new JsonHelperError.NOT_FOUND("Node not found!\n");
-			generator.set_root(node.get_array().get_element(0));
+			return node.get_array().get_element(0);
 		}else{
-			generator.set_root(node);
+			return node;
 		}
-		return generator.to_data(null);
 	}
 	
-	public static void set( Jsonable obj, string data, string? jsonpath = null ) throws Error {
+	public static void set_string( Jsonable obj, string data, string? jsonpath = null ) throws Error {
 		Json.Parser parser = new Json.Parser();
 		parser.load_from_data(data);
 		Json.Node root = parser.get_root();
 		
+		set_json( obj, root, jsonpath );
+	}
+	
+	public static void set_json( Jsonable obj, Json.Node root, string? jsonpath = null ) throws Error {
 		if(jsonpath != null) {
 			Json.Node node = obj.to_json();
 			Json.Node subnode = Json.Path.query(jsonpath, node);
@@ -83,6 +91,14 @@ namespace WordClock.JsonHelper {
 				stdout.printf("%s%s => %s\n", indent, member_name, member_node.get_value().strdup_contents());
 			break;
 		}
+	}
+	
+	public static bool equals( Json.Node node_a, Json.Node node_b ) {
+		Json.Generator generator_a = new Json.Generator();
+		Json.Generator generator_b = new Json.Generator();
+		generator_a.set_root(node_a);
+		generator_b.set_root(node_b);
+		return generator_a.to_data(null) == generator_b.to_data(null);
 	}
 }
 

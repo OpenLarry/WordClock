@@ -43,6 +43,7 @@ public class WordClock.Main : GLib.Object {
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);
+		type = typeof(JsonableNode);
 		type = typeof(JsonModifierSink);
 		
 		stdout.puts("Wordclock 1.0\n\n");
@@ -58,9 +59,17 @@ public class WordClock.Main : GLib.Object {
 		button2 = new Gpio(6);
 		motion = new Gpio(7);
 		
+		motion.action.connect((value) => {
+			Buzzer.beep(100,(value=="1")?2500:1500,255);
+		});
+		
 		loop = new MainLoop();
 		
 		var remote = new IrRemote( loop.get_context() );
+		
+		remote.action.connect((value) => {
+			Buzzer.beep(50,2500,255);
+		});
 		
 		var signalrouter = new SignalRouter();
 		signalrouter.add_source("button0", button0);
@@ -72,16 +81,6 @@ public class WordClock.Main : GLib.Object {
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
-		
-		// renderer.renderers["Time"] = new TimeRenderer();
-		// renderer.renderers["BigTime"] = new BigTimeRenderer();
-		// renderer.renderers["Test"] = new TestSequenceRenderer();
-		// renderer.renderers["Color"] = new ColorRenderer();
-		// renderer.renderers["GammaTest"] = new GammaTestRenderer();
-		// renderer.renderers["Seconds"] = new SecondsRenderer();
-		
-		// renderer.configurations["default"] = new ClockConfiguration("Time","Time","Seconds");
-		// renderer.active = "default";
 		
 		try{
 			settings.load();
@@ -120,7 +119,7 @@ public class WordClock.Main : GLib.Object {
 		signalsource.attach( loop.get_context() );
 		
 		
-		button0.action.connect((value) => {
+		// button0.action.connect((value) => {
 			// if(value) {
 				// try{
 					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_hours(1).format("%T") ));
@@ -128,8 +127,8 @@ public class WordClock.Main : GLib.Object {
 					// stderr.printf("%s\n",e.message);
 				// }
 			// }
-		});
-		button1.action.connect((value) => {
+		// });
+		// button1.action.connect((value) => {
 			// if(value) {
 				// try{
 					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_minutes(1).format("%T") ));
@@ -137,8 +136,8 @@ public class WordClock.Main : GLib.Object {
 					// stderr.printf("%s\n",e.message);
 				// }
 			// }
-		});
-		button2.action.connect((value) => {
+		// });
+		// button2.action.connect((value) => {
 			// if(value) {
 				// try{
 					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_seconds(1).format("%T") ));
@@ -146,10 +145,7 @@ public class WordClock.Main : GLib.Object {
 					// stderr.printf("%s\n",e.message);
 				// }
 			// }
-		});
-		motion.action.connect((value) => {
-			Buzzer.beep(100,(value=="1")?2500:1500,255);
-		});
+		// });
 		
 		
 		

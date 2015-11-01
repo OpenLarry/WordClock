@@ -21,11 +21,19 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 		JsonHelper.save( this, path, true );
 	}
 	
-	public string get_json( string? jsonpath = null, bool pretty = false ) throws Error {
-		return JsonHelper.get( this, jsonpath, pretty );
+	public string get_string( string? jsonpath = null, bool pretty = false ) throws Error {
+		return JsonHelper.get_string( this, jsonpath, pretty );
 	}
 	
-	public void set_json( string data, string? jsonpath = null ) throws Error {
-		JsonHelper.set( this, data, jsonpath );
+	public void set_string( string data, string? jsonpath = null ) throws Error {
+		JsonHelper.set_string( this, data, jsonpath );
+	}
+	
+	public Json.Node get_json( string? jsonpath = null, bool pretty = false ) throws Error {
+		return JsonHelper.get_json( this, jsonpath );
+	}
+	
+	public void set_json( Json.Node data, string? jsonpath = null ) throws Error {
+		JsonHelper.set_json( this, data, jsonpath );
 	}
 }

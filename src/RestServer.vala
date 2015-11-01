@@ -47,7 +47,7 @@ public class WordClock.RestServer : Soup.Server {
 			switch(msg.method) {
 				case "GET":
 					try{
-						string data = JsonHelper.get(Main.sensors);
+						string data = JsonHelper.get_string(Main.sensors);
 						
 						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 						msg.set_status(200);
@@ -68,7 +68,7 @@ public class WordClock.RestServer : Soup.Server {
 				switch(msg.method) {
 					case "GET":
 						try{
-							string data = Main.settings.get_json( jsonpath, (query != null && query.contains("pretty")) );
+							string data = Main.settings.get_string( jsonpath, (query != null && query.contains("pretty")) );
 							msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 							
 							msg.set_status(200);
@@ -79,7 +79,7 @@ public class WordClock.RestServer : Soup.Server {
 					break;
 					case "PUT":
 						try{
-							Main.settings.set_json( (string) msg.request_body.flatten().data, jsonpath );
+							Main.settings.set_string( (string) msg.request_body.flatten().data, jsonpath );
 							Main.settings.save();
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);

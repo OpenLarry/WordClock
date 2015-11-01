@@ -16,7 +16,7 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 		
 		Json.Object obj = new Json.Object();
 		this.foreach((entry) => {
-			Value val = Value( typeof(Jsonable) );
+			Value val = Value( this.value_type );
 			val.set_object( (Jsonable) entry.value );
 			obj.set_member( entry.key, value_to_json(val) );
 			return true;
@@ -38,7 +38,7 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 			if(member.get_node_type() != Json.NodeType.OBJECT) {
 				this.unset(name);
 			}else{
-				Value val = Value( typeof(Jsonable) );
+				Value val = Value( this.value_type );
 				if(this.has_key(name)) {
 					val.take_object( (Jsonable) this.get(name) );
 				}

@@ -5,14 +5,19 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
-	public JsonableArrayList<string> settings { get; set; default = new JsonableArrayList<string>(); }
+	public JsonableArrayList<JsonableNode> settings { get; set; default = new JsonableArrayList<JsonableNode>((a,b) => {
+		if(a.node == null || b.node == null) return false;
+		return JsonHelper.equals(a.node,b.node);
+	}); }
+	
 	public string path { get; set; default = ""; }
 	public bool cyclic { get; set; default = false; }
 	
 	public void action(int repetition) {
 		try {
-			string json = Main.settings.get_json( this.path );
-			int index = this.settings.index_of(json);
+			Json.Node json = Main.settings.get_json( this.path );
+			JsonableNode node = new JsonableNode(json);
+			int index = this.settings.index_of(node);
 			if(index >= 0) {
 				index = (index+1);
 			}else{
@@ -27,7 +32,7 @@ public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
 				}
 			}
 			
-			Main.settings.set_json( this.settings[index], this.path );
+			Main.settings.set_json( this.settings[index].node.copy(), this.path );
 			Main.settings.save();
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);

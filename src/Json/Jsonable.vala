@@ -52,10 +52,12 @@ public interface WordClock.Jsonable : GLib.Object {
 			}else{
 				node = ser.to_json();
 				if(node == null) node = new Json.Node( Json.NodeType.NULL );
-				if(node.get_node_type() == Json.NodeType.OBJECT) {
-					node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
-				}else{
-					stderr.puts("Invalid node type! Unable to append class name.\n");
+				if(!val.type().is_a(typeof(JsonableNode))) {
+					if(node.get_node_type() == Json.NodeType.OBJECT) {
+						node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
+					}else{
+						stderr.puts("Invalid node type! Unable to append class name.\n");
+					}
 				}
 			}
 		}else if(val.type().is_object()) {
@@ -100,10 +102,19 @@ public interface WordClock.Jsonable : GLib.Object {
 	}
 	
 	public static void value_from_json( Json.Node node, ref Value val ) throws JsonableError {
-		if(val.type().is_a(typeof(Jsonable))) {
-			Jsonable ser = (Jsonable) val.get_object();
+		if(val.type().is_a(typeof(JsonableNode))) {
+			JsonableNode ser = (JsonableNode) val.get_object();
 			if(ser == null) {
-				if(node.get_node_type() != Json.NodeType.OBJECT) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+				ser = new JsonableNode( node );
+				val.take_object(ser);
+			}else{
+				ser.from_json(node);
+				val.set_object(ser);
+			}
+		}else if(val.type().is_a(typeof(Jsonable))) {
+			Jsonable ser = (Jsonable) val.get_object();
+			if(node.get_node_type() != Json.NodeType.OBJECT) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+			if(ser == null) {
 				if(!node.get_object().has_member("-type")) throw new JsonableError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
 				if(!Type.from_name( node.get_object().get_string_member("-type") ).is_a(typeof(Jsonable)) ) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
 				ser = (Jsonable) Object.new( Type.from_name( node.get_object().get_string_member("-type") ) );
