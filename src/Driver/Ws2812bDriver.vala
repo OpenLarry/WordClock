@@ -13,7 +13,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	
 	private GLib.Cancellable? cancellable;
 	
-	private uint8 fps = 30;
+	private uint8 fps = 25;
 	private Color[,] leds;
 	private uint8[] ports;
 	
