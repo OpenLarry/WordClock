@@ -35,7 +35,7 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 		// Can not use Json.Object.foreach_member here, because we have to throw exceptions in case of error which are not supported by the delegate!
 		foreach(string name in node.get_object().get_members()) {
 			Json.Node member = node.get_object().get_member(name);
-			if(member.get_node_type() != Json.NodeType.OBJECT) {
+			if(member.get_node_type() == Json.NodeType.NULL) {
 				this.unset(name);
 			}else{
 				Value val = Value( this.value_type );
