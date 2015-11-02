@@ -7,7 +7,7 @@ using WordClock, Gee;
 public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	protected TreeMap<string,SignalSource> sources = new TreeMap<string,SignalSource>();
 	
-	public JsonableTreeMap<SignalSink> sinks { get; set; default = new JsonableTreeMap<SignalSink>(); }
+	public JsonableTreeMultiMap<SignalSink> sinks { get; set; default = new JsonableTreeMultiMap<SignalSink>(); }
 	
 	public void add_source( string source_name, SignalSource source ) {
 		sources[source_name] = source;
@@ -18,9 +18,11 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	
 	
 	protected void action ( string source_name, string action_name, int repetition ) {
-		var sink = this.sinks[source_name+","+action_name];
-		if(sink == null) return;
+		var sinks = this.sinks[source_name+","+action_name];
+		if(sinks == null) return;
 		
-		sink.action( repetition );
+		foreach(var sink in sinks) {
+			sink.action( repetition );
+		}
 	}
 }

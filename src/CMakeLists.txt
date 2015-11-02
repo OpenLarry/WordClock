@@ -42,6 +42,7 @@ set(VALA_SRC
 	Color.vala
 	Settings.vala
 	Json/JsonableTreeMap.vala
+	Json/JsonableTreeMultiMap.vala
 	Json/JsonableArrayList.vala
 	Json/JsonableNode.vala
 	Json/JsonHelper.vala
