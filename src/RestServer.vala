@@ -33,6 +33,11 @@ public class WordClock.RestServer : Soup.Server {
 		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
 		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 		
+		if(msg.method == "OPTIONS") {
+			msg.set_status(200);
+			return;
+		}
+		
 		if(path == "/") {
 			switch(msg.method) {
 				case "GET":
