@@ -52,7 +52,7 @@ public interface WordClock.Jsonable : GLib.Object {
 			}else{
 				node = ser.to_json();
 				if(node == null) node = new Json.Node( Json.NodeType.NULL );
-				if(!val.type().is_a(typeof(JsonableNode))) {
+				if(val.type() != ser.get_class().get_type()) {
 					if(node.get_node_type() == Json.NodeType.OBJECT) {
 						node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
 					}else{
@@ -102,31 +102,26 @@ public interface WordClock.Jsonable : GLib.Object {
 	}
 	
 	public static void value_from_json( Json.Node node, ref Value val ) throws JsonableError {
-		if(val.type().is_a(typeof(JsonableNode))) {
-			JsonableNode ser = (JsonableNode) val.get_object();
-			if(ser == null) {
-				ser = new JsonableNode( node );
-				val.take_object(ser);
-			}else{
-				ser.from_json(node);
-				val.set_object(ser);
-			}
-		}else if(val.type().is_a(typeof(Jsonable))) {
+		if(val.type().is_a(typeof(Jsonable))) {
 			Jsonable ser = (Jsonable) val.get_object();
-			if(node.get_node_type() != Json.NodeType.OBJECT) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
 			if(ser == null) {
-				if(!node.get_object().has_member("-type")) throw new JsonableError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
-				if(!Type.from_name( node.get_object().get_string_member("-type") ).is_a(typeof(Jsonable)) ) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
-				ser = (Jsonable) Object.new( Type.from_name( node.get_object().get_string_member("-type") ) );
+				Type type;
+				if(node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type")) {
+					type = Type.from_name( node.get_object().get_string_member("-type") );
+					node.get_object().remove_member("-type");
+					if(!type.is_a(val.type()) || !type.is_instantiatable() || type.is_abstract() ) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable or is abstract!");
+				}else{
+					type = val.type();
+					if(!type.is_instantiatable() || type.is_abstract() ) throw new JsonableError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
+				}
 				
+				ser = (Jsonable) Object.new( type );
 				if(ser == null) throw new JsonableError.INVALID_CLASS_NAME("Can not instantiate class!\n");
 				
-				
-				if(node.get_object().has_member("-type")) node.get_object().remove_member("-type");
 				ser.from_json(node);
 				val.take_object(ser);
 			}else{
-				if(node.get_object().has_member("-type")) node.get_object().remove_member("-type");
+				if(node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type")) node.get_object().remove_member("-type");
 				ser.from_json(node);
 				val.set_object(ser);
 			}
