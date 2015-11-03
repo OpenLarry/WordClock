@@ -22,22 +22,16 @@ public class WordClock.JsonableArrayList<G> : Gee.ArrayList<G>, Jsonable {
 			return true;
 		});
 		
-		
-		Json.Object obj = new Json.Object();
-		obj.set_array_member( "values", arr );
-		
-		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
-		node.take_object(obj);
+		Json.Node node = new Json.Node( Json.NodeType.ARRAY );
+		node.take_array(arr);
 		
 		return node;
 	}
 	
 	public void from_json(Json.Node node) throws JsonableError {
 		if(!this.element_type.is_a(typeof(Jsonable))) throw new JsonableError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
-		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
-		Json.Node arr_node = node.get_object().get_member("values");
-		if(arr_node == null || arr_node.get_node_type() != Json.NodeType.ARRAY ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
-		Json.Array arr = arr_node.get_array();
+		if( node.get_node_type() != Json.NodeType.ARRAY ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
+		Json.Array arr = node.get_array();
 		
 		this.clear();
 		
