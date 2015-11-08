@@ -85,7 +85,6 @@ public class WordClock.RestServer : Soup.Server {
 					case "PUT":
 						try{
 							Main.settings.set_string( (string) msg.request_body.flatten().data, jsonpath );
-							Main.settings.save();
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);

@@ -33,7 +33,6 @@ public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
 			}
 			
 			Main.settings.set_json( this.settings[index].node.copy(), this.path );
-			Main.settings.save();
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);
 		}
