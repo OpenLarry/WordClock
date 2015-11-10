@@ -39,17 +39,22 @@ public class WordClock.JsonableTreeMultiMap<V> : Gee.TreeMultiMap<string,V>, Jso
 		foreach(string name in node.get_object().get_members()) {
 			Json.Node member = node.get_object().get_member(name);
 			this.remove_all(name);
-			if(member.get_node_type() == Json.NodeType.ARRAY) {
-				Json.Array arr = member.get_array();
-				for(int i=0;i<arr.get_length();i++) {
-					Json.Node element = arr.get_element(i);
-					Value val = Value( this.value_type );
-				
-					value_from_json( element, ref val );
-					this.set(name, val.dup_object());
-				}
-			}else{
-				throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
+			switch(member.get_node_type()) {
+				case Json.NodeType.ARRAY:
+					Json.Array arr = member.get_array();
+					for(int i=0;i<arr.get_length();i++) {
+						Json.Node element = arr.get_element(i);
+						Value val = Value( this.value_type );
+					
+						value_from_json( element, ref val );
+						this.set(name, val.dup_object());
+					}
+				break;
+				case Json.NodeType.NULL:
+					// do nothing - just remove
+				break;
+				default:
+					throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
 			}
 		}
 	}
