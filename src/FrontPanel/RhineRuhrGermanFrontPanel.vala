@@ -5,6 +5,11 @@ using WordClock, Gee;
  * @version 1.0
  */
 public class WordClock.RhineRuhrGermanFrontPanel : GermanFrontPanel {
+	/**
+	 * @param hour hour
+	 * @param minute minute
+	 * @return set of word positions
+	 */
 	public override HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute ) {
 		GermanFrontPanel.Word[] words = {};
 		

@@ -15,6 +15,12 @@ public class WordClock.Buzzer : GLib.Object {
 	
 	private static int buzzer;
 	
+	/**
+	 * Generates beep sound
+	 * @param msec length
+	 * @param freq frequency (Hz)
+	 * @param volume volume (0-255)
+	 */
 	public static void beep( uint16 msec = 250, uint16 freq = 2000, uint8 volume = 255 ) {
 		lock(buzzer) {
 			try {
@@ -22,6 +28,7 @@ public class WordClock.Buzzer : GLib.Object {
 				GLib.FileOutputStream ostream;
 				GLib.DataOutputStream dostream;
 				
+				// set period and duty cycle (frequency and volume)
 				try{
 					file = GLib.File.new_for_path( PWM_PATH_PERIOD.printf(PWM_CHIP,PWM_PORT) );
 					ostream = file.append_to(FileCreateFlags.NONE);
@@ -44,14 +51,14 @@ public class WordClock.Buzzer : GLib.Object {
 					file = GLib.File.new_for_path( PWM_PATH_DUTY_CYCLE.printf(PWM_CHIP,PWM_PORT) );
 					ostream = file.append_to(FileCreateFlags.NONE);
 					dostream = new GLib.DataOutputStream( ostream );
-					dostream.put_string("%u\n".printf(((1000000000/freq/2)*volume)/256));
+					dostream.put_string("%u\n".printf(((1000000000/freq/2)*volume)/255));
 				} catch( IOError e ) {
 					// if duty_cycle > period, try the other way round
 					if( e is IOError.INVALID_ARGUMENT ) {
 						file = GLib.File.new_for_path( PWM_PATH_DUTY_CYCLE.printf(PWM_CHIP,PWM_PORT) );
 						ostream = file.append_to(FileCreateFlags.NONE);
 						dostream = new GLib.DataOutputStream( ostream );
-						dostream.put_string("%u\n".printf(((1000000000/freq/2)*volume)/256));
+						dostream.put_string("%u\n".printf(((1000000000/freq/2)*volume)/255));
 						
 						file = GLib.File.new_for_path( PWM_PATH_PERIOD.printf(PWM_CHIP,PWM_PORT) );
 						ostream = file.append_to(FileCreateFlags.NONE);
@@ -62,13 +69,15 @@ public class WordClock.Buzzer : GLib.Object {
 					}
 				}
 				
+				// enable
 				file = GLib.File.new_for_path( PWM_PATH_ENABLE.printf(PWM_CHIP,PWM_PORT) );
 				ostream = file.append_to(FileCreateFlags.NONE);
 				dostream = new GLib.DataOutputStream( ostream );
 				dostream.put_string("%u\n".printf(1));
 				
-				Posix.usleep(msec*1000);
+				Thread.usleep(msec*1000);
 				
+				// disable
 				file = GLib.File.new_for_path( PWM_PATH_ENABLE.printf(PWM_CHIP,PWM_PORT) );
 				ostream = file.append_to(FileCreateFlags.NONE);
 				dostream = new GLib.DataOutputStream( ostream );

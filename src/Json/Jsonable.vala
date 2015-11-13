@@ -10,6 +10,10 @@ using WordClock, Gee;
 
 public interface WordClock.Jsonable : GLib.Object {
 	
+	/**
+	* Encodes object to json
+	* @return json node
+	*/
 	public virtual Json.Node to_json() {
 		Json.Object obj = new Json.Object();
 		
@@ -26,6 +30,10 @@ public interface WordClock.Jsonable : GLib.Object {
 		return node;
 	}
 	
+	/**
+	 * Sets object properties by json
+	 * @param node json node
+	 */
 	public virtual void from_json( Json.Node node ) throws JsonableError {
 		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
 		

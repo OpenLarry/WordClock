@@ -21,9 +21,11 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	 * New instance of WS2812b driver for controlling RGB-LEDs via framebuffer
 	 * @param ports Used display ports
 	 * @param leds Number of LEDs per strip
+	 * @param cancellable Cancellable object to stop running driver
 	 */
 	public Ws2812bDriver( uint8[] ports, int leds, GLib.Cancellable? cancellable = null ) {
 		this.cancellable = cancellable;
+		this.ports = ports;
 		
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
 		GLib.assert(this.fd>=0); GLib.debug("device opened");
@@ -57,13 +59,11 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.fb_var.vsync_len = (uint32)
 			(1000000000000/this.fps
 			/(this.fb_var.pixclock*(this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len))
-			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/50/(208333*144)-122
+			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/fps/(208333*144)-122
 		
 		// put frambuffer settings
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
 		GLib.assert(ret==0); GLib.debug("put screeninfo");
-		
-		this.ports = ports;
 		
 		// init LED array
 		this.leds = new Color[this.ports.length,leds];
@@ -87,13 +87,13 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	}
 	
 	/**
-	 * Encode LED array into framebuffer LED timings
-	 * @param bottom top or bottom part of framebuffer (for vsync)
+	 * Encode LED color array into framebuffer LED timings
+	 * @param bottom top or bottom part of framebuffer (for vsync, odd or even frame)
 	 */
 	private void encode_to_fb(bool bottom) {
 		/*
-		 * Every display pixel (16 bit) is _part_ of one WS2812b bit for all 16 LED strips
-		 * Every WS2812b bit needs 6 pixels:
+		 * Each display pixel (16 bit) is _part_ of one WS2812b bit for all 16 LED strips
+		 * Each WS2812b bit needs 6 pixels:
 		 * - Pixel data 110000 = LED bit 0
 		 * - Pixel data 111100 = LED bit 1
 		 * One LED (3x8 bit) needs 3x8x6 - 2 = 142 pixels
@@ -107,6 +107,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 				for(int8 bit=7; bit>=0; bit--) {
 					uint16 pix = 0x0000;
 					for(int strip=0; strip<this.leds.length[0]; strip++) {
+						
+						// green, red, blue
 						uint8 channel = 0;
 						switch(color) {
 							case 0:
@@ -120,10 +122,12 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 							break;
 						}
 						
+						// encode bit
 						if((bool) channel & (1 << bit))
 							pix |= (1 << this.ports[strip]);
 					}
 					
+					// 6 pixels = 1 bit for 16 LEDs
 					this.fb[pos++] = 0xffff;
 					this.fb[pos++] = 0xffff;
 					this.fb[pos++] = pix;
@@ -154,7 +158,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	}
 	
 	/**
-	 * Set framerate
+	 * Set framerate.
+	 * Avoid this function if driver is running, results in weird vsync buffering.
 	 * @param fps Frames per second
 	 */
 	public void set_fps( uint8 fps ) {
@@ -169,7 +174,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.fb_var.vsync_len = (uint32)
 			(1000000000000/fps
 			/(this.fb_var.pixclock*(this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len))
-			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/50/(208333*144)-122
+			-(this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin)); // 1000000000000/fps/(208333*144)-122
 		
 		// put frambuffer settings
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
@@ -177,7 +182,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 	}
 	
 	/**
-	 * Start copying LED array into framebuffer on every vsync
+	 * Start copying LED color array into framebuffer on every vsync
+	 * @param renderer Active frame renderer
+	 * @return Result code
 	 */
 	public int start( FrameRenderer renderer ) {
 		bool bottom = true;
