@@ -237,26 +237,71 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		}
 	}
 	
-	public Json.Node to_json() {
-		Json.Object obj = new Json.Object();
+	public Json.Node to_json( string path = "" ) throws JsonError {
+		string subpath;
+		string? property = JsonHelper.get_property( path, out subpath );
 		
-		obj.set_int_member( "h", this.h );
-		obj.set_int_member( "s", this.s );
-		obj.set_int_member( "v", this.v );
-		
-		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
-		node.take_object(obj);
-		
-		return node;
+		if(property != null) {
+			if(subpath!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(subpath));
+			
+			Json.Node node = new Json.Node( Json.NodeType.VALUE );
+			switch(property) {
+				case "h":
+					node.set_int( this.h );
+				break;
+				case "s":
+					node.set_int( this.s );
+				break;
+				case "v":
+					node.set_int( this.v );
+				break;
+				default:
+					throw new JsonError.INVALID_PATH("Invalid property '%s'!".printf(property));
+			}
+			return node;
+		}else{
+			Json.Object obj = new Json.Object();
+			
+			obj.set_int_member( "h", this.h );
+			obj.set_int_member( "s", this.s );
+			obj.set_int_member( "v", this.v );
+			
+			Json.Node node = new Json.Node( Json.NodeType.OBJECT );
+			node.take_object(obj);
+			
+			return node;
+		}
 	}
 	
-	public void from_json(Json.Node node) throws JsonableError {
-		if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+	public void from_json(Json.Node node, string path = "") throws JsonError {
+		string subpath;
+		string? property = JsonHelper.get_property( path, out subpath );
 		
-		Json.Object obj = node.get_object();
-		if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new JsonableError.INVALID_PROPERTY("Need properties h, s and v!");
-		if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new JsonableError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
-		
-		this.set_hsv( (uint16) obj.get_int_member( "h" ), (uint8) obj.get_int_member( "s" ), (uint8) obj.get_int_member( "v" ) );
+		if(property != null) {
+			if(subpath!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(subpath));
+			if( node.get_node_type() != Json.NodeType.VALUE ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
+			
+			switch(property) {
+				case "h":
+					this.set_hsv( (uint16) node.get_int(), null, null );
+				break;
+				case "s":
+					this.set_hsv( null, (uint8) node.get_int(), null );
+				break;
+				case "v":
+					this.set_hsv( null, null, (uint8) node.get_int() );
+				break;
+				default:
+					throw new JsonError.INVALID_PATH("Invalid property '%s'!".printf(property));
+			}
+		}else{
+			if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+			
+			Json.Object obj = node.get_object();
+			if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new JsonError.INVALID_PROPERTY("Need properties h, s and v!");
+			if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
+			
+			this.set_hsv( (uint16) obj.get_int_member( "h" ), (uint8) obj.get_int_member( "s" ), (uint8) obj.get_int_member( "v" ) );
+		}
 	}
 }

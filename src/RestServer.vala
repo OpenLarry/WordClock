@@ -52,7 +52,7 @@ public class WordClock.RestServer : Soup.Server {
 			switch(msg.method) {
 				case "GET":
 					try{
-						string data = JsonHelper.get_string(Main.sensors);
+						string data = JsonHelper.to_string(Main.sensors.to_json());
 						
 						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 						msg.set_status(200);
@@ -66,14 +66,10 @@ public class WordClock.RestServer : Soup.Server {
 				break;
 			}
 		}else if( path.index_of("/settings") == 0 ) {
-				string? jsonpath = null;
-				if(path.length > 9) {
-					jsonpath = "$"+path.substring(9).replace("/",".");
-				}
 				switch(msg.method) {
 					case "GET":
 						try{
-							string data = Main.settings.get_string( jsonpath, (query != null && query.contains("pretty")) );
+							string data = JsonHelper.to_string( Main.settings.to_json( path.substring(9) ) );
 							msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 							
 							msg.set_status(200);
@@ -84,7 +80,8 @@ public class WordClock.RestServer : Soup.Server {
 					break;
 					case "PUT":
 						try{
-							Main.settings.set_string( (string) msg.request_body.flatten().data, jsonpath );
+							Main.settings.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ), path.substring(9) );
+							Main.settings.deferred_save();
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);

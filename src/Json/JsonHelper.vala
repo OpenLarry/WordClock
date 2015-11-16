@@ -18,58 +18,151 @@ namespace WordClock.JsonHelper {
 		generator.to_file(path);
 	}
 	
-	public static string get_string( Jsonable obj, string? jsonpath = null, bool pretty = false ) throws Error {
+	public static string to_string( Json.Node node, bool pretty = false ) {
 		Json.Generator generator = new Json.Generator();
 		generator.pretty = pretty;
-		generator.set_root(get_json(obj,jsonpath));
+		generator.set_root(node);
 		return generator.to_data(null);
 	}
 	
-	public static Json.Node get_json( Jsonable obj, string? jsonpath = null ) throws Error {
-		Json.Node node = obj.to_json();
-		if(jsonpath != null) {
-			node = Json.Path.query(jsonpath, node);
-			if(node.get_array().get_length() > 1) throw new JsonHelperError.AMBIGUOUS("JSONPath is ambiguous!\n");
-			if(node.get_array().get_length() == 0) throw new JsonHelperError.NOT_FOUND("Node not found!\n");
-			return node.get_array().get_element(0);
-		}else{
-			return node;
-		}
-	}
-	
-	public static void set_string( Jsonable obj, string data, string? jsonpath = null ) throws Error {
+	public static Json.Node from_string( string data ) throws Error {
 		Json.Parser parser = new Json.Parser();
 		parser.load_from_data(data);
-		Json.Node root = parser.get_root();
-		
-		set_json( obj, root, jsonpath );
+		return parser.get_root();
 	}
 	
-	public static void set_json( Jsonable obj, Json.Node root, string? jsonpath = null ) throws Error {
-		if(jsonpath != null) {
-			Json.Node node = obj.to_json();
-			Json.Node subnode = Json.Path.query(jsonpath, node);
-			if(subnode.get_array().get_length() > 1) throw new JsonHelperError.AMBIGUOUS("JSONPath is ambiguous!\n");
-			if(subnode.get_array().get_length() == 0) throw new JsonHelperError.NOT_FOUND("Node not found!\n");
-			if(subnode.get_array().get_element(0).get_node_type() != root.get_node_type()) throw new JsonHelperError.WRONG_TYPE("Wrong node type!\n");
-			
-			switch(subnode.get_array().get_element(0).get_node_type()) {
-				case Json.NodeType.OBJECT:
-					root.get_object().foreach_member((obj,name,node) => {
-						subnode.get_array().get_element(0).get_object().set_member(name,node);
-					});
-				break;
-				case Json.NodeType.ARRAY:
-					subnode.get_array().get_element(0).take_array( root.dup_array() );
-				break;
-				case Json.NodeType.VALUE:
-					subnode.get_array().get_element(0).set_value( root.get_value() );
-				break;
+	public static string? get_property( string path, out string subpath ) {
+		Regex regex = /^\/([0-9a-z\-,]+?)(\/.+)?$/i;
+		MatchInfo match_info;
+		if( !regex.match( path, 0, out match_info ) ) {
+			subpath = "";
+			return null;
+		}
+		
+		subpath = match_info.fetch(2) ?? "";
+		return match_info.fetch(1);
+	}
+	
+	public static Json.Node value_to_json( Value val, string path = "" ) throws JsonError {
+		Json.Node node;
+		if(val.type().is_a(typeof(Jsonable))) {
+			Jsonable ser = (Jsonable) val.get_object();
+			if(ser == null){
+				node = new Json.Node( Json.NodeType.NULL );
+			}else{
+				node = ser.to_json( path );
+				if(node == null) node = new Json.Node( Json.NodeType.NULL );
+				if(val.type() != ser.get_class().get_type() && path == "") {
+					if(node.get_node_type() == Json.NodeType.OBJECT) {
+						node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
+					}else{
+						stderr.puts("Invalid node type! Unable to append class name.\n");
+					}
+				}
 			}
+		}else if(val.type().is_object()) {
+			if(path!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(path));
 			
-			obj.from_json(node);
+			node = new Json.Node( Json.NodeType.OBJECT );
+			Json.Object obj = new Json.Object();
+			obj.set_string_member( "-type", val.get_object().get_class().get_type().name() );
+			node.take_object(obj);
 		}else{
-			obj.from_json(root);
+			if(path!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(path));
+			
+			node = new Json.Node( Json.NodeType.VALUE );
+			if(val.holds(typeof(bool))) {
+				node.set_boolean( val.get_boolean() );
+			}else if(val.holds(typeof(char))) {
+				node.set_int( val.get_char() );
+			}else if(val.holds(typeof(uchar))) {
+				node.set_int( val.get_uchar() );
+			}else if(val.holds(typeof(int))) {
+				node.set_int( val.get_int() );
+			}else if(val.holds(typeof(uint))) {
+				node.set_int( val.get_uint() );
+			}else if(val.holds(typeof(long))) {
+				node.set_int( val.get_long() );
+			}else if(val.holds(typeof(ulong))) {
+				node.set_int( val.get_ulong() );
+			}else if(val.holds(typeof(int64))) {
+				node.set_int( val.get_int64() );
+			}else if(val.holds(typeof(uint64))) {
+				// convert to signed integer
+				node.set_int( (int64) val.get_uint64() );
+			}else if(val.holds(typeof(float))) {
+				node.set_double( val.get_float() );
+			}else if(val.holds(typeof(double))) {
+				node.set_double( val.get_double() );
+			}else if(val.holds(typeof(string))) {
+				node.set_string( val.get_string() );
+			}else{
+				throw new JsonError.INVALID_VALUE_TYPE("Invalid type: %s\n".printf(val.type().name()));
+			}
+		}
+		
+		return node;
+	}
+	
+	public static void value_from_json( Json.Node node, ref Value val, string path = "" ) throws JsonError {
+		if(val.type().is_a(typeof(Jsonable))) {
+			Jsonable ser = (Jsonable) val.get_object();
+			if(ser == null) {
+				Type type;
+				if(path == "" && node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type")) {
+					type = Type.from_name( node.get_object().get_string_member("-type") );
+					node.get_object().remove_member("-type");
+					if(!type.is_a(val.type()) || !type.is_instantiatable() || type.is_abstract() ) throw new JsonError.INVALID_CLASS_NAME("Class does not implement interface Jsonable or is abstract!");
+				}else{
+					type = val.type();
+					if(!type.is_instantiatable() || type.is_abstract() ) throw new JsonError.UNKNOWN_CLASS_NAME("Unknwon class name! Property '-type' missing.");
+				}
+				
+				ser = (Jsonable) Object.new( type );
+				if(ser == null) throw new JsonError.INVALID_CLASS_NAME("Can not instantiate class!\n");
+				
+				ser.from_json(node, path);
+				val.take_object(ser);
+			}else{
+				if(path == "" && node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type")) node.get_object().remove_member("-type");
+				ser.from_json(node, path);
+				val.set_object(ser);
+			}
+		}else if(val.type().is_object()) {
+			if(path!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(path));
+			
+			if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
+			if( node.get_object().get_size() > 0 ) throw new JsonError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
+		}else{
+			if(path!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(path));
+			
+			if(val.holds(typeof(bool))) {
+				val.set_boolean( node.get_boolean() );
+			}else if(val.holds(typeof(char))) {
+				val.set_char( (char) node.get_int() );
+			}else if(val.holds(typeof(uchar))) {
+				val.set_uchar( (uchar) node.get_int() );
+			}else if(val.holds(typeof(int))) {
+				val.set_int( (int) node.get_int() );
+			}else if(val.holds(typeof(uint))) {
+				val.set_uint( (uint) node.get_int() );
+			}else if(val.holds(typeof(long))) {
+				val.set_long( (long) node.get_int() );
+			}else if(val.holds(typeof(ulong))) {
+				val.set_ulong( (ulong) node.get_int() );
+			}else if(val.holds(typeof(int64))) {
+				val.set_int64( node.get_int() );
+			}else if(val.holds(typeof(uint64))) {
+				val.set_uint64( node.get_int() );
+			}else if(val.holds(typeof(float))) {
+				val.set_float( (float) node.get_double() );
+			}else if(val.holds(typeof(double))) {
+				val.set_double( node.get_double() );
+			}else if(val.holds(typeof(string))) {
+				val.set_string( node.get_string() );
+			}else{
+				throw new JsonError.INVALID_VALUE_TYPE("Invalid type: %s\n".printf(val.type().name()));
+			}
 		}
 	}
 	
@@ -102,6 +195,6 @@ namespace WordClock.JsonHelper {
 	}
 }
 
-errordomain JsonHelperError {
-	AMBIGUOUS, NOT_FOUND, WRONG_TYPE
+public errordomain WordClock.JsonError {
+	INVALID_PROPERTY, INVALID_NODE_TYPE, UNKNOWN_CLASS_NAME, INVALID_CLASS_NAME, INVALID_VALUE_TYPE, INVALID_PATH
 }

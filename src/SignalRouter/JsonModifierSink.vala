@@ -15,7 +15,7 @@ public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
 	
 	public void action(int repetition) {
 		try {
-			Json.Node json = Main.settings.get_json( this.path );
+			Json.Node json = Main.settings.to_json( this.path );
 			JsonableNode node = new JsonableNode(json);
 			int index = this.settings.index_of(node);
 			if(index >= 0) {
@@ -32,7 +32,8 @@ public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
 				}
 			}
 			
-			Main.settings.set_json( this.settings[index].node.copy(), this.path );
+			Main.settings.from_json( this.settings[index].node.copy(), this.path );
+			Main.settings.deferred_save();
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);
 		}
