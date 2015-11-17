@@ -30,12 +30,12 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
 		GLib.assert(this.fd>=0); GLib.debug("device opened");
 		
-		// blank screen
-		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
-		GLib.assert(ret==0); GLib.debug("blank screen");
+		// blank screen - disabled because of driver bug
+		// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
+		// GLib.assert(ret==0); GLib.debug("blank screen");
 		
 		// get frambuffer settings
-		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
+		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
 		GLib.assert(ret==0); GLib.debug("got screeninfo");
 		
 		// resolution
@@ -79,9 +79,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		
 		this.clear_fb();
 		
-		// unblank screen
-		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 0 /*FB_BLANK_UNBLANK const missing in vala*/);
-		GLib.assert(ret==0); GLib.debug("unblank screen");
+		// unblank screen - disabled because of driver bug
+		// ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 0 /*FB_BLANK_UNBLANK const missing in vala*/);
+		// GLib.assert(ret==0); GLib.debug("unblank screen");
 		
 		this.encode_to_fb(false);
 	}
@@ -218,9 +218,9 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		if(this.cancellable.is_cancelled()) {
 			this.clear_fb();
 			
-			// blank screen
-			var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
-			GLib.assert(ret==0); GLib.debug("blank screen");
+			// blank screen - disabled because of driver bug
+			// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
+			// GLib.assert(ret==0); GLib.debug("blank screen");
 		}
 		
 		return 0;
