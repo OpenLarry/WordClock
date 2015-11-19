@@ -59,7 +59,7 @@ public interface WordClock.Font : GLib.Object {
 			}
 			
 			// character spacing
-			for(int e=0;e<font_character_spacing;e++) r += 0x0000;
+			if( i<str.length-1 ) for(int e=0;e<font_character_spacing;e++) r += 0x0000;
 		}
 		
 		return r;
