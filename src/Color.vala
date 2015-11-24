@@ -23,11 +23,12 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	
 	const double GAMMA = 2.2;
 	
-	/**
-	 * Create a new instance for representing any colors
-	 */
-	public Color( ) {
-		if(gamma_correction.length == 0) init_gamma_correction();
+	// init gamma correction
+	static construct {
+		gamma_correction = new uint8[256];
+		for(uint16 i=0;i<256;i++) {
+			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
+		}
 	}
 	
 	/**
@@ -37,8 +38,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	 * @param blue Blue channel brightness
 	 */
 	public Color.from_rgb( uint8 r, uint8 g, uint8 b ) {
-		if(gamma_correction.length == 0) init_gamma_correction();
-		
 		this.r_no_gamma = r;
 		this.g_no_gamma = g;
 		this.b_no_gamma = b;
@@ -54,8 +53,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	 * @param blue Blue channel brightness
 	 */
 	public Color.from_hsv( uint16 h, uint8 s, uint8 v ) {
-		if(gamma_correction.length == 0) init_gamma_correction();
-		
 		this.set_hsv(h,s,v);
 	}
 	
@@ -228,13 +225,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		this.r = gamma_correction[this.r_no_gamma];
 		this.g = gamma_correction[this.g_no_gamma];
 		this.b = gamma_correction[this.b_no_gamma];
-	}
-	
-	private static void init_gamma_correction() {
-		gamma_correction = new uint8[256];
-		for(uint16 i=0;i<256;i++) {
-			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
-		}
 	}
 	
 	public Json.Node to_json( string path = "" ) throws JsonError {
