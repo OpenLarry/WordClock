@@ -41,6 +41,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(ClockConfiguration);
 		type = typeof(TimeRenderer);
 		type = typeof(BigTimeRenderer);
+		type = typeof(BigDigitRenderer);
 		type = typeof(TestSequenceRenderer);
 		type = typeof(ColorRenderer);
 		type = typeof(GammaTestRenderer);

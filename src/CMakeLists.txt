@@ -71,6 +71,7 @@ set(VALA_SRC
 	Renderer/TimeRenderer.vala
 	Renderer/SecondsRenderer.vala
 	Renderer/BigTimeRenderer.vala
+	Renderer/BigDigitRenderer.vala
 	Renderer/TestSequenceRenderer.vala
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala
