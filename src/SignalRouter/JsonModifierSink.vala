@@ -13,7 +13,7 @@ public class WordClock.JsonModifierSink : GLib.Object, Jsonable, SignalSink {
 	public string path { get; set; default = ""; }
 	public bool cyclic { get; set; default = false; }
 	
-	public void action(int repetition) {
+	public void action() {
 		try {
 			Json.Node json = Main.settings.to_json( this.path );
 			JsonableNode node = new JsonableNode(json);

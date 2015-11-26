@@ -65,7 +65,7 @@ public class WordClock.Gpio : GLib.Object, SignalSource {
 					
 					// don't fire signal after initializiation
 					if(!this.first) {
-						this.action((this.value)?"1":"0",0);
+						this.action((this.value)?"1":"0");
 					}else{
 						this.first = false;
 					}

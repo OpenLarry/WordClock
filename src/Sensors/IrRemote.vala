@@ -22,7 +22,7 @@ public class WordClock.IrRemote : GLib.Object, SignalSource {
 		}
 		
 		this.listener.button.connect((device_conf, interpreted_key_code, repetition_number) => {
-			if(repetition_number==0) this.action(interpreted_key_code, 0);
+			if(repetition_number==0) this.action(interpreted_key_code);
 		});
 	}
 }

@@ -5,5 +5,5 @@ using WordClock, Gee;
  * @version 1.0
  */
 public interface WordClock.SignalSink : GLib.Object, Jsonable {
-	public abstract void action ( int repetition );
+	public abstract void action ( );
 }

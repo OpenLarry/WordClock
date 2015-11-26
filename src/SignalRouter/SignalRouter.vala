@@ -11,18 +11,18 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	
 	public void add_source( string source_name, SignalSource source ) {
 		sources[source_name] = source;
-		source.action.connect( (name,repetition) => {
-			this.action( source_name, name, repetition );
+		source.action.connect( (name) => {
+			this.action( source_name, name );
 		});
 	}
 	
 	
-	protected void action ( string source_name, string action_name, int repetition ) {
+	protected void action ( string source_name, string action_name ) {
 		var sinks = this.sinks[source_name+","+action_name];
 		if(sinks == null) return;
 		
 		foreach(var sink in sinks) {
-			sink.action( repetition );
+			sink.action();
 		}
 	}
 }

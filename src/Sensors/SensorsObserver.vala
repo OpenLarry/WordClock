@@ -41,7 +41,7 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 				bool old_state = this.states[entry.key];
 				bool new_state = val.get_float() > entry.value.node.get_double();
 				if(old_state != new_state) {
-					this.action( entry.key+((new_state)?"_higher":"_lower"), 0 );
+					this.action( entry.key+((new_state)?"_higher":"_lower") );
 					this.states[entry.key] = new_state;
 				}
 			}else{
