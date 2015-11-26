@@ -88,6 +88,7 @@ set(VALA_SRC
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
 	System/WpsPbcSink.vala
+	System/DateTimeModifierSink.vala
 )
 
 

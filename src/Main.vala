@@ -53,6 +53,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(JsonModifierSink);
 		
 		type = typeof(WpsPbcSink);
+		type = typeof(DateTimeModifierSink);
 		
 		stdout.puts("Wordclock 1.0\n\n");
 		
@@ -131,25 +132,6 @@ public class WordClock.Main : GLib.Object {
 		button1 = new Gpio(91);
 		button2 = new Gpio(23);
 		motion = new Gpio(7);
-		
-		// button0.action.connect((value) => {
-			// if(value) {
-				// try{
-					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_hours(1).format("%T") ));
-				// }catch(Error e) {
-					// stderr.printf("%s\n",e.message);
-				// }
-			// }
-		// });
-		// button1.action.connect((value) => {
-			// if(value) {
-				// try{
-					// Process.spawn_command_line_sync("date +%%T -s \"%s\"".printf( new DateTime.now_local().add_minutes(1).format("%T") ));
-				// }catch(Error e) {
-					// stderr.printf("%s\n",e.message);
-				// }
-			// }
-		// });
 		
 		
 		try {
