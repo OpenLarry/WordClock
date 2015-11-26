@@ -30,6 +30,8 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(HueRotateColor);
 		type = typeof(BrightnessSensorColor);
 		
+		type = typeof(Buzzer);
+		
 		type = typeof(WestGermanFrontPanel);
 		type = typeof(EastGermanFrontPanel);
 		type = typeof(RhineRuhrGermanFrontPanel);
@@ -66,10 +68,6 @@ public class WordClock.Main : GLib.Object {
 		motion = new Gpio(7);
 		
 		var sensorsobserver = new SensorsObserver(sensors);
-		
-		motion.action.connect((value) => {
-			Buzzer.beep(100,(value=="1")?2500:1500,255);
-		});
 		
 		loop = new MainLoop();
 		

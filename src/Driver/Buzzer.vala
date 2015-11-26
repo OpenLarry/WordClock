@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Buzzer : GLib.Object {
+public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 	const uint8 PWM_PORT = 2;
 	const uint8 PWM_CHIP = 0;
 	
@@ -14,6 +14,14 @@ public class WordClock.Buzzer : GLib.Object {
 	const string PWM_PATH_ENABLE = "/sys/class/pwm/pwmchip%u/pwm%u/enable";
 	
 	private static int buzzer;
+	
+	public uint msec { get; set; default = 250; }
+	public uint freq { get; set; default = 2000; }
+	public uint8 volume { get; set; default = 255; }
+	
+	public void action () {
+		beep( (uint16) this.msec, (uint16) this.freq, this.volume );
+	}
 	
 	/**
 	 * Generates beep sound
