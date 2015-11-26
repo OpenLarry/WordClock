@@ -16,8 +16,4 @@ macro(make_compile_directory directory)
 	endif (NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${directory}")
 endmacro(make_compile_directory)
 
-make_compile_directory( "schemas" )
-
-execute_process (COMMAND glib-compile-schemas --targetdir=${CMAKE_CURRENT_BINARY_DIR}/schemas "${CMAKE_CURRENT_SOURCE_DIR}/schemas")
-
 add_subdirectory(src)
