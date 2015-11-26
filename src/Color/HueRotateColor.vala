@@ -4,13 +4,13 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TimeColor : Color, Jsonable {
+public class WordClock.HueRotateColor : Color, Jsonable {
 	public uint timespan { get; set; default = 60; }
 	public Color basic_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	
 	private uint timeout = 0;
 	
-	public TimeColor() {
+	public HueRotateColor() {
 		this.set_timeout();
 	}
 	

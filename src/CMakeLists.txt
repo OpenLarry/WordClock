@@ -41,7 +41,7 @@ set(VALA_SRC
 	RestServer.vala
 	Settings.vala
 	Color/Color.vala
-	Color/TimeColor.vala
+	Color/HueRotateColor.vala
 	Color/BrightnessSensorColor.vala
 	Json/JsonableTreeMap.vala
 	Json/JsonableTreeMultiMap.vala
