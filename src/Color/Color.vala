@@ -18,10 +18,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	protected uint8  s = 0;
 	protected uint8  v = 0;
 	
-	protected uint16 h_perm = 0;
-	protected uint8  s_perm = 0;
-	protected uint8  v_perm = 0;
-	
 	private static uint8[] gamma_correction = {};
 	
 	const double GAMMA = 2.2;
@@ -54,46 +50,29 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		this.set_rgb(r,g,b);
 	}
 	
-	public Color set_hsv( uint16? h, uint8? s, uint8? v, bool temporary = false ) {
+	public Color set_hsv( uint16? h, uint8? s, uint8? v ) {
 		this.h = h ?? this.h;
 		this.h = this.h % 360;
 		this.s = s ?? this.s;
 		this.v = v ?? this.v;
-		
-		if(!temporary) {
-			this.h_perm = this.h;
-			this.s_perm = this.s;
-			this.v_perm = this.v;
-		}
 		
 		this.to_rgb();
 		this.do_gamma_correction();
 		return this;
 	}
 	
-	public Color set_rgb( uint8? r, uint8? g, uint8? b, bool temporary = false ) {
+	public Color set_rgb( uint8? r, uint8? g, uint8? b ) {
 		this.r_no_gamma = r ?? this.r_no_gamma;
 		this.g_no_gamma = g ?? this.g_no_gamma;
 		this.b_no_gamma = b ?? this.b_no_gamma;
 		
 		this.to_hsv();
-		
-		if(!temporary) {
-			this.h_perm = this.h;
-			this.s_perm = this.s;
-			this.v_perm = this.v;
-		}
-		
 		this.do_gamma_correction();
 		return this;
 	}
 	
-	public uint16[] get_hsv( bool temporary = false ) {
-		if(temporary) {
-			return { this.h, this.s, this.v };
-		}else{
-			return { this.h_perm, this.s_perm, this.v_perm };
-		}
+	public uint16[] get_hsv( ) {
+		return { this.h, this.s, this.v };
 	}
 	
 	/**
@@ -181,9 +160,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.r_no_gamma = color.r_no_gamma;
 			this.g_no_gamma = color.g_no_gamma;
 			this.b_no_gamma = color.b_no_gamma;
-			this.h_perm = this.h = color.h;
-			this.s_perm = this.s = color.s;
-			this.v_perm = this.v = color.v;
+			this.h = color.h;
+			this.s = color.s;
+			this.v = color.v;
 		}else if(gamma_fade) {
 			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) color.r_no_gamma)*percent) / 255 );
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
@@ -207,9 +186,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		ret.r_no_gamma = this.r_no_gamma;
 		ret.g_no_gamma = this.g_no_gamma;
 		ret.b_no_gamma = this.b_no_gamma;
-		ret.h_perm = ret.h = this.h;
-		ret.s_perm = ret.s = this.s;
-		ret.v_perm = ret.v = this.v;
+		ret.h = this.h;
+		ret.s = this.s;
+		ret.v = this.v;
 		
 		return ret;
 	}
@@ -230,13 +209,13 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			Json.Node node = new Json.Node( Json.NodeType.VALUE );
 			switch(property) {
 				case "h":
-					node.set_int( this.h_perm );
+					node.set_int( this.h );
 				break;
 				case "s":
-					node.set_int( this.s_perm );
+					node.set_int( this.s );
 				break;
 				case "v":
-					node.set_int( this.v_perm );
+					node.set_int( this.v );
 				break;
 				default:
 					throw new JsonError.INVALID_PATH("Invalid property '%s'!".printf(property));
@@ -245,9 +224,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		}else{
 			Json.Object obj = new Json.Object();
 			
-			obj.set_int_member( "h", this.h_perm );
-			obj.set_int_member( "s", this.s_perm );
-			obj.set_int_member( "v", this.v_perm );
+			obj.set_int_member( "h", this.h );
+			obj.set_int_member( "s", this.s );
+			obj.set_int_member( "v", this.v );
 			
 			Json.Node node = new Json.Node( Json.NodeType.OBJECT );
 			node.take_object(obj);
