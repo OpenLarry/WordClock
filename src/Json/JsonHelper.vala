@@ -107,6 +107,12 @@ namespace WordClock.JsonHelper {
 	public static void value_from_json( Json.Node node, ref Value val, string path = "" ) throws JsonError {
 		if(val.type().is_a(typeof(Jsonable))) {
 			Jsonable ser = (Jsonable) val.get_object();
+			
+			// destroy previous object if type is different
+			if(ser != null && path == "" && node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type") && ser.get_class().get_type().name() != node.get_object().get_string_member("-type") ) {
+				ser = null;
+			}
+			
 			if(ser == null) {
 				Type type;
 				if(path == "" && node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type")) {

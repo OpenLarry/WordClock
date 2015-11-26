@@ -39,8 +39,9 @@ link_directories(${LIB_PATHS})
 set(VALA_SRC
 	Main.vala
 	RestServer.vala
-	Color.vala
 	Settings.vala
+	Color/Color.vala
+	Color/TimeColor.vala
 	Json/JsonableTreeMap.vala
 	Json/JsonableTreeMultiMap.vala
 	Json/JsonableArrayList.vala

@@ -5,19 +5,22 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Color : GLib.Object, Jsonable {
-	/* MUST NOT BE MODIFIED, properties are public for performance reasons ! */
+	/* MUST NOT BE MODIFIED, fields are public for performance reasons ! */
 	public uint8 r = 0;
 	public uint8 g = 0;
 	public uint8 b = 0;
 	
+	protected uint8 r_no_gamma = 0;
+	protected uint8 g_no_gamma = 0;
+	protected uint8 b_no_gamma = 0;
 	
-	private uint8 r_no_gamma = 0;
-	private uint8 g_no_gamma = 0;
-	private uint8 b_no_gamma = 0;
+	protected uint16 h = 0;
+	protected uint8  s = 0;
+	protected uint8  v = 0;
 	
-	private uint16 h = 0;
-	private uint8 s = 0;
-	private uint8 v = 0;
+	protected uint16 h_perm = 0;
+	protected uint8  s_perm = 0;
+	protected uint8  v_perm = 0;
 	
 	private static uint8[] gamma_correction = {};
 	
@@ -33,93 +36,103 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	
 	/**
 	 * Create a new instance for representing any colors
-	 * @param red Red channel brightness
-	 * @param green Green channel brightness
-	 * @param blue Blue channel brightness
-	 */
-	public Color.from_rgb( uint8 r, uint8 g, uint8 b ) {
-		this.r_no_gamma = r;
-		this.g_no_gamma = g;
-		this.b_no_gamma = b;
-		
-		this.to_hsv();
-		this.do_gamma_correction();
-	}
-	
-	/**
-	 * Create a new instance for representing any colors
-	 * @param red Red channel brightness
-	 * @param green Green channel brightness
-	 * @param blue Blue channel brightness
+	 * @param h Color hue
+	 * @param s Color saturation
+	 * @param v Color value (brightness)
 	 */
 	public Color.from_hsv( uint16 h, uint8 s, uint8 v ) {
 		this.set_hsv(h,s,v);
 	}
 	
-	public Color set_hsv( uint16? h, uint8? s, uint8? v ) {
+	/**
+	 * Create a new instance for representing any colors
+	 * @param r Red channel brightness
+	 * @param g Green channel brightness
+	 * @param b Blue channel brightness
+	 */
+	public Color.from_rgb( uint8 r, uint8 g, uint8 b ) {
+		this.set_rgb(r,g,b);
+	}
+	
+	public Color set_hsv( uint16? h, uint8? s, uint8? v, bool temporary = false ) {
 		this.h = h ?? this.h;
 		this.h = this.h % 360;
 		this.s = s ?? this.s;
 		this.v = v ?? this.v;
+		
+		if(!temporary) {
+			this.h_perm = this.h;
+			this.s_perm = this.s;
+			this.v_perm = this.v;
+		}
 		
 		this.to_rgb();
 		this.do_gamma_correction();
 		return this;
 	}
 	
-	public Color set_rgb( uint8? r, uint8? g, uint8? b ) {
+	public Color set_rgb( uint8? r, uint8? g, uint8? b, bool temporary = false ) {
 		this.r_no_gamma = r ?? this.r_no_gamma;
 		this.g_no_gamma = g ?? this.g_no_gamma;
 		this.b_no_gamma = b ?? this.b_no_gamma;
 		
 		this.to_hsv();
+		
+		if(!temporary) {
+			this.h_perm = this.h;
+			this.s_perm = this.s;
+			this.v_perm = this.v;
+		}
+		
 		this.do_gamma_correction();
 		return this;
 	}
 	
-	public uint16[] get_hsv() {
-		return { this.h, this.s, this.v };
+	public uint16[] get_hsv( bool temporary = false ) {
+		if(temporary) {
+			return { this.h, this.s, this.v };
+		}else{
+			return { this.h_perm, this.s_perm, this.v_perm };
+		}
 	}
 	
 	/**
 	 * Convert rgb to hsv values
 	 * http://stackoverflow.com/a/14733008
 	 */
-	private void to_hsv() {
+	protected void to_hsv() {
 		uint8 rgbMin, rgbMax;
 
 		rgbMin = uint8.min(this.r_no_gamma,uint8.min(this.g_no_gamma,this.b_no_gamma));
 		rgbMax = uint8.max(this.r_no_gamma,uint8.max(this.g_no_gamma,this.b_no_gamma));
 
 		this.v = rgbMax;
-		if (this.v == 0)
-		{
+		if (this.v == 0) {
 			this.h = 0;
 			this.s = 0;
 			return;
 		}
 
 		this.s = (uint8) (((uint16) 255) * (rgbMax - rgbMin) / this.v);
-		if (this.s == 0)
-		{
+		if (this.s == 0) {
 			this.h = 0;
 			return;
 		}
 
-		if (rgbMax == this.r_no_gamma)
+		if (rgbMax == this.r_no_gamma) {
 			this.h = 0 + 60 * (this.g_no_gamma - this.b_no_gamma) / (rgbMax - rgbMin);
-		else if (rgbMax == this.g_no_gamma)
+		}else if (rgbMax == this.g_no_gamma) {
 			this.h = 120 + 60 * (this.b_no_gamma - this.r_no_gamma) / (rgbMax - rgbMin);
-		else
+		}else{
 			this.h = 240 + 60 * (this.r_no_gamma - this.g_no_gamma) / (rgbMax - rgbMin);
-
+		}
 	}
 	
 	/**
 	 * Convert hsv to rgb values
 	 * http://stackoverflow.com/a/14733008
 	 */
-	private void to_rgb() {
+	protected void to_rgb() {
 		uint8 region, fpart, p, q, t;
 		
 		if(this.s == 0) {
@@ -168,9 +181,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.r_no_gamma = color.r_no_gamma;
 			this.g_no_gamma = color.g_no_gamma;
 			this.b_no_gamma = color.b_no_gamma;
-			this.h = color.h;
-			this.s = color.s;
-			this.v = color.v;
+			this.h_perm = this.h = color.h;
+			this.s_perm = this.s = color.s;
+			this.v_perm = this.v = color.v;
 		}else if(gamma_fade) {
 			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) color.r_no_gamma)*percent) / 255 );
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
@@ -194,40 +207,20 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		ret.r_no_gamma = this.r_no_gamma;
 		ret.g_no_gamma = this.g_no_gamma;
 		ret.b_no_gamma = this.b_no_gamma;
-		ret.h = this.h;
-		ret.s = this.s;
-		ret.v = this.v;
+		ret.h_perm = ret.h = this.h;
+		ret.s_perm = ret.s = this.s;
+		ret.v_perm = ret.v = this.v;
 		
 		return ret;
 	}
 	
-	public Color add_hue( int16 h ) {
-		this.h = (this.h + h) % 360;
-		
-		this.to_rgb();
-		this.do_gamma_correction();
-		
-		return this;
-	}
-	
-	public Color add_hue_by_time( DateTime time, uint timespan ) {
-		uint seconds = time.get_hour() * 60 * 60 + time.get_minute() * 60 + time.get_second();
-		
-		uint offset = 0;
-		if( (360/timespan) > 1 ) {
-			offset = 360 * time.get_microsecond() / timespan / 1000000;
-		}
-		
-		return this.add_hue( (int16) (((seconds%timespan) * 360)/timespan + offset) );
-	}
-	
-	private void do_gamma_correction() {
+	protected void do_gamma_correction() {
 		this.r = gamma_correction[this.r_no_gamma];
 		this.g = gamma_correction[this.g_no_gamma];
 		this.b = gamma_correction[this.b_no_gamma];
 	}
 	
-	public Json.Node to_json( string path = "" ) throws JsonError {
+	public virtual Json.Node to_json( string path = "" ) throws JsonError {
 		string subpath;
 		string? property = JsonHelper.get_property( path, out subpath );
 		
@@ -237,13 +230,13 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			Json.Node node = new Json.Node( Json.NodeType.VALUE );
 			switch(property) {
 				case "h":
-					node.set_int( this.h );
+					node.set_int( this.h_perm );
 				break;
 				case "s":
-					node.set_int( this.s );
+					node.set_int( this.s_perm );
 				break;
 				case "v":
-					node.set_int( this.v );
+					node.set_int( this.v_perm );
 				break;
 				default:
 					throw new JsonError.INVALID_PATH("Invalid property '%s'!".printf(property));
@@ -252,9 +245,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		}else{
 			Json.Object obj = new Json.Object();
 			
-			obj.set_int_member( "h", this.h );
-			obj.set_int_member( "s", this.s );
-			obj.set_int_member( "v", this.v );
+			obj.set_int_member( "h", this.h_perm );
+			obj.set_int_member( "s", this.s_perm );
+			obj.set_int_member( "v", this.v_perm );
 			
 			Json.Node node = new Json.Node( Json.NodeType.OBJECT );
 			node.take_object(obj);
@@ -263,7 +256,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		}
 	}
 	
-	public void from_json(Json.Node node, string path = "") throws JsonError {
+	public virtual void from_json(Json.Node node, string path = "") throws JsonError {
 		string subpath;
 		string? property = JsonHelper.get_property( path, out subpath );
 		

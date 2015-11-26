@@ -12,11 +12,6 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	public Color dots_background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color dots_color { get; set; default = new Color.from_hsv( 0, 255, 150 ); }
 	
-	public uint background_rotate { get; set; default = 0; }
-	public uint words_rotate { get; set; default = 86400; }
-	public uint dots_background_rotate { get; set; default = 0; }
-	public uint dots_rotate { get; set; default = 86400; }
-	
 	public double fade_secs { get; set; default = 1.0; }
 	
 	public string frontpanel_name {
@@ -35,19 +30,6 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
 		var time = new DateTime.now_local();
-		
-		// rotate hue by time
-		Color background_color, words_color;
-		if(this.background_rotate > 0) {
-			background_color = this.background_color.clone().add_hue_by_time( time, this.background_rotate );
-		}else{
-			background_color = this.background_color;
-		}
-		if(this.words_rotate > 0) {
-			words_color = this.words_color.clone().add_hue_by_time( time, this.words_rotate );
-		}else{
-			words_color = this.words_color;
-		}
 		
 		// background
 		for(int i=0;i<leds_matrix.length[0];i++) {
@@ -103,19 +85,6 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	
 	public bool render_dots( Color[] leds_dots ) {
 		var time = new DateTime.now_local();
-		
-		// rotate hue by time
-		Color dots_background_color, dots_color;
-		if(this.dots_background_rotate > 0) {
-			dots_background_color = this.dots_background_color.clone().add_hue_by_time( time, this.dots_background_rotate );
-		}else{
-			dots_background_color = this.dots_background_color;
-		}
-		if(this.dots_rotate > 0) {
-			dots_color = this.dots_color.clone().add_hue_by_time( time, this.dots_rotate );
-		}else{
-			dots_color = this.dots_color;
-		}
 		
 		// smooth fading
 		uint8 fade;

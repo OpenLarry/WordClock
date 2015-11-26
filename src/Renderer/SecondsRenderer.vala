@@ -11,9 +11,6 @@ public class WordClock.SecondsRenderer : GLib.Object, Jsonable, ClockRenderable,
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 25 ); }
 	public Color seconds_color { get; set; default = new Color.from_hsv( 0, 255, 255 ); }
 	
-	public uint background_rotate { get; set; default = 0; }
-	public uint seconds_rotate { get; set; default = 3600; }
-	
 	protected GLib.Settings settings;
 	
 	public uint8[] get_fps_range() {
@@ -22,19 +19,6 @@ public class WordClock.SecondsRenderer : GLib.Object, Jsonable, ClockRenderable,
 	
 	public bool render_backlight( Color[] leds_backlight ) {
 		var time = new DateTime.now_local();
-		
-		// rotate hue by time
-		Color background_color, seconds_color;
-		if(this.background_rotate > 0) {
-			background_color = this.background_color.clone().add_hue_by_time( time, this.background_rotate );
-		}else{
-			background_color = this.background_color;
-		}
-		if(this.seconds_rotate > 0) {
-			seconds_color = this.seconds_color.clone().add_hue_by_time( time, this.seconds_rotate );
-		}else{
-			seconds_color = this.seconds_color;
-		}
 		
 		// background
 		for(int i=0;i<leds_backlight.length;i++) {

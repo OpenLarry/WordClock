@@ -25,8 +25,11 @@ public class WordClock.Main : GLib.Object {
 			return -1;
 		}
 		
-		// Register FrontPanels: http://valadoc.org/#!api=gobject-2.0/GLib.Type.from_name
-		Type? type = typeof(WestGermanFrontPanel);
+		// Register Types: http://valadoc.org/#!api=gobject-2.0/GLib.Type.from_name
+		Type? type = typeof(Color);
+		type = typeof(TimeColor);
+		
+		type = typeof(WestGermanFrontPanel);
 		type = typeof(EastGermanFrontPanel);
 		type = typeof(RhineRuhrGermanFrontPanel);
 		type = typeof(MicrosoftSansSerifFont);
