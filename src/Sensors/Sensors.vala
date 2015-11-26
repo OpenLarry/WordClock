@@ -11,6 +11,11 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	private LinkedList<float?> temp_vals = new LinkedList<float?>();
 	private LinkedList<float?> brightness_vals = new LinkedList<float?>();
 	
+	public signal void updated();
+	
+	public float vdd5v_median {
+		get { return median(this.vdd5v_vals); }
+	}
 	public float vdd5v_mean {
 		get { return mean(this.vdd5v_vals); }
 	}
@@ -19,6 +24,9 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	}
 	public float vdd5v_max {
 		get { return max(this.vdd5v_vals); }
+	}
+	public float vddio_median {
+		get { return median(this.vddio_vals); }
 	}
 	public float vddio_mean {
 		get { return mean(this.vddio_vals); }
@@ -29,6 +37,9 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	public float vddio_max {
 		get { return max(this.vddio_vals); }
 	}
+	public float battery_median {
+		get { return median(this.battery_vals); }
+	}
 	public float battery_mean {
 		get { return mean(this.battery_vals); }
 	}
@@ -38,6 +49,9 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	public float battery_max {
 		get { return max(this.battery_vals); }
 	}
+	public float temp_median {
+		get { return median(this.temp_vals); }
+	}
 	public float temp_mean {
 		get { return mean(this.temp_vals); }
 	}
@@ -46,6 +60,9 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	}
 	public float temp_max {
 		get { return max(this.temp_vals); }
+	}
+	public float brightness_median {
+		get { return median(this.brightness_vals); }
 	}
 	public float brightness_mean {
 		get { return mean(this.brightness_vals); }
@@ -91,6 +108,24 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 		}
 	}
 	
+	private static float median(LinkedList<float?> list) {
+		if(list.size == 0) {
+			return float.NAN;
+		}else{
+			ArrayList<float?> array = new ArrayList<float?>();
+			array.add_all(list);
+			array.sort((a,b) => {
+				return (a<b) ? -1 : (a>b) ? 1 : 0;
+			});
+			
+			if(list.size % 2 == 1) {
+				return array[list.size/2];
+			}else{
+				return (array[list.size/2] + array[list.size/2-1]) / 2.0f;
+			}
+		}
+	}
+	
 	public void read() {
 		this.vdd5v_vals.offer_tail( Lradc.get_vdd5v() );
 		this.vddio_vals.offer_tail( Lradc.get_vddio() );
@@ -108,5 +143,7 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 		this.button0 = Main.button0.value;
 		this.button1 = Main.button1.value;
 		this.button2 = Main.button2.value;
+		
+		this.updated();
 	}
 }
