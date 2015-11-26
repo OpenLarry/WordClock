@@ -1,3 +1,5 @@
+# https://github.com/jakobwesthoff/Vala_CMake/blob/master/vala/FindVala.cmake
+
 ##
 # Find module for the Vala compiler (valac)
 #

@@ -88,7 +88,7 @@ set(VALA_SRC
 )
 
 
-vala_precompile(VALA_C
+vala_precompile(VALA_C wordclock
 	${VALA_SRC}
 PACKAGES 
 	libsoup-2.4
@@ -96,18 +96,18 @@ PACKAGES
 	gio-2.0
 	gee-0.8
 	json-glib-1.0
-#	poppler-glib
-#	gtk+-2.0
+	# poppler-glib
+	# gtk+-2.0
 	posix
 	linux
 OPTIONS 
 	--thread
 	--target-glib 2.42
-#	--debug
-#GENERATE_HEADER
-#	wordclock
-#GENERATE_VAPI
-#	wordclock
+	# --debug
+# GENERATE_HEADER
+	# wordclock
+# GENERATE_VAPI
+	# wordclock
 )
 
 add_executable(wordclock
