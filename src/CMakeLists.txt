@@ -47,8 +47,9 @@ set(VALA_SRC
 	Json/JsonableTreeMultiMap.vala
 	Json/JsonableArrayList.vala
 	Json/JsonableNode.vala
-	Json/JsonHelper.vala
 	Json/Jsonable.vala
+	Json/JsonHelper.vala
+	Json/JsonModifierSink.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
 	Driver/Buzzer.vala
@@ -86,7 +87,6 @@ set(VALA_SRC
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
-	SignalRouter/JsonModifierSink.vala
 )
 
 
