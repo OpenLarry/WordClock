@@ -87,6 +87,7 @@ set(VALA_SRC
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
+	System/WpsPbcSink.vala
 )
 
 

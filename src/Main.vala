@@ -11,8 +11,6 @@ public class WordClock.Main : GLib.Object {
 	public static Gpio motion;
 	public static Sensors sensors;
 	
-	public static int wps_lock;
-	
 	public static Settings settings;
 	
 	private static ClockRenderer renderer;
@@ -53,6 +51,8 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(JsonableArrayList);
 		type = typeof(JsonableNode);
 		type = typeof(JsonModifierSink);
+		
+		type = typeof(WpsPbcSink);
 		
 		stdout.puts("Wordclock 1.0\n\n");
 		
@@ -150,43 +150,6 @@ public class WordClock.Main : GLib.Object {
 				// }
 			// }
 		// });
-		
-		button2.action.connect((value) => {
-			if(value=="1") {
-				try{
-					new Thread<int>.try("WPS PBC", () => {
-						lock(wps_lock) {
-							try{
-								Process.spawn_command_line_sync("wpa_cli wps_pbc");
-								
-								string output="";
-								do {
-									Buzzer.beep(100,2000,25);
-									Process.spawn_command_line_sync("wpa_cli status", out output);
-									stdout.printf("WPS: %s\n", output);
-									Thread.usleep(1000000);
-								} while(output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED"));
-								
-								if(output.contains("wpa_state=COMPLETED")) {
-									Buzzer.beep(100,3000,25);
-									Buzzer.beep(400,4000,25);
-								}else{
-									Buzzer.beep(200,1000,25);
-									Thread.usleep(200000);
-									Buzzer.beep(200,1000,25);
-								}
-							}catch(Error e) {
-								stderr.printf("%s\n",e.message);
-							}
-						}
-						return 0;
-					});
-				}catch(Error e) {
-					stderr.printf("%s\n",e.message);
-				}
-			}
-		});
-		
 		
 		
 		try {
