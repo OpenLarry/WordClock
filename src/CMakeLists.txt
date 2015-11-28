@@ -76,6 +76,7 @@ set(VALA_SRC
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala
 	Renderer/StringRenderer.vala
+	Renderer/ScalaRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala

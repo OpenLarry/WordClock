@@ -47,6 +47,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(GammaTestRenderer);
 		type = typeof(StringRenderer);
 		type = typeof(SecondsRenderer);
+		type = typeof(ScalaRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);
