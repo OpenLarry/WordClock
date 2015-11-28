@@ -15,6 +15,7 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 		}
 		set {
 			this.font = (Font) Object.new( Type.from_name( value ) );
+			this.last_str = "";
 		}
 	}
 	
