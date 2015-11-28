@@ -8,7 +8,6 @@ public class WordClock.SecondsRenderer : GLib.Object, Jsonable, ClockRenderable,
 	public bool smooth { get; set; default = true; }
 	public uint8 width { get; set; default = 3; }
 	
-	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 25 ); }
 	public Color seconds_color { get; set; default = new Color.from_hsv( 0, 255, 255 ); }
 	
 	protected GLib.Settings settings;
@@ -19,11 +18,6 @@ public class WordClock.SecondsRenderer : GLib.Object, Jsonable, ClockRenderable,
 	
 	public bool render_backlight( Color[] leds_backlight ) {
 		var time = new DateTime.now_local();
-		
-		// background
-		for(int i=0;i<leds_backlight.length;i++) {
-			leds_backlight[i].mix_with(background_color, 255);
-		}
 		
 		// seconds
 		if(this.width > 0) {

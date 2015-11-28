@@ -5,7 +5,6 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
-	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color left_color { get; set; default = new Color.from_hsv( 0, 255, 35 ); }
 	public Color right_color { get; set; default = new Color.from_hsv( 120, 255, 35 ); }
 	public uint8 speed { get; set; default = 10; }
@@ -40,13 +39,6 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	 * @return Continue
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
-		for(int i=0;i<leds_matrix.length[0];i++) {
-			for(int j=0;j<leds_matrix.length[1];j++) {
-				leds_matrix[i,j].mix_with(this.background_color, 255);
-			}
-		};
-		
-		
 		var time = new DateTime.now_local();
 		
 		string str;

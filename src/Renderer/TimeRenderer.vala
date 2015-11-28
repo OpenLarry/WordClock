@@ -7,9 +7,7 @@ using WordClock, Gee;
 public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer {
 	private FrontPanel frontpanel = new WestGermanFrontPanel();
 	
-	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color words_color { get; set; default =  new Color.from_hsv( 0, 255, 150 ); }
-	public Color dots_background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color dots_color { get; set; default = new Color.from_hsv( 0, 255, 150 ); }
 	
 	public double fade_secs { get; set; default = 1.0; }
@@ -30,13 +28,6 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
 		var time = new DateTime.now_local();
-		
-		// background
-		for(int i=0;i<leds_matrix.length[0];i++) {
-			for(int j=0;j<leds_matrix.length[1];j++) {
-				leds_matrix[i,j].mix_with(background_color, 255);
-			}
-		}
 		
 		// words - smooth fading
 		if(time.get_minute() % 5 == 4 && 60.0 - time.get_seconds() < this.fade_secs) {
@@ -93,11 +84,6 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 			time = time.add_seconds(this.fade_secs);
 		}else{
 			fade = 255;
-		}
-		
-		// minutes
-		for(int i=0;i<4;i++) {
-			leds_dots[i].mix_with(dots_background_color, 255);
 		}
 		
 		// dots

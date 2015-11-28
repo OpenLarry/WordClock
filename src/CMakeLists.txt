@@ -47,6 +47,7 @@ set(VALA_SRC
 	Json/JsonableTreeMultiMap.vala
 	Json/JsonableArrayList.vala
 	Json/JsonableNode.vala
+	Json/JsonableString.vala
 	Json/Jsonable.vala
 	Json/JsonHelper.vala
 	Json/JsonModifierSink.vala
