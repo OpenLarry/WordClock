@@ -79,7 +79,7 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	public bool button1 { get; private set; }
 	public bool button2 { get; private set; }
 	
-	const uint8 SIZE = 20;
+	const uint8 SIZE = 120;
 	
 	private static float min(LinkedList<float?> list) {
 		if(list.size == 0) {
