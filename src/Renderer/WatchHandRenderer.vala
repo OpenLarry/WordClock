@@ -20,7 +20,7 @@ public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderabl
 		
 		double seconds = time.get_hour() * 3600 + time.get_minute() * 60 + time.get_seconds();
 		double position = Math.fmod( seconds, this.rotate_time ) * leds_backlight.length / this.rotate_time;
-		uint8 pos = (uint8) Math.floor(position);
+		
 		
 		// seconds
 		if(this.width > 0) {
@@ -33,6 +33,7 @@ public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderabl
 			if(this.width % 2 == 0 ) {
 				position += 0.5;
 			}
+			uint8 pos = (uint8) Math.floor(position);
 			uint8 fade = (uint8) (Math.fmod( position, 1.0 ) * 256);
 			
 			// mix with seconds color, do fading
