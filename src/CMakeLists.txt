@@ -69,7 +69,7 @@ set(VALA_SRC
 	Renderer/DotsRenderer.vala
 	Renderer/BacklightRenderer.vala
 	Renderer/TimeRenderer.vala
-	Renderer/SecondsRenderer.vala
+	Renderer/WatchHandRenderer.vala
 	Renderer/BigTimeRenderer.vala
 	Renderer/BigDigitRenderer.vala
 	Renderer/TestSequenceRenderer.vala
