@@ -70,6 +70,7 @@ public class WordClock.Main : GLib.Object {
 		button2 = new Gpio(23);
 		motion = new Gpio(7);
 		
+		
 		var sensorsobserver = new SensorsObserver(sensors);
 		
 		loop = new MainLoop();
@@ -94,13 +95,26 @@ public class WordClock.Main : GLib.Object {
 		settings.objects["sensorsobserver"] = sensorsobserver;
 		
 		try{
-			settings.load();
+			// Process button interrupts
+			while( loop.get_context().pending() ) loop.get_context().iteration( false );
+			
+			if(button1.value) {
+				Buzzer.beep(200,2000,255);
+				Thread.usleep(200000);
+				Buzzer.beep(200,2000,255);
+				Thread.usleep(200000);
+				Buzzer.beep(200,2000,255);
+				
+				stdout.puts("Loading default settings!\n");
+				settings.load("defaults.json");
+			}else{
+				settings.load();
+			}
 			stdout.puts("Settings loaded!\n");
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);
+			return 1;
 		}
-		
-		
 		
 		try{
 			stdout.puts("Starting REST server...\n");
@@ -108,6 +122,7 @@ public class WordClock.Main : GLib.Object {
 			stdout.puts("Running!\n");
 		} catch( Error e ) {
 			stdout.printf("Error %s\n", e.message);
+			return 2;
 		}
 		
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
@@ -121,12 +136,6 @@ public class WordClock.Main : GLib.Object {
 		signalsource = new Unix.SignalSource( Posix.SIGINT );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
-		
-		
-		button0 = new Gpio(92);
-		button1 = new Gpio(91);
-		button2 = new Gpio(23);
-		motion = new Gpio(7);
 		
 		
 		try {
@@ -154,7 +163,7 @@ public class WordClock.Main : GLib.Object {
 			
 		} catch ( Error e ) {
 			stderr.printf("Thread error: %s", e.message);
-			return 1;
+			return 3;
 		}
 		
 		stdout.puts("Bye!\n");

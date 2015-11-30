@@ -17,16 +17,16 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 		this.path = path;
 	}
 	
-	public void load( ) throws Error {
-		JsonHelper.load( this, path );
+	public void load( string? path = null ) throws Error {
+		JsonHelper.load( this, path ?? this.path );
 	}
 	
-	public void save() throws Error {
+	public void save( string? path = null ) throws Error {
 		lock(source) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
 			this.timeout = 0;
 		}
-		JsonHelper.save( this, path, true );
+		JsonHelper.save( this, path ?? this.path, true );
 	}
 	
 	public void deferred_save() throws Error {
