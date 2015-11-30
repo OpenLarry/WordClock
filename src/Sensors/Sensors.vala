@@ -79,7 +79,16 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	public bool button1 { get; private set; }
 	public bool button2 { get; private set; }
 	
-	const uint8 SIZE = 120;
+	const uint8 SIZE = 60;
+	
+	public Sensors( uint interval = 500 ) {
+		if(interval > 0) {
+			GLib.Timeout.add(interval, () => {
+				this.read();
+				return true;
+			});
+		}
+	}
 	
 	private static float min(LinkedList<float?> list) {
 		if(list.size == 0) {

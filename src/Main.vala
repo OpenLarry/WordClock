@@ -110,13 +110,6 @@ public class WordClock.Main : GLib.Object {
 			stdout.printf("Error %s\n", e.message);
 		}
 		
-		
-		
-		GLib.Timeout.add(500, () => {
-			sensors.read();
-			return true;
-		});
-		
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
