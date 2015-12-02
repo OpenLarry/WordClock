@@ -73,6 +73,17 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 	public float brightness_max {
 		get { return max(this.brightness_vals); }
 	}
+	public string iwconfig {
+		owned get { 
+			string output;
+			try{
+				Process.spawn_command_line_sync("iwconfig wlan0", out output);
+			}catch( Error e ) {
+				output = e.message;
+			}
+			return output; 
+		}
+	}
 	
 	public bool motion { get; private set; }
 	public bool button0 { get; private set; }
