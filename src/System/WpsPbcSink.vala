@@ -7,6 +7,7 @@ using WordClock;
 public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	const string WPA_WPS_PBC = "wpa_cli wps_pbc";
 	const string WPA_STATUS = "wpa_cli status";
+	const string NTP_RESTART = "systemctl restart ntp";
 	
 	public static int wps_lock;
 	
@@ -33,6 +34,8 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 							Thread.usleep(200000);
 							Buzzer.beep(200,1000,25);
 						}
+						
+						Process.spawn_command_line_sync(NTP_RESTART);
 					}catch(Error e) {
 						stderr.printf("%s\n",e.message);
 					}
