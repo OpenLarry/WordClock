@@ -194,10 +194,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 		var timer = new GLib.Timer();
 		timer.start();
 		
-		var cont = true;
-		
-		while(cont && !this.cancellable.is_cancelled()) {
-			cont = renderer.render( this.leds );
+		while(!this.cancellable.is_cancelled()) {
+			renderer.render( this.leds );
 			
 			if(timer.elapsed() > 1) {
 				stdout.printf("%u fps\n", frame);

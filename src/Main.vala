@@ -139,19 +139,14 @@ public class WordClock.Main : GLib.Object {
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
 		
+		TestSequenceRenderer test = new TestSequenceRenderer();
+		renderer.set_overwrite( { test }, { test }, { test } );
 		
 		try {
-			string active = renderer.active;
-			renderer.active = "on";
-			Thread<int> thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
+			var thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			Buzzer.beep(100,2000,10);
 			Buzzer.beep(400,4000,10);
-			
-			thread.join();
-			
-			renderer.active = active;
-			thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
 			
 			loop.run();
 			
@@ -174,8 +169,12 @@ public class WordClock.Main : GLib.Object {
     }
 	
 	public static bool shutdown() {
-		renderer.active = "off";
+		ColorRenderer black = new ColorRenderer();
+		black.color.set_hsv(0,0,0);
+		renderer.set_overwrite( { black }, { black }, { black } );
+		
 		Thread.usleep(1000000);
+		
 		cancellable.cancel();
 		loop.quit();
 		
