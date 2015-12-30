@@ -5,8 +5,8 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
-	public Color left_color { get; set; default = new Color.from_hsv( 0, 255, 35 ); }
-	public Color right_color { get; set; default = new Color.from_hsv( 120, 255, 35 ); }
+	public Color left_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
+	public Color right_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public uint8 speed { get; set; default = 10; }
 	
 	public string font_name {
@@ -21,6 +21,8 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	
 	public bool time_format { get; set; default = true; }
 	public string string { get; set; default = "%k:%M "; }
+	
+	public int count = -1;
 	
 	protected Font font = new MicrosoftSansSerifFont();
 	
@@ -55,7 +57,9 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 		
 		
 		var pos = ((time.to_unix() * 1000000 + time.get_microsecond() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
-		if(pos >= this.rendered_str.length){
+		if(pos >= this.rendered_str.length) {
+			if(count >= 0 && count-- == 0) return false;
+			
 			this.start_time = time.to_unix() * 1000000 + time.get_microsecond();
 			pos = ((time.to_unix() * 1000000 + time.get_microsecond() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
 		}
