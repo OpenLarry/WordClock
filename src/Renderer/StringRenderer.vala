@@ -22,12 +22,11 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	public bool time_format { get; set; default = true; }
 	public string string { get; set; default = "%k:%M "; }
 	
-	protected GLib.Settings settings;
-	
 	protected Font font = new MicrosoftSansSerifFont();
 	
 	protected uint16[] rendered_str;
 	protected string last_str;
+	protected int64 start_time = 0;
 	
 	public uint8[] get_fps_range() {
 		return {this.speed,uint8.MAX};
@@ -55,12 +54,16 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 		}
 		
 		
-		var pos = (int) (((time.to_unix() * 1000000 + time.get_microsecond())/(1000000/this.speed)) % (this.rendered_str.length));
+		var pos = ((time.to_unix() * 1000000 + time.get_microsecond() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
+		if(pos >= this.rendered_str.length){
+			this.start_time = time.to_unix() * 1000000 + time.get_microsecond();
+			pos = ((time.to_unix() * 1000000 + time.get_microsecond() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
+		}
 		
-		for(int i=0; i<11; i++) {
-			for(int j=0;j<10; j++) {
-				if((bool) (this.rendered_str[(pos+i)%this.rendered_str.length] & (0x0001 << j)))
-					leds_matrix[i,j].mix_with(this.left_color.clone().mix_with(this.right_color, (uint8) (((pos+i)%this.rendered_str.length)*255/this.rendered_str.length)), 255);
+		for(int i=0; i<leds_matrix.length[0]; i++) {
+			for(int j=0;j<leds_matrix.length[1]; j++) {
+				if(pos+i >= 0 && pos+i < this.rendered_str.length && (bool) (this.rendered_str[pos+i] & (0x0001 << j)))
+					leds_matrix[i,j].mix_with(this.left_color.clone().mix_with(this.right_color, (uint8) (pos+i)*255/this.rendered_str.length), 255);
 			}
 		}
 		
