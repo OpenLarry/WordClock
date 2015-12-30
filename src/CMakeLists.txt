@@ -92,6 +92,7 @@ set(VALA_SRC
 	SignalRouter/SignalSink.vala
 	System/WpsPbcSink.vala
 	System/DateTimeModifierSink.vala
+	System/MessageOverlay.vala
 )
 
 

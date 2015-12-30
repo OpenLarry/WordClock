@@ -7,6 +7,7 @@ using WordClock;
 public class WordClock.Main : GLib.Object {
 	public static Sensors sensors;
 	public static Settings settings;
+	public static MessageOverlay message;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -91,10 +92,13 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("remote", remote);
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
 		
+		message = new MessageOverlay( renderer );
+		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
+		settings.objects["message"] = message;
 		
 		try{
 			// Process button interrupts
