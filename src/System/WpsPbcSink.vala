@@ -15,6 +15,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 		try{
 			new Thread<int>.try("WPS PBC", () => {
 				lock(wps_lock) {
+					Main.message.info("WPS",-1);
 					try{
 						Process.spawn_command_line_sync(WPA_WPS_PBC);
 						
@@ -26,10 +27,16 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 							Thread.usleep(1000000);
 						} while(output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED"));
 						
+						Main.message.stop();
+						
 						if(output.contains("wpa_state=COMPLETED")) {
+							Main.message.info("Completed!");
+							
 							Buzzer.beep(100,3000,25);
 							Buzzer.beep(400,4000,25);
 						}else{
+							Main.message.error("Error!");
+							
 							Buzzer.beep(200,1000,25);
 							Thread.usleep(200000);
 							Buzzer.beep(200,1000,25);
