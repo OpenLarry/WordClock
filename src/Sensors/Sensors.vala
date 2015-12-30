@@ -85,10 +85,10 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 		}
 	}
 	
-	public bool motion { get; private set; }
-	public bool button0 { get; private set; }
-	public bool button1 { get; private set; }
-	public bool button2 { get; private set; }
+	public bool motion { get; set; }
+	public bool button0 { get; set; }
+	public bool button1 { get; set; }
+	public bool button2 { get; set; }
 	
 	const uint8 SIZE = 60;
 	
@@ -158,11 +158,6 @@ public class WordClock.Sensors : GLib.Object, Jsonable {
 		if(this.battery_vals.size > SIZE) this.battery_vals.poll_head();
 		if(this.temp_vals.size > SIZE) this.temp_vals.poll_head();
 		if(this.brightness_vals.size > SIZE) this.brightness_vals.poll_head();
-		
-		this.motion = Main.motion.value;
-		this.button0 = Main.button0.value;
-		this.button1 = Main.button1.value;
-		this.button2 = Main.button2.value;
 		
 		this.updated();
 	}

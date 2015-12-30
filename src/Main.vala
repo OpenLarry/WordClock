@@ -5,12 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Main : GLib.Object {
-	public static Gpio button0;
-	public static Gpio button1;
-	public static Gpio button2;
-	public static Gpio motion;
 	public static Sensors sensors;
-	
 	public static Settings settings;
 	
 	private static ClockRenderer renderer;
@@ -67,10 +62,15 @@ public class WordClock.Main : GLib.Object {
 		
 		sensors = new Sensors();
 		
-		button0 = new Gpio(92);
-		button1 = new Gpio(91);
-		button2 = new Gpio(23);
-		motion = new Gpio(7);
+		Gpio button0 = new Gpio(92);
+		Gpio button1 = new Gpio(91);
+		Gpio button2 = new Gpio(23);
+		Gpio motion = new Gpio(7);
+		
+		button0.action.connect( (val) => { sensors.button0 = (val == "1"); } );
+		button1.action.connect( (val) => { sensors.button1 = (val == "1"); } );
+		button2.action.connect( (val) => { sensors.button2 = (val == "1"); } );
+		motion.action.connect( (val) => { sensors.motion = (val == "1"); } );
 		
 		
 		var sensorsobserver = new SensorsObserver(sensors);
