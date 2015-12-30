@@ -93,6 +93,7 @@ set(VALA_SRC
 	System/WpsPbcSink.vala
 	System/DateTimeModifierSink.vala
 	System/MessageOverlay.vala
+	System/InfoSink.vala
 )
 
 
