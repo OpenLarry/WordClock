@@ -8,6 +8,7 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	public Color error_color { get; set; default = new Color.from_hsv( 0, 255, 200 ); }
 	public Color warning_color { get; set; default = new Color.from_hsv( 60, 255, 200 ); }
 	public Color info_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
+	public Color success_color { get; set; default = new Color.from_hsv( 120, 255, 200 ); }
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	
 	protected ClockRenderer renderer;
@@ -41,6 +42,10 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 				str_renderer.left_color  = this.info_color;
 				str_renderer.right_color = this.info_color;
 			break;
+			case MessageType.SUCCESS:
+				str_renderer.left_color  = this.success_color;
+				str_renderer.right_color = this.success_color;
+			break;
 		}
 		
 		this.renderer.set_overwrite( { background, str_renderer }, { background }, { background } );
@@ -58,6 +63,10 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 		this.message( str, MessageType.INFO, count );
 	}
 	
+	public void success( string str, int count = 1 ) {
+		this.message( str, MessageType.SUCCESS, count );
+	}
+	
 	public void stop() {
 		if(this.infinite) {
 			this.renderer.set_overwrite( null, null, null );
@@ -68,5 +77,6 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 public enum WordClock.MessageType {
 	ERROR,
 	WARNING,
-	INFO
+	INFO,
+	SUCCESS
 }
