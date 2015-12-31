@@ -10,11 +10,13 @@ public class WordClock.WestGermanFrontPanel : GermanFrontPanel {
 	 * @param minute minute
 	 * @return set of word positions
 	 */
-	public override HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute ) {
+	public override HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute, bool display_it_is = true ) {
 		GermanFrontPanel.Word[] words = {};
 		
-		words += Word.ES;
-		words += Word.IST;
+		if(display_it_is) {
+			words += Word.ES;
+			words += Word.IST;
+		}
 		
 		switch(minute/5) {
 			case 0: // 00

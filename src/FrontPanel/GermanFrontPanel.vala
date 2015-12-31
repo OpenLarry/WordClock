@@ -59,5 +59,5 @@ public abstract class WordClock.GermanFrontPanel : GLib.Object, FrontPanel {
 		new FrontPanel.WordPosition() { x=8,y=9,length= 3 }, // 23 - UHR
 	};
 	
-	public abstract HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute );
+	public abstract HashSet<FrontPanel.WordPosition> getTime( uint8 hour, uint8 minute, bool display_it_is = true );
 }

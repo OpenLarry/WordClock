@@ -11,5 +11,5 @@ public interface WordClock.FrontPanel : GLib.Object {
 		public int length;
 	}
 	
-	public abstract HashSet<WordPosition> getTime( uint8 hour, uint8 minute );
+	public abstract HashSet<WordPosition> getTime( uint8 hour, uint8 minute, bool display_it_is = true );
 }

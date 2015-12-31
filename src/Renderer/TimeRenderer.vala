@@ -12,6 +12,8 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	
 	public double fade_secs { get; set; default = 1.0; }
 	
+	public bool display_it_is { get; set; default = true; }
+	
 	public string frontpanel_name {
 		owned get {
 			return frontpanel.get_class().get_type().name();
@@ -33,9 +35,9 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 		if(time.get_minute() % 5 == 4 && 60.0 - time.get_seconds() < this.fade_secs) {
 			uint8 fade = (uint8) (((time.get_seconds() - 60 + this.fade_secs) / this.fade_secs)*256.0);
 			
-			var words_old = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
+			var words_old = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute(), this.display_it_is);
 			time = time.add_seconds(this.fade_secs);
-			var words_new = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
+			var words_new = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute(), this.display_it_is);
 			
 			var words_common = new HashSet<FrontPanel.WordPosition>();
 			words_common.add_all(words_old);
@@ -62,7 +64,7 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 			}
 		// words - static
 		}else{
-			var words = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute());
+			var words = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute(), this.display_it_is);
 			foreach(var word in words) {
 				for(int j=0;j<word.length;j++) {
 					leds_matrix[word.x+j,word.y].mix_with(words_color, 255);
