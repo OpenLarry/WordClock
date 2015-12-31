@@ -51,11 +51,13 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				
 				Main.message.info("Cancelled!");
 			}else if(output.contains("wpa_state=COMPLETED")) {
+				cancellable.cancel();
 				Main.message.info("Completed!");
 				
 				Buzzer.beep(100,3000,25);
 				Buzzer.beep(400,4000,25);
 			}else{
+				cancellable.cancel();
 				Main.message.error("Error!");
 				
 				Buzzer.beep(200,1000,25);
