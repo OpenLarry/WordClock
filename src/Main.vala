@@ -62,6 +62,9 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
+		TestSequenceRenderer test = new TestSequenceRenderer();
+		renderer.set_overwrite( { test }, { test }, { test } );
+		
 		sensors = new Sensors();
 		
 		Gpio button0 = new Gpio(92);
@@ -112,6 +115,8 @@ public class WordClock.Main : GLib.Object {
 				Thread.usleep(200000);
 				Buzzer.beep(200,2000,255);
 				
+				
+				message.info("Loading defaults...");
 				stdout.puts("Loading default settings!\n");
 				settings.load("defaults.json");
 			}else{
@@ -143,9 +148,6 @@ public class WordClock.Main : GLib.Object {
 		signalsource = new Unix.SignalSource( Posix.SIGINT );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
-		
-		TestSequenceRenderer test = new TestSequenceRenderer();
-		renderer.set_overwrite( { test }, { test }, { test } );
 		
 		try {
 			var thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
