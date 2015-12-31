@@ -7,7 +7,7 @@ using WordClock;
 public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderable, BacklightRenderer {
 	public bool smooth { get; set; default = true; }
 	public uint8 width { get; set; default = 3; }
-	public uint rotate_time { get; set; default = 60; }
+	public int rotate_time { get; set; default = 60; }
 	
 	public Color color { get; set; default = new Color.from_hsv( 0, 255, 255 ); }
 	
@@ -21,6 +21,7 @@ public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderabl
 		double seconds = time.get_hour() * 3600 + time.get_minute() * 60 + time.get_seconds();
 		double position = Math.fmod( seconds, this.rotate_time ) * leds_backlight.length / this.rotate_time;
 		
+		if(position < 0) position = leds_backlight.length + position;
 		
 		// seconds
 		if(this.width > 0) {
