@@ -1,0 +1,3 @@
+class WordClock.Version : GLib.Object {
+	public const string GIT_DESCRIBE = "@GIT_DESCRIBE@";
+}

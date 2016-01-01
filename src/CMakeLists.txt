@@ -36,6 +36,9 @@ set(LIB_PATHS
 )
 link_directories(${LIB_PATHS})
 
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Version.vala.in" "${CMAKE_CURRENT_BINARY_DIR}/Version.vala" @ONLY)
+
 set(VALA_SRC
 	Main.vala
 	RestServer.vala
@@ -94,6 +97,7 @@ set(VALA_SRC
 	System/DateTimeModifierSink.vala
 	System/MessageOverlay.vala
 	System/InfoSink.vala
+	${CMAKE_CURRENT_BINARY_DIR}/Version.vala
 )
 
 

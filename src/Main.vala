@@ -56,7 +56,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(DateTimeModifierSink);
 		type = typeof(InfoSink);
 		
-		stdout.puts("Wordclock 1.0\n\n");
+		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		
 		cancellable = new Cancellable();
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
