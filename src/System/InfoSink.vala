@@ -8,9 +8,10 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 	const string IFCONFIG = "ifconfig wlan0";
 	const string IWCONFIG = "iwconfig wlan0";
 	const string HOSTNAME = "hostname";
+	const string KERNEL = "uname -sr";
 	
 	public void action () {
-		string output, ip = "none", wlan = "none", hostname = "none";
+		string output, ip = "none", wlan = "none", hostname = "none", kernel = "unknown";
 		try{
 			Process.spawn_command_line_sync(IFCONFIG, out output);
 			
@@ -43,6 +44,14 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 			stderr.printf("%s\n",e.message);
 		}
 		
-		Main.message.info(@"IP: $ip  HOST: $hostname  WLAN: $wlan");
+		try{
+			Process.spawn_command_line_sync(KERNEL, out output);
+			
+			kernel = output;
+		}catch(Error e) {
+			stderr.printf("%s\n",e.message);
+		}
+		
+		Main.message.info(@"WordClock $(Version.GIT_DESCRIBE)  IP: $ip  Host: $hostname  WLAN: $wlan  Kernel: $kernel");
 	}
 }
