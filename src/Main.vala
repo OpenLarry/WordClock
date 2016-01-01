@@ -40,7 +40,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(TimeRenderer);
 		type = typeof(BigTimeRenderer);
 		type = typeof(BigDigitRenderer);
-		type = typeof(TestSequenceRenderer);
+		type = typeof(BootSequenceRenderer);
 		type = typeof(ColorRenderer);
 		type = typeof(GammaTestRenderer);
 		type = typeof(StringRenderer);
@@ -62,8 +62,10 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
-		TestSequenceRenderer test = new TestSequenceRenderer();
-		renderer.set_overwrite( { test }, { test }, { test } );
+		BootSequenceRenderer boot = new BootSequenceRenderer();
+		ColorRenderer black = new ColorRenderer();
+		black.color.set_hsv(0,0,0);
+		renderer.set_overwrite( { black, boot }, { black, boot }, { black, boot } );
 		
 		sensors = new Sensors();
 		

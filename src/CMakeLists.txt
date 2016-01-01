@@ -75,7 +75,7 @@ set(VALA_SRC
 	Renderer/WatchHandRenderer.vala
 	Renderer/BigTimeRenderer.vala
 	Renderer/BigDigitRenderer.vala
-	Renderer/TestSequenceRenderer.vala
+	Renderer/BootSequenceRenderer.vala
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala
 	Renderer/StringRenderer.vala
