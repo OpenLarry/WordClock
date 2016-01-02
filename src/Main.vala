@@ -62,10 +62,13 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
-		BootSequenceRenderer boot = new BootSequenceRenderer();
-		ColorRenderer black = new ColorRenderer();
-		black.color.set_hsv(0,0,0);
-		renderer.set_overwrite( { black, boot }, { black, boot }, { black, boot } );
+		// Parameter -s skips boot sequence
+		if(args.length <= 1 || args[1] != "-s") {
+			BootSequenceRenderer boot = new BootSequenceRenderer();
+			ColorRenderer black = new ColorRenderer();
+			black.color.set_hsv(0,0,0);
+			renderer.set_overwrite( { black, boot }, { black, boot }, { black, boot } );
+		}
 		
 		sensors = new Sensors();
 		
