@@ -47,5 +47,6 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
 		this.set_timeout();
 		Jsonable.default_from_json( this, node, path );
+		this.hue_by_time( new DateTime.now_local() );
 	}
 }

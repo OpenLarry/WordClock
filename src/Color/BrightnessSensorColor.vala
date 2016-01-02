@@ -41,5 +41,6 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
 		this.connect_sensor();
 		Jsonable.default_from_json( this, node, path );
+		this.update();
 	}
 }
