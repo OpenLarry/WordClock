@@ -30,7 +30,7 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 		}else if(brightness <= this.min_brightness) {
 			this.mix_with( this.min_color, 255 );
 		}else{
-			this.mix_with( this.min_color.clone().mix_with( this.max_color, (uint8) Math.roundf((brightness-this.min_brightness)*255/(this.max_brightness-this.min_brightness)) ) );
+			this.mix_with( this.min_color.clone().mix_with( this.max_color, (uint8) Math.roundf((brightness-this.min_brightness)*255/(this.max_brightness-this.min_brightness)) ), 255 );
 		}
 	}
 	
