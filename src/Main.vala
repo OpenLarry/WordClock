@@ -56,6 +56,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(WpsPbcSink);
 		type = typeof(DateTimeModifierSink);
 		type = typeof(InfoSink);
+		type = typeof(MessageSink);
 		
 		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		

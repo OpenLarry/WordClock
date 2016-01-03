@@ -98,6 +98,7 @@ set(VALA_SRC
 	System/DateTimeModifierSink.vala
 	System/MessageOverlay.vala
 	System/InfoSink.vala
+	System/MessageSink.vala
 	${CMAKE_CURRENT_BINARY_DIR}/Version.vala
 )
 

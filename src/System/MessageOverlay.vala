@@ -78,5 +78,19 @@ public enum WordClock.MessageType {
 	ERROR,
 	WARNING,
 	INFO,
-	SUCCESS
+	SUCCESS;
+	
+	public static MessageType from_string( string s ) {
+		switch(s) {
+			case "ERROR":
+				return ERROR;
+			case "WARNING":
+				return WARNING;
+			case "INFO":
+			default:
+				return INFO;
+			case "SUCCESS":
+				return SUCCESS;
+		}
+	}
 }
