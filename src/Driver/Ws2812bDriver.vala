@@ -213,14 +213,34 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			bottom = !bottom;
 		}
 		
-		if(this.cancellable.is_cancelled()) {
-			this.clear_fb();
-			
-			// blank screen - disabled because of driver bug
-			// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
-			// GLib.assert(ret==0); GLib.debug("blank screen");
+		// black screen
+		for(int i=0;i<this.leds.length[0];i++) {
+			for(int j=0;j<this.leds.length[1];j++) {
+				this.leds[i,j].set_hsv(0,0,0);
+			}
 		}
 		
+		// wait for vsync - start render previous frame
+		var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
+		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		
+		this.encode_to_fb(bottom);
+		bottom = !bottom;
+		
+		// wait for vsync - start render black frame
+		ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
+		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		
+		// wait for vsync - finished render black frame
+		ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
+		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		
+		this.clear_fb();
+		
+		// blank screen - disabled because of driver bug
+		// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
+		// GLib.assert(ret==0); GLib.debug("blank screen");
+			
 		return 0;
 	}
 } 

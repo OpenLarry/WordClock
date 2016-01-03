@@ -187,12 +187,6 @@ public class WordClock.Main : GLib.Object {
     }
 	
 	public static bool shutdown() {
-		ColorRenderer black = new ColorRenderer();
-		black.color.set_hsv(0,0,0);
-		renderer.set_overwrite( { black }, { black }, { black } );
-		
-		Thread.usleep(1000000);
-		
 		cancellable.cancel();
 		loop.quit();
 		
