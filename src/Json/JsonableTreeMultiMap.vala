@@ -103,6 +103,15 @@ public class WordClock.JsonableTreeMultiMap<V> : Gee.TreeMultiMap<string,V>, Jso
 						throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
 				}
 			}
+			
+			// Remove elements
+			string[] keys = {};
+			foreach(string key in this.get_keys()) {
+				if(!node.get_object().has_member(key)) keys += key;
+			}
+			foreach(string key in keys) {
+				this.remove_all(key);
+			}
 		}
 	}
 }

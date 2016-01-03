@@ -72,6 +72,15 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 					this.set(name, val.dup_object());
 				}
 			}
+			
+			// Remove elements
+			string[] keys = {};
+			foreach(string key in this.keys) {
+				if(!node.get_object().has_member(key)) keys += key;
+			}
+			foreach(string key in keys) {
+				this.unset(key);
+			}
 		}
 	}
 }
