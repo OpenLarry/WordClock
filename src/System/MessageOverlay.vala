@@ -10,6 +10,9 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	public Color info_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public Color success_color { get; set; default = new Color.from_hsv( 120, 255, 200 ); }
 	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
+	public uint8 speed { get; set; default = 10; }
+	public uint8 add_spacing { get; set; default = 0; }
+	public string font_name { get; set; default = "WordClockMicrosoftSansSerifFont"; }
 	
 	protected ClockRenderer renderer;
 	protected bool infinite = false;
@@ -23,6 +26,9 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 		str_renderer.string = str;
 		str_renderer.time_format = false;
 		str_renderer.count = count;
+		str_renderer.speed = this.speed;
+		str_renderer.add_spacing = this.add_spacing;
+		str_renderer.font_name = this.font_name;
 		
 		if(count < 0) this.infinite = true;
 		

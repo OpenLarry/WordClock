@@ -11,7 +11,7 @@ public interface WordClock.Font : GLib.Object {
 	public abstract uint8 get_offset();
 	public abstract uint8 get_character_spacing();
 	
-	public virtual uint16[] render_str( string s ){
+	public virtual uint16[] render_str( string s, uint8 add_spacing = 0 ){
 		uint16[] r = {};
 		
 		// convert encoding
@@ -35,6 +35,7 @@ public interface WordClock.Font : GLib.Object {
 			// space
 			if( str.@get(i) == ' ' ) {
 				for(int e=0;e<3*font_character_spacing;e++) r += 0x0000;
+				for(int e=0;e<add_spacing;e++) r += 0x0000;
 				continue;
 			}
 			
@@ -60,6 +61,7 @@ public interface WordClock.Font : GLib.Object {
 			
 			// character spacing
 			if( i<str.length-1 ) for(int e=0;e<font_character_spacing;e++) r += 0x0000;
+			for(int e=0;e<add_spacing;e++) r += 0x0000;
 		}
 		
 		return r;

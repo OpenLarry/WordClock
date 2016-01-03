@@ -8,6 +8,7 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	public Color left_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public Color right_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public uint8 speed { get; set; default = 10; }
+	public uint8 add_spacing { get; set; default = 0; }
 	
 	public string font_name {
 		owned get {
@@ -52,7 +53,7 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 		
 		if(str != this.last_str) {
 			this.last_str = str;
-			this.rendered_str = this.font.render_str(str);
+			this.rendered_str = this.font.render_str(str, add_spacing);
 		}
 		
 		
