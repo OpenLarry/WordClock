@@ -7,9 +7,8 @@ using WordClock, Gee;
 public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 	private Sensors sensors;
 	
-	public JsonableTreeMap<JsonableNode> thresholds { get; set; default = new JsonableTreeMap<JsonableNode>(); }
+	public JsonableTreeMap<SensorsThreshold> thresholds { get; set; default = new JsonableTreeMap<SensorsThreshold>(); }
 	
-	public TreeMap<string,bool> states = new TreeMap<string,bool>();
 	
 	public SensorsObserver( Sensors sensors, uint interval = 1000 ) {
 		this.sensors = sensors;
@@ -30,25 +29,41 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 			
 			Value val = Value( pspec.value_type );
 			
-			if( !val.holds(typeof(float)) || entry.value.node.get_node_type() != Json.NodeType.VALUE || !entry.value.node.get_value_type().is_a(typeof(double)) ) {
-				stderr.printf("Incompatible types!\n");
-				return true;
-			}
-			
 			this.sensors.get_property( entry.key, ref val );
 			
-			if(this.states.has_key( entry.key )) {
-				bool old_state = this.states[entry.key];
-				bool new_state = val.get_float() > entry.value.node.get_double();
-				if(old_state != new_state) {
-					this.action( entry.key+((new_state)?"_higher":"_lower") );
-					this.states[entry.key] = new_state;
-				}
-			}else{
-				this.states[entry.key] = val.get_float() > entry.value.node.get_double();;
+			bool? action = entry.value.check( val.get_float() );
+			if(action != null) {
+				this.action( entry.key+((action)?"-higher":"-lower") );
 			}
 			
 			return true;
 		});
+	}
+	
+	public class SensorsThreshold : GLib.Object, Jsonable {
+		public double threshold { get; set; default = 0; }
+		public double hysteresis { get; set; default = 0; }
+		public bool first { get; set; default = false; }
+		
+		public bool? old_state = null;
+		
+		public bool? check ( double val ) {
+			bool? new_state = null;
+			
+			if( val - this.threshold > this.hysteresis / 2 ) new_state = true;
+			else if( this.threshold - val > this.hysteresis / 2 ) new_state = false;
+			
+			if(new_state != null) {
+				if((this.old_state != null || this.first) && this.old_state != new_state) {
+					this.old_state = new_state;
+					return new_state;
+				}else{
+					this.old_state = new_state;
+					return null;
+				}
+			}else{
+				return null;
+			}
+		}
 	}
 }
