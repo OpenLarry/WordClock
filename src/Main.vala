@@ -105,11 +105,13 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
 		signalrouter.add_source("timeobserver", timeobserver);
 		
+		message = new MessageOverlay( renderer );
+		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
-		settings.objects["message"] = new MessageOverlay( renderer );
+		settings.objects["message"] = message;
 		settings.objects["timeobserver"] = timeobserver;
 		
 		try{
