@@ -199,6 +199,32 @@ namespace WordClock.JsonHelper {
 		generator_b.set_root(node_b);
 		return generator_a.to_data(null) == generator_b.to_data(null);
 	}
+	
+	public static bool intersection_equals( Json.Node node_a, Json.Node node_b ) {
+		if( node_a.get_node_type() != node_b.get_node_type() ) return false;
+		
+		switch(node_a.get_node_type()) {
+			case Json.NodeType.OBJECT:
+				foreach(unowned string name in node_a.get_object().get_members()) {
+					if( !node_b.get_object().has_member( name ) ) continue;
+					if( !intersection_equals(node_a.get_object().get_member(name),node_b.get_object().get_member(name)) ) return false;
+				}
+			break;
+			case Json.NodeType.ARRAY:
+				if( node_a.get_array().get_length() != node_b.get_array().get_length() ) return false;
+				
+				for(int i=0;i<node_a.get_array().get_length();i++) {
+					if( !intersection_equals(node_a.get_array().get_element(i),node_b.get_array().get_element(i)) ) return false;
+				}
+			break;
+			case Json.NodeType.NULL:
+			break;
+			default:
+				return node_a.get_value().strdup_contents() == node_b.get_value().strdup_contents();
+		}
+		
+		return true;
+	}
 }
 
 public errordomain WordClock.JsonError {
