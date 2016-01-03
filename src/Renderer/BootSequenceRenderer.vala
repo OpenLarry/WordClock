@@ -69,9 +69,11 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 			for(int i=0;i<leds_backlight.length;i++) {
 				leds_backlight[i].set_hsv( 0, 0, 255 );
 			}
-			leds_backlight[(this.frame-75)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
-			leds_backlight[(this.frame-76)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
-			leds_backlight[(this.frame-77)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
+			leds_backlight[(leds_backlight.length+this.frame-74)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
+			leds_backlight[(leds_backlight.length+this.frame-75)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
+			leds_backlight[(leds_backlight.length+this.frame-76)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
+			leds_backlight[(leds_backlight.length+this.frame-77)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
+			leds_backlight[(leds_backlight.length+this.frame-78)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, 255 );
 		}
 		
 		this.frame++;
