@@ -29,7 +29,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 		JsonHelper.save( this, path ?? this.path, true );
 	}
 	
-	public void deferred_save() throws Error {
+	public void deferred_save() {
 		lock(source) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
 			this.timeout = GLib.Timeout.add(this.save_time, () => {
