@@ -260,10 +260,19 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			if( node.get_node_type() != Json.NodeType.OBJECT ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Object expected.");
 			
 			Json.Object obj = node.get_object();
-			if( obj.get_size() != 3 || !obj.has_member("h") || !obj.has_member("s") || !obj.has_member("v") ) throw new JsonError.INVALID_PROPERTY("Need properties h, s and v!");
-			if( obj.get_member("h").get_node_type() != Json.NodeType.VALUE || obj.get_member("s").get_node_type() != Json.NodeType.VALUE || obj.get_member("v").get_node_type() != Json.NodeType.VALUE ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
+			if(
+				obj.has_member("h") && obj.get_member("h").get_node_type() != Json.NodeType.VALUE ||
+				obj.has_member("s") && obj.get_member("s").get_node_type() != Json.NodeType.VALUE ||
+				obj.has_member("v") && obj.get_member("v").get_node_type() != Json.NodeType.VALUE
+			) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Value expected.");
 			
-			this.set_hsv( (uint16) obj.get_int_member( "h" ), (uint8) obj.get_int_member( "s" ), (uint8) obj.get_int_member( "v" ) );
+			uint16? h = null;
+			uint8? s = null, v = null;
+			if(obj.has_member("h")) h = (uint16) obj.get_int_member( "h" );
+			if(obj.has_member("s")) s = (uint8) obj.get_int_member( "s" );
+			if(obj.has_member("v")) v = (uint8) obj.get_int_member( "v" );
+			
+			this.set_hsv(h,s,v);
 		}
 	}
 }
