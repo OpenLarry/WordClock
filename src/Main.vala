@@ -94,6 +94,8 @@ public class WordClock.Main : GLib.Object {
 			Buzzer.beep(50,2500,255);
 		});
 		
+		var timeobserver = new TimeObserver();
+		
 		var signalrouter = new SignalRouter();
 		signalrouter.add_source("button0", button0);
 		signalrouter.add_source("button1", button1);
@@ -101,14 +103,14 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("motion", motion);
 		signalrouter.add_source("remote", remote);
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
-		
-		message = new MessageOverlay( renderer );
+		signalrouter.add_source("timeobserver", timeobserver);
 		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
-		settings.objects["message"] = message;
+		settings.objects["message"] = new MessageOverlay( renderer );
+		settings.objects["timeobserver"] = timeobserver;
 		
 		try{
 			// Process button interrupts

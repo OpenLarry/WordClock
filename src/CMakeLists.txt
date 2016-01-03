@@ -90,6 +90,7 @@ set(VALA_SRC
 	Sensors/Gpio.vala
 	Sensors/Lirc.vala
 	Sensors/IrRemote.vala
+	Sensors/TimeObserver.vala
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
