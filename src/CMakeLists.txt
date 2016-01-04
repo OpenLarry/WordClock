@@ -94,6 +94,7 @@ set(VALA_SRC
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala
+	SignalRouter/SignalDelayerSink.vala
 	System/WpsPbcSink.vala
 	System/DateTimeModifierSink.vala
 	System/MessageOverlay.vala
