@@ -127,12 +127,25 @@ public class WordClock.Main : GLib.Object {
 				Thread.usleep(200000);
 				Buzzer.beep(200,2000,255);
 				
-				
 				message.info("Loading defaults...");
 				stdout.puts("Loading default settings!\n");
 				settings.load("defaults.json");
 			}else{
-				settings.load();
+				try {
+					settings.load();
+				} catch ( Error e ) {
+					stderr.printf("Error: %s\n", e.message);
+					
+					Buzzer.beep(200,2000,255);
+					Thread.usleep(200000);
+					Buzzer.beep(200,2000,255);
+					Thread.usleep(200000);
+					Buzzer.beep(200,2000,255);
+					
+					message.error("Loading settings failed! Loading defaults...");
+					stderr.puts("Loading settings failed! Loading default settings!\n");
+					settings.load("defaults.json");
+				}
 			}
 			stdout.puts("Settings loaded!\n");
 		} catch( Error e ) {
