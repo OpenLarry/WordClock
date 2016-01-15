@@ -100,7 +100,7 @@ set(VALA_SRC
 	System/MessageOverlay.vala
 	System/InfoSink.vala
 	System/MessageSink.vala
-	${CMAKE_CURRENT_BINARY_DIR}/Version.vala
+	Version.vala
 )
 
 
