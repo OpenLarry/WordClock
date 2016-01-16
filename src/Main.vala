@@ -26,6 +26,7 @@ public class WordClock.Main : GLib.Object {
 		Type? type = typeof(Color);
 		type = typeof(HueRotateColor);
 		type = typeof(BrightnessSensorColor);
+		type = typeof(NetworkColor);
 		
 		type = typeof(Buzzer);
 		
