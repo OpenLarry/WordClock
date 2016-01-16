@@ -26,13 +26,12 @@ public class WordClock.NetworkColor : Color, Jsonable {
 			this.source = sock.create_source(IOCondition.IN);
 			this.source.set_callback( (s, cond) => {
 				try {
-					uint8 buffer[4096];
-					size_t read = s.receive (buffer);
-					buffer[read] = 0; // null-terminate string
+					uint8 rgb[3];
+					size_t read = s.receive(rgb);
 					
-					uint8 r,g,b;
-					if(((string) buffer).scanf("%hhu,%hhu,%hhu", out r, out g, out b) == 3) {
-						this.set_rgb(r,g,b);
+					if(read == 3) {
+						//stdout.printf("Received color: %u,%u,%u\n", rgb[0],rgb[1],rgb[2]);
+						this.set_rgb(rgb[0],rgb[1],rgb[2]);
 					}
 				} catch (Error e) {
 					stderr.printf (e.message);
