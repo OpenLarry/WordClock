@@ -1,4 +1,5 @@
 using WordClock;
+using SDLImage;
 
 /**
  * @author Aaron Larisch
@@ -48,6 +49,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(StringRenderer);
 		type = typeof(WatchHandRenderer);
 		type = typeof(ScalaRenderer);
+		type = typeof(ImageRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);
@@ -61,6 +63,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(SignalDelayerSink);
 		
 		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
+		
 		
 		cancellable = new Cancellable();
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );

@@ -8,6 +8,7 @@
 * gio-2.0
 * gee-0.8
 * json-glib-1.0
+* sdl, sdl-image
 
 ## Compilation
 

@@ -5,6 +5,7 @@ pkg_check_modules(GIO_UNIX REQUIRED gio-unix-2.0)
 pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(GEE REQUIRED gee-0.8)
 pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
+pkg_check_modules(SDL REQUIRED sdl)
 
 set(CFLAGS
 	${GOBJECT_CFLAGS} ${GOBJECT_CFLAGS_OTHER}
@@ -13,6 +14,7 @@ set(CFLAGS
 	${GIO_CFLAGS} ${GIO_CFLAGS_OTHER}
 	${GEE_CFLAGS} ${GEE_OTHER}
 	${JSON_GLIB_CFLAGS} ${JSON_GLIB_OTHER}
+	${SDL_CFLAGS} ${SDL_OTHER}
 )
 add_definitions(${CFLAGS})
 
@@ -23,6 +25,8 @@ set(LIBS
 	${GIO_LIBRARIES}
 	${GEE_LIBRARIES}
 	${JSON_GLIB_LIBRARIES}
+	${SDL_LIBRARIES}
+	SDL_image
 )
 link_libraries(${LIBS})
 
@@ -33,6 +37,7 @@ set(LIB_PATHS
 	${GIO_LIBRARY_DIRS}
 	${GEE_LIBRARY_DIRS}
 	${JSON_GLIB_LIBRARY_DIRS}
+	${SDL_LIBRARY_DIRS}
 )
 link_directories(${LIB_PATHS})
 
@@ -81,6 +86,7 @@ set(VALA_SRC
 	Renderer/GammaTestRenderer.vala
 	Renderer/StringRenderer.vala
 	Renderer/ScalaRenderer.vala
+	Renderer/ImageRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
@@ -113,6 +119,8 @@ PACKAGES
 	gio-2.0
 	gee-0.8
 	json-glib-1.0
+	sdl
+	sdl-image
 	# poppler-glib
 	# gtk+-2.0
 	posix
