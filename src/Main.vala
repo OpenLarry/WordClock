@@ -9,6 +9,7 @@ public class WordClock.Main : GLib.Object {
 	public static Sensors sensors;
 	public static Settings settings;
 	public static MessageOverlay message;
+	public static OWMWeatherProvider weather;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -50,6 +51,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(WatchHandRenderer);
 		type = typeof(ScalaRenderer);
 		type = typeof(ImageRenderer);
+		type = typeof(OWMWeatherRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);
@@ -61,6 +63,9 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(InfoSink);
 		type = typeof(MessageSink);
 		type = typeof(SignalDelayerSink);
+		type = typeof(OWMWeatherSink);
+		
+		type = typeof(GoogleLocationProvider);
 		
 		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		
@@ -113,12 +118,15 @@ public class WordClock.Main : GLib.Object {
 		
 		message = new MessageOverlay( renderer );
 		
+		weather = new OWMWeatherProvider();
+		
 		settings = new Settings("settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
 		settings.objects["message"] = message;
 		settings.objects["timeobserver"] = timeobserver;
+		settings.objects["weather"] = weather;
 		
 		try{
 			// Process button interrupts

@@ -87,6 +87,7 @@ set(VALA_SRC
 	Renderer/StringRenderer.vala
 	Renderer/ScalaRenderer.vala
 	Renderer/ImageRenderer.vala
+	Renderer/OWMWeatherRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
@@ -107,6 +108,10 @@ set(VALA_SRC
 	System/MessageOverlay.vala
 	System/InfoSink.vala
 	System/MessageSink.vala
+	System/LocationProvider.vala
+	System/GoogleLocationProvider.vala
+	System/OWMWeatherProvider.vala
+	System/OWMWeatherSink.vala
 	Version.vala
 )
 

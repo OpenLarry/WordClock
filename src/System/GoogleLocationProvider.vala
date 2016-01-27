@@ -1,0 +1,114 @@
+using WordClock;
+
+/**
+ * @author Aaron Larisch
+ * @version 1.0
+ */
+public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
+	const string IWLIST = "iwlist wlan0 scan";
+	const string GOOGLE_LOCATION_API = "https://maps.googleapis.com/maps/api/browserlocation/json";
+	
+	public uint refresh_interval {
+		get {
+			return this._refresh_interval;
+		}
+		set {
+			if(value != this._refresh_interval) {
+				this._refresh_interval = value;
+				this.set_timeout();
+			}
+		}
+		default = 86400;
+	}
+	private uint _refresh_interval;
+	
+	private uint timeout = 0;
+	
+	private LocationInfo? location = null;
+	
+	construct {
+		this.threaded_refresh();
+	}
+	
+	protected void set_timeout() {
+		if(this.timeout > 0) GLib.Source.remove(this.timeout);
+		if(this.refresh_interval > 0) {
+			this.timeout = GLib.Timeout.add_seconds(this.refresh_interval, () => {
+				this.threaded_refresh();
+				return GLib.Source.CONTINUE;
+			});
+		}else{
+			this.timeout = 0;
+		}
+	}
+	
+	public LocationInfo? get_location() {
+		return this.location;
+	}
+	
+	public void threaded_refresh() {
+		new Thread<int>("googlelocation", () => {
+			this.refresh();
+			return 0;
+		});
+	}
+	
+	public void refresh() {
+		try{
+			Soup.Session ses = new Soup.Session();
+			Soup.URI uri = new Soup.URI(GOOGLE_LOCATION_API);
+			HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
+			
+			query.insert("browser","firefox");
+			query.insert("sensor","true");
+			
+			string output;
+			try{
+				Process.spawn_command_line_sync(IWLIST, out output);
+				
+				Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
+				MatchInfo match_weather;
+				if( regex.match( output, 0, out match_weather ) ) {
+					do {
+						query.insert("wifi","mac:"+match_weather.fetch(1).replace(":","-")+"|ssid:"+match_weather.fetch(2));
+					} while ( match_weather.next() );
+				}
+			}catch(Error e) {
+				stderr.printf("%s\n",e.message);
+			}
+			
+			uri.set_query_from_form( query );
+			Soup.Request req = ses.request_uri( uri );
+			
+			var dis = new DataInputStream( req.send() );
+			string? line;
+			string res = "";
+			while ((line = dis.read_line ()) != null) {
+				res += line;
+			}
+			
+			Json.Node node = JsonHelper.from_string( res );
+			
+			Json.Object obj;
+			if(node.get_node_type() == Json.NodeType.OBJECT &&
+			   node.get_object().has_member("status") &&
+			   node.get_object().get_string_member("status") == "OK" &&
+			   node.get_object().has_member("accuracy") &&
+			   node.get_object().has_member("location")) {
+				obj = node.get_object().get_object_member("location");
+				if(obj != null &&
+				   obj.has_member("lat") &&
+				   obj.has_member("lng")) {
+					LocationInfo location = new LocationInfo();
+					location.lat = obj.get_double_member("lat");
+					location.lng = obj.get_double_member("lng");
+					location.accuracy = (int) node.get_object().get_int_member("accuracy");
+					this.location = location;
+					this.update();
+				}
+			}
+		} catch ( Error e ) {
+			stderr.printf("Error %s\n", e.message);
+		}
+	}
+}
