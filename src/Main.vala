@@ -66,6 +66,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(OWMWeatherSink);
 		
 		type = typeof(GoogleLocationProvider);
+		type = typeof(StaticLocationProvider);
 		
 		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		

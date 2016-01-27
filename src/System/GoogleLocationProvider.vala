@@ -18,9 +18,8 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				this.set_timeout();
 			}
 		}
-		default = 86400;
 	}
-	private uint _refresh_interval;
+	private uint _refresh_interval = 86400;
 	
 	private uint timeout = 0;
 	
@@ -28,6 +27,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	
 	construct {
 		this.threaded_refresh();
+		this.set_timeout();
 	}
 	
 	protected void set_timeout() {

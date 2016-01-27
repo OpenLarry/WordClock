@@ -19,7 +19,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 			this._location = value;
 			this.update_handler_id = this.location.update.connect( this.threaded_refresh );
 		}
-		default = new GoogleLocationProvider();
+		default = new StaticLocationProvider();
 	}
 	private LocationProvider _location;
 	
@@ -33,9 +33,8 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 				this.set_timeout();
 			}
 		}
-		default = 1800;
 	}
-	private uint _refresh_interval;
+	private uint _refresh_interval = 1800;
 	
 	private uint timeout = 0;
 	private ulong update_handler_id = 0;
@@ -45,7 +44,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	public signal void update();
 	
 	construct {
-		this.threaded_refresh();
+		this.set_timeout();
 	}
 	
 	protected void set_timeout() {

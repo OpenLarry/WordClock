@@ -110,6 +110,7 @@ set(VALA_SRC
 	System/MessageSink.vala
 	System/LocationProvider.vala
 	System/GoogleLocationProvider.vala
+	System/StaticLocationProvider.vala
 	System/OWMWeatherProvider.vala
 	System/OWMWeatherSink.vala
 	Version.vala
