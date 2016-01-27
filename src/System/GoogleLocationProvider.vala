@@ -99,10 +99,8 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				if(obj != null &&
 				   obj.has_member("lat") &&
 				   obj.has_member("lng")) {
-					LocationInfo location = new LocationInfo();
-					location.lat = obj.get_double_member("lat");
-					location.lng = obj.get_double_member("lng");
-					location.accuracy = (int) node.get_object().get_int_member("accuracy");
+					LocationInfo location = new LocationInfo(obj.get_double_member("lat"),obj.get_double_member("lng"),(int) node.get_object().get_int_member("accuracy"));
+					
 					this.location = location;
 					this.update();
 				}
