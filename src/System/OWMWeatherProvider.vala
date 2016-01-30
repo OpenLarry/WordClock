@@ -142,6 +142,7 @@ public class WordClock.OWMWeatherInfo : GLib.Object, Jsonable {
 	public JsonableTreeMap<JsonableNode> rain { get; set; default = new JsonableTreeMap<JsonableNode>(); }
 	// workaround because vala does not support properties with beginning numbers
 	public JsonableTreeMap<JsonableNode> snow { get; set; default = new JsonableTreeMap<JsonableNode>(); }
+	public OWMWeatherVisibility visibility { get; set; default = new OWMWeatherVisibility(); }
 	public int dt { get; set; default = 0; }
 	public OWMWeatherSys sys { get; set; default = new OWMWeatherSys(); }
 	public int id { get; set; default = 0; }
@@ -174,6 +175,10 @@ public class WordClock.OWMWeatherWind : GLib.Object, Jsonable {
 }
 public class WordClock.OWMWeatherClouds : GLib.Object, Jsonable {
 	public int all { get; set; default = 0; }
+}
+public class WordClock.OWMWeatherVisibility : GLib.Object, Jsonable {
+	public int distance { get; set; default = 0; }
+	public int prefix { get; set; default = 0; }
 }
 public class WordClock.OWMWeatherSys : GLib.Object, Jsonable {
 	public int id { get; set; default = 0; }
