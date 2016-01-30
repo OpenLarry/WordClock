@@ -8,6 +8,9 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	const string OWM_API = "http://api.openweathermap.org/data/2.5/weather";
 	const string OWM_APPID = "44db6a862fba0b067b1930da0d769e98";
 	
+	const uint RETRY_COUNT = 10;
+	const uint RETRY_INTERVAL = 60;
+	
 	public string language { get; set; default = "de"; }
 	
 	public LocationProvider location {
@@ -38,6 +41,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	
 	private uint timeout = 0;
 	private ulong update_handler_id = 0;
+	private bool refresh_running = false;
 	
 	private OWMWeatherInfo? weather = null;
 	
@@ -64,55 +68,65 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	}
 	
 	public void threaded_refresh() {
+		if(this.refresh_running) return;
+		
+		this.refresh_running = true;
 		new Thread<int>("owmweather", () => {
 			// set idle scheduling policy
 			Posix.Sched.Param param = { 0 };
 			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
 			GLib.assert(ret==0); GLib.debug("Set scheduler");
 			
-			this.refresh();
+			// retry on error
+			for(uint i=0;i<RETRY_COUNT;i++) {
+				try{
+					this.refresh();
+					break;
+				} catch ( Error e ) {
+					stderr.printf("Error %s\n", e.message);
+					Thread.usleep(RETRY_INTERVAL*1000000);
+				}
+			}
+			
+			this.refresh_running = false;
 			return 0;
 		});
 	}
 	
-	public void refresh() {
+	public void refresh() throws Error {
 		LocationInfo? location = this.location.get_location();
 		if(location == null) return;
-	
-		try{
-			Soup.Session ses = new Soup.Session();
-			Soup.URI uri = new Soup.URI(OWM_API);
-			HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
-			
-			query.insert("lat",location.lat.to_string());
-			query.insert("lon",location.lng.to_string());
-			query.insert("units","metric");
-			query.insert("lang","de");
-			query.insert("appid",OWM_APPID);
-			
-			uri.set_query_from_form( query );
-			Soup.Request req = ses.request_uri( uri );
-			
-			DataInputStream dis = new DataInputStream( req.send() );
-			string? line;
-			string res = "";
-			while ((line = dis.read_line ()) != null) {
-				res += line;
-			}
-			
-			OWMWeatherInfo weather = new OWMWeatherInfo();
-			Json.Node node = JsonHelper.from_string( res );
-			
-			// properties named "type" are not allowed in the gobject system
-			if(node.get_node_type() != Json.NodeType.OBJECT || !node.get_object().has_member("sys")) return;
-			node.get_object().get_object_member("sys").remove_member("type");
-			
-			weather.from_json( node );
-			this.weather = weather;
-			this.update();
-		} catch ( Error e ) {
-			stderr.printf("Error %s\n", e.message);
+		
+		Soup.Session ses = new Soup.Session();
+		Soup.URI uri = new Soup.URI(OWM_API);
+		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
+		
+		query.insert("lat",location.lat.to_string());
+		query.insert("lon",location.lng.to_string());
+		query.insert("units","metric");
+		query.insert("lang","de");
+		query.insert("appid",OWM_APPID);
+		
+		uri.set_query_from_form( query );
+		Soup.Request req = ses.request_uri( uri );
+		
+		DataInputStream dis = new DataInputStream( req.send() );
+		string? line;
+		string res = "";
+		while ((line = dis.read_line ()) != null) {
+			res += line;
 		}
+		
+		OWMWeatherInfo weather = new OWMWeatherInfo();
+		Json.Node node = JsonHelper.from_string( res );
+		
+		// properties named "type" are not allowed in the gobject system
+		if(node.get_node_type() != Json.NodeType.OBJECT || !node.get_object().has_member("sys")) return;
+		node.get_object().get_object_member("sys").remove_member("type");
+		
+		weather.from_json( node );
+		this.weather = weather;
+		this.update();
 	}
 }
 
