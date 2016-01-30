@@ -65,6 +65,11 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	
 	public void threaded_refresh() {
 		new Thread<int>("owmweather", () => {
+			// set idle scheduling policy
+			Posix.Sched.Param param = { 0 };
+			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
+			GLib.assert(ret==0); GLib.debug("Set scheduler");
+			
 			this.refresh();
 			return 0;
 		});

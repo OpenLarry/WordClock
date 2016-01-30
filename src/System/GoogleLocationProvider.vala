@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
-	const string IWLIST = "iwlist wlan0 scan";
+	const string IWLIST = "nice -10 iwlist wlan0 scan";
 	const string GOOGLE_LOCATION_API = "https://maps.googleapis.com/maps/api/browserlocation/json";
 	
 	public uint refresh_interval {
@@ -48,6 +48,11 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	
 	public void threaded_refresh() {
 		new Thread<int>("googlelocation", () => {
+			// set idle scheduling policy
+			Posix.Sched.Param param = { 0 };
+			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
+			GLib.assert(ret==0); GLib.debug("Set scheduler");
+			
 			this.refresh();
 			return 0;
 		});

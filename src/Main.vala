@@ -188,7 +188,14 @@ public class WordClock.Main : GLib.Object {
 		signalsource.attach( loop.get_context() );
 		
 		try {
-			var thread = new Thread<int>.try("Ws2812bDriver", () => { return driver.start(renderer); });
+			var thread = new Thread<int>.try("Ws2812bDriver", () => {
+				// set real-time scheduling policy
+				Posix.Sched.Param param = { 1 };
+				int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
+				GLib.assert(ret==0); GLib.debug("Set scheduler");
+				
+				return driver.start(renderer);
+			});
 			
 			Buzzer.beep(100,2000,10);
 			Buzzer.beep(400,4000,10);
