@@ -5,7 +5,7 @@ using WordClock, Gee;
  * @version 1.0
  */
 public class WordClock.TimeObserver : GLib.Object, Jsonable, SignalSource {
-	public JsonableTreeMultiMap<TimeEvent> events { get; set; default = new JsonableTreeMultiMap<TimeEvent>(); }
+	public JsonableTreeMapArrayList<TimeEvent> events { get; set; default = new JsonableTreeMapArrayList<TimeEvent>(); }
 	
 	public TimeObserver() {
 		GLib.Timeout.add_seconds( 60, () => {
@@ -13,9 +13,9 @@ public class WordClock.TimeObserver : GLib.Object, Jsonable, SignalSource {
 		
 			uint time = (uint) ((datetime.to_unix() + datetime.get_utc_offset() / 1000000) % 604800) / 60;
 		
-			foreach(string key in this.events.get_keys()) {
-				foreach(TimeEvent event in this.events[key]) {
-					if( event.check(time) ) this.action( key );
+			foreach(var entry in this.events.entries) {
+				foreach(TimeEvent event in entry.value) {
+					if( event.check(time) ) this.action( entry.key );
 				}
 			}
 			
