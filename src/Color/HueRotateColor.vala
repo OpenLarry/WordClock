@@ -17,8 +17,11 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	private void set_timeout() {
 		if(this.timeout == 0) {
 			this.timeout = GLib.Timeout.add_seconds(1, () => {
+				// ignore timeout if no other reference is held anymore
+				if(this.ref_count == 1) return GLib.Source.REMOVE;
+				
 				this.hue_by_time( new DateTime.now_local() );
-				return true;
+				return GLib.Source.CONTINUE;
 			});
 		}
 	}
