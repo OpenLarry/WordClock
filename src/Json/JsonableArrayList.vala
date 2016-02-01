@@ -54,15 +54,26 @@ public class WordClock.JsonableArrayList<G> : Gee.ArrayList<G>, Jsonable {
 			if( node.get_node_type() != Json.NodeType.ARRAY ) throw new JsonError.INVALID_NODE_TYPE("Invalid node type! Array expected.");
 			Json.Array arr = node.get_array();
 			
-			this.clear();
-			
-			// Can not use Json.Array.foreach_member here, because we have to throw exceptions in case of error which are not supported by the delegate!
-			for(int i=0;i<arr.get_length();i++) {
-				Json.Node element = arr.get_element(i);
-				Value val = Value( this.element_type );
+			// try to reuse previous objects if array size is unchanged
+			if(arr.get_length() == this.size) {
+				for(int i=0;i<arr.get_length();i++) {
+					Json.Node element = arr.get_element(i);
+					Value val = Value( this.element_type );
+					val.set_object( (Jsonable) this.get(i) );
+					JsonHelper.value_from_json( element, ref val );
+					this.set(i, val.dup_object());
+				}
+			}else{
+				this.clear();
 				
-				JsonHelper.value_from_json( element, ref val );
-				this.add(val.dup_object());
+				// Can not use Json.Array.foreach_member here, because we have to throw exceptions in case of error which are not supported by the delegate!
+				for(int i=0;i<arr.get_length();i++) {
+					Json.Node element = arr.get_element(i);
+					Value val = Value( this.element_type );
+					
+					JsonHelper.value_from_json( element, ref val );
+					this.add(val.dup_object());
+				}
 			}
 		}
 	}
