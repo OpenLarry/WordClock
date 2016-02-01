@@ -10,17 +10,8 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	public Color min_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color max_color { get; set; default = new Color.from_hsv( 0, 0, 255 ); }
 	
-	private bool connected = false;
-	
-	public BrightnessSensorColor() {
-		this.connect_sensor();
-	}
-	
-	private void connect_sensor() {
-		if(!this.connected) {
-			this.connected = true;
-			Main.sensors.updated.connect( this.update );
-		}
+	construct {
+		Main.sensors.updated.connect( this.update );
 	}
 	
 	private void update() {
@@ -39,7 +30,6 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	}
 	
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
-		this.connect_sensor();
 		Jsonable.default_from_json( this, node, path );
 		this.update();
 	}

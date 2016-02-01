@@ -8,22 +8,14 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	public uint timespan { get; set; default = 60; }
 	public Color basic_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	
-	private uint timeout = 0;
-	
-	public HueRotateColor() {
-		this.set_timeout();
-	}
-	
-	private void set_timeout() {
-		if(this.timeout == 0) {
-			this.timeout = GLib.Timeout.add_seconds(1, () => {
-				// ignore timeout if no other reference is held anymore
-				if(this.ref_count == 1) return GLib.Source.REMOVE;
-				
-				this.hue_by_time( new DateTime.now_local() );
-				return GLib.Source.CONTINUE;
-			});
-		}
+	construct {
+		GLib.Timeout.add_seconds(1, () => {
+			// ignore timeout if no other reference is held anymore
+			if(this.ref_count == 1) return GLib.Source.REMOVE;
+			
+			this.hue_by_time( new DateTime.now_local() );
+			return GLib.Source.CONTINUE;
+		});
 	}
 	
 	private void hue_by_time( DateTime time ) {
@@ -48,7 +40,6 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	}
 	
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
-		this.set_timeout();
 		Jsonable.default_from_json( this, node, path );
 		this.hue_by_time( new DateTime.now_local() );
 	}
