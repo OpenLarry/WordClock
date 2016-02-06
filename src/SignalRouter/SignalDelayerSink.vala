@@ -5,7 +5,23 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.SignalDelayerSink : GLib.Object, Jsonable, SignalSink {
-	public uint delay { get; set; default = 60; }
+	public uint delay {
+		get {
+			return this._delay;
+		}
+		set {
+			if(this._delay != value) {
+				this._delay = value;
+				if(this.timeout > 0) {
+					this.action();
+				}
+			}else{
+				this._delay = value;
+			}
+		}
+	}
+	private uint _delay = 60;
+	
 	public SignalSink sink { get; set; default = null; }
 	
 	private uint timeout = 0;
