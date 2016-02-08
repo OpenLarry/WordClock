@@ -97,7 +97,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		LocationInfo? location = this.location.get_location();
 		if(location == null) return;
 		
-		Soup.Session ses = new Soup.Session();
+		Soup.Session ses = new Soup.SessionSync();
 		Soup.URI uri = new Soup.URI(OWM_API);
 		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
 		
