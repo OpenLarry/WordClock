@@ -108,21 +108,18 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		query.insert("appid",OWM_APPID);
 		
 		uri.set_query_from_form( query );
-		Soup.Request req = ses.request_uri( uri );
+		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
+		ses.send_message(msg);
 		
-		DataInputStream dis = new DataInputStream( req.send() );
-		string? line;
-		string res = "";
-		while ((line = dis.read_line ()) != null) {
-			res += line;
-		}
+		if(msg.status_code != 200) throw new IOError.FAILED("Got status code: %u: %s\n", msg.status_code, msg.reason_phrase);
 		
-		OWMWeatherInfo weather = new OWMWeatherInfo();
-		Json.Node node = JsonHelper.from_string( res );
+		Json.Node node = JsonHelper.from_string( (string) msg.response_body.data );
 		
 		// properties named "type" are not allowed in the gobject system
 		if(node.get_node_type() != Json.NodeType.OBJECT || !node.get_object().has_member("sys")) return;
 		node.get_object().get_object_member("sys").remove_member("type");
+		
+		OWMWeatherInfo weather = new OWMWeatherInfo();
 		
 		weather.from_json( node );
 		this.weather = weather;

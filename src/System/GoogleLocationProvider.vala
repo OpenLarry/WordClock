@@ -100,16 +100,12 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		}
 		
 		uri.set_query_from_form( query );
-		Soup.Request req = ses.request_uri( uri );
+		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
+		ses.send_message(msg);
 		
-		var dis = new DataInputStream( req.send() );
-		string? line;
-		string res = "";
-		while ((line = dis.read_line ()) != null) {
-			res += line;
-		}
+		if(msg.status_code != 200) throw new IOError.FAILED("Got status code: %u: %s\n", msg.status_code, msg.reason_phrase);
 		
-		Json.Node node = JsonHelper.from_string( res );
+		Json.Node node = JsonHelper.from_string( (string) msg.response_body.data );
 		
 		Json.Object obj;
 		if(node.get_node_type() == Json.NodeType.OBJECT &&
