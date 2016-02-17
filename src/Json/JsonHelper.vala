@@ -220,7 +220,26 @@ namespace WordClock.JsonHelper {
 			case Json.NodeType.NULL:
 			break;
 			default:
-				return node_a.get_value().strdup_contents() == node_b.get_value().strdup_contents();
+				Value a = node_a.get_value(), b = node_b.get_value();
+				
+				if(a.holds(typeof(double)) != b.holds(typeof(double))) {
+					Value c = Value(typeof(double));
+					
+					if(a.holds(typeof(double))) {
+						return b.transform(ref c) && a.get_double() == c.get_double();
+					}else{
+						return a.transform(ref c) && b.get_double() == c.get_double();
+					}
+				}else if(a.holds(typeof(float)) != b.holds(typeof(float))) {
+					Value c = Value(typeof(float));
+					if(a.holds(typeof(float))) {
+						return b.transform(ref c) && a.get_float() == c.get_float();
+					}else{
+						return a.transform(ref c) && b.get_float() == c.get_float();
+					}
+				}else {
+					return a.strdup_contents() == b.strdup_contents();
+				}
 		}
 		
 		return true;
