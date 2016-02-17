@@ -6,7 +6,6 @@ using WordClock, Gee;
  */
 public class WordClock.Settings : GLib.Object, Jsonable {
 	private uint timeout = 0;
-	private int source = 0;
 	
 	public string path;
 	
@@ -22,15 +21,19 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 	}
 	
 	public void save( string? path = null ) throws Error {
-		lock(source) {
+		lock(this.timeout) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
 			this.timeout = 0;
 		}
 		JsonHelper.save( this, path ?? this.path, true );
 	}
 	
+	public void check_save() throws Error {
+		if(this.timeout > 0) this.save();
+	}
+	
 	public void deferred_save() {
-		lock(source) {
+		lock(this.timeout) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
 			this.timeout = GLib.Timeout.add_seconds(this.save_time, () => {
 				try{

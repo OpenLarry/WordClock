@@ -189,33 +189,34 @@ public class WordClock.Main : GLib.Object {
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
 		
-		try {
-			var thread = new Thread<int>.try("Ws2812bDriver", () => {
-				// set real-time scheduling policy
-				Posix.Sched.Param param = { 1 };
-				int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
-				GLib.assert(ret==0); GLib.debug("Set scheduler");
-				
-				return driver.start(renderer);
-			});
+		var thread = new Thread<int>("Ws2812bDriver", () => {
+			// set real-time scheduling policy
+			Posix.Sched.Param param = { 1 };
+			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
+			GLib.assert(ret==0); GLib.debug("Set scheduler");
 			
-			Buzzer.beep(100,2000,10);
-			Buzzer.beep(400,4000,10);
-			
-			loop.run();
-			
-			
-			stdout.puts("Terminating. Waiting for threads...\n");
-			
-			Buzzer.beep(100,4000,10);
-			Buzzer.beep(100,2000,10);
-			
-			thread.join();
-			
-		} catch ( Error e ) {
-			stderr.printf("Thread error: %s", e.message);
-			return 3;
+			return driver.start(renderer);
+		});
+		
+		Buzzer.beep(100,2000,10);
+		Buzzer.beep(400,4000,10);
+		
+		loop.run();
+		
+		
+		stdout.puts("Terminating. Waiting for threads...\n");
+		
+		Buzzer.beep(100,4000,10);
+		Buzzer.beep(100,2000,10);
+		
+		Lradc.stop();
+		try{
+			settings.check_save();
+		}catch( Error e ) {
+			stderr.printf("Error: %s\n", e.message);
 		}
+		
+		thread.join();
 		
 		stdout.puts("Bye!\n");
 		
@@ -225,7 +226,6 @@ public class WordClock.Main : GLib.Object {
 	public static bool shutdown() {
 		cancellable.cancel();
 		loop.quit();
-		Lradc.stop();
 		
 		return Source.REMOVE;
 	}
