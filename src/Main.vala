@@ -6,7 +6,7 @@ using SDLImage;
  * @version 1.0
  */
 public class WordClock.Main : GLib.Object {
-	public static Sensors sensors;
+	public static HardwareInfo hwinfo;
 	public static Settings settings;
 	public static MessageOverlay message;
 	public static OWMWeatherProvider weather;
@@ -83,20 +83,22 @@ public class WordClock.Main : GLib.Object {
 			renderer.set_overwrite( { black, boot }, { black, boot }, { black, boot } );
 		}
 		
-		sensors = new Sensors();
+		hwinfo = new HardwareInfo();
+		hwinfo.lradcs["brightness"] = Lradc.get_channel(1);
+		hwinfo.lradcs["brightness"].set_scale("0.90332031"); 
+		hwinfo.lradcs["vddio"] = Lradc.get_channel(6);
+		hwinfo.lradcs["battery"] = Lradc.get_channel(7);
+		hwinfo.lradcs["temp"] = Lradc.get_channel(8);
+		hwinfo.lradcs["vdd5v"] = Lradc.get_channel(15);
+		Lradc.start();
 		
-		Gpio button0 = new Gpio(92);
-		Gpio button1 = new Gpio(91);
-		Gpio button2 = new Gpio(23);
-		Gpio motion = new Gpio(7);
-		
-		button0.action.connect( (val) => { sensors.button0 = (val == "1"); } );
-		button1.action.connect( (val) => { sensors.button1 = (val == "1"); } );
-		button2.action.connect( (val) => { sensors.button2 = (val == "1"); } );
-		motion.action.connect( (val) => { sensors.motion = (val == "1"); } );
+		hwinfo.gpios["button0"] = new Gpio(92);
+		hwinfo.gpios["button1"] = new Gpio(91);
+		hwinfo.gpios["button2"] = new Gpio(23);
+		hwinfo.gpios["motion"] = new Gpio(7);
 		
 		
-		var sensorsobserver = new SensorsObserver(sensors);
+		var sensorsobserver = new SensorsObserver(hwinfo);
 		
 		loop = new MainLoop();
 		
@@ -109,10 +111,10 @@ public class WordClock.Main : GLib.Object {
 		var timeobserver = new TimeObserver();
 		
 		var signalrouter = new SignalRouter();
-		signalrouter.add_source("button0", button0);
-		signalrouter.add_source("button1", button1);
-		signalrouter.add_source("button2", button2);
-		signalrouter.add_source("motion", motion);
+		signalrouter.add_source("button0", hwinfo.gpios["button0"]);
+		signalrouter.add_source("button1", hwinfo.gpios["button1"]);
+		signalrouter.add_source("button2", hwinfo.gpios["button2"]);
+		signalrouter.add_source("motion", hwinfo.gpios["motion"]);
 		signalrouter.add_source("remote", remote);
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
 		signalrouter.add_source("timeobserver", timeobserver);
@@ -133,7 +135,7 @@ public class WordClock.Main : GLib.Object {
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
 			
-			if(button1.value) {
+			if(hwinfo.gpios["button0"].value) {
 				Buzzer.beep(200,2000,255);
 				Thread.usleep(200000);
 				Buzzer.beep(200,2000,255);
@@ -223,6 +225,7 @@ public class WordClock.Main : GLib.Object {
 	public static bool shutdown() {
 		cancellable.cancel();
 		loop.quit();
+		Lradc.stop();
 		
 		return Source.REMOVE;
 	}

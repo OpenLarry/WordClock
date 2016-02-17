@@ -5,15 +5,15 @@ using WordClock, Gee;
  * @version 1.0
  */
 public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
-	private Sensors sensors;
+	private HardwareInfo hwinfo;
 	
 	public JsonableTreeMap<SensorsThreshold> thresholds { get; set; default = new JsonableTreeMap<SensorsThreshold>(); }
 	
 	
-	public SensorsObserver( Sensors sensors, uint interval = 1000 ) {
-		this.sensors = sensors;
+	public SensorsObserver( HardwareInfo hwinfo, uint interval = 1 ) {
+		this.hwinfo = hwinfo;
 		
-		GLib.Timeout.add(interval, () => {
+		GLib.Timeout.add_seconds(interval, () => {
 			this.check();
 			return true;
 		});
@@ -21,15 +21,24 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 	
 	public void check() {
 		this.thresholds.foreach((entry) => {
-			ParamSpec? pspec = this.sensors.get_class().find_property( entry.key );
+			string[] parts = entry.key.split("-");
+			
+			if(parts.length != 2 || !this.hwinfo.lradcs.has_key(parts[0])) {
+				stderr.printf("Lradc channel does not exist!\n");
+				return true;
+			}
+			
+			Lradc lradc = this.hwinfo.lradcs[parts[0]];
+			
+			ParamSpec? pspec = lradc.get_class().find_property(parts[1]);
 			if(pspec == null) {
-				stderr.printf("Property does not exist!\n");
+				stderr.printf("Lradc property does not exist!\n");
 				return true;
 			}
 			
 			Value val = Value( pspec.value_type );
 			
-			this.sensors.get_property( entry.key, ref val );
+			lradc.get_property( parts[1], ref val );
 			
 			bool? action = entry.value.check( val.get_float() );
 			if(action != null) {

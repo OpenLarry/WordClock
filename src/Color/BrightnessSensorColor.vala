@@ -6,16 +6,16 @@ using WordClock;
  */
 public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	public float min_brightness { get; set; default = 0f; }
-	public float max_brightness { get; set; default = 1f; }
+	public float max_brightness { get; set; default = 1850f; }
 	public Color min_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color max_color { get; set; default = new Color.from_hsv( 0, 0, 255 ); }
 	
 	construct {
-		Main.sensors.updated.connect( this.update );
+		Main.hwinfo.lradcs["brightness"].update.connect( this.update );
 	}
 	
 	private void update() {
-		float brightness = Main.sensors.brightness_median;
+		float brightness = Main.hwinfo.lradcs["brightness"].median;
 		if(brightness >= this.max_brightness) {
 			this.mix_with( this.max_color, 255 );
 		}else if(brightness <= this.min_brightness) {

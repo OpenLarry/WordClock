@@ -48,11 +48,11 @@ public class WordClock.RestServer : Soup.Server {
 					msg.set_status(405);
 				break;
 			}
-		}else if( path == "/sensors" ) {
+		}else if( path == "/hwinfo" ) {
 			switch(msg.method) {
 				case "GET":
 					try{
-						string data = JsonHelper.to_string(Main.sensors.to_json());
+						string data = JsonHelper.to_string(Main.hwinfo.to_json());
 						
 						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 						msg.set_status(200);

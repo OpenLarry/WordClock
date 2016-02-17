@@ -6,14 +6,14 @@ using WordClock;
  *
  * https://www.linux.com/learn/tutorials/765810-beaglebone-black-how-to-get-interrupts-through-linux-gpio
  */
-public class WordClock.Gpio : GLib.Object, SignalSource {
+public class WordClock.Gpio : GLib.Object, SignalSource, Jsonable {
 	const string GPIO_EXPORT = "/sys/class/gpio/export";
 	
 	const string GPIO_DIRECTION = "/sys/class/gpio/gpio%u/direction";
 	const string GPIO_EDGE = "/sys/class/gpio/gpio%u/edge";
 	const string GPIO_VALUE = "/sys/class/gpio/gpio%u/value";
 	
-	public bool value = false;
+	public bool value { get; set; default = false; }
 	
 	private bool first = true;
 	

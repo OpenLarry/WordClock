@@ -94,7 +94,7 @@ set(VALA_SRC
 	Font/HugeMicrosoftSansSerifFont.vala
 	Font/ConsolasFont.vala
 	Sensors/Lradc.vala
-	Sensors/Sensors.vala
+	Sensors/HardwareInfo.vala
 	Sensors/SensorsObserver.vala
 	Sensors/Gpio.vala
 	Sensors/Lirc.vala
@@ -114,6 +114,7 @@ set(VALA_SRC
 	System/StaticLocationProvider.vala
 	System/OWMWeatherProvider.vala
 	System/OWMWeatherSink.vala
+	Statistic.vala
 	Version.vala
 )
 
