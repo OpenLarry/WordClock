@@ -32,7 +32,7 @@ public class WordClock.StaticLocationProvider : GLib.Object, Jsonable, LocationP
 		if( this._location == null ) return;
 		if( this.old_location == null || !this._location.equals( this.old_location ) ) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
-			this.timeout = GLib.Timeout.add(1000, () => {
+			this.timeout = GLib.Timeout.add_seconds(1, () => {
 				this.timeout = 0;
 				this.update();
 				return GLib.Source.REMOVE;

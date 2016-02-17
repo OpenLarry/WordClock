@@ -10,7 +10,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 	
 	public string path;
 	
-	public uint save_time { get; set; default = 5000; }
+	public uint save_time { get; set; default = 5; }
 	public JsonableTreeMap<Jsonable> objects { get; set; default = new JsonableTreeMap<Jsonable>(); }
 	
 	public Settings( string path ) {
@@ -32,7 +32,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 	public void deferred_save() {
 		lock(source) {
 			if(this.timeout > 0) GLib.Source.remove(this.timeout);
-			this.timeout = GLib.Timeout.add(this.save_time, () => {
+			this.timeout = GLib.Timeout.add_seconds(this.save_time, () => {
 				try{
 					this.save();
 				}catch( Error e ) {
