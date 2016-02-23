@@ -147,7 +147,7 @@ add_executable(wordclock
   	${VALA_C}
 )
 
-add_definitions(-w)
+add_definitions(-w -O0)
 
 # explicitly add libraries (needed e.g. for Fedora 13+)
 target_link_libraries(wordclock -lm)
