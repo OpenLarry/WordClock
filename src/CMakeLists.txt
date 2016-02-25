@@ -147,7 +147,8 @@ add_executable(wordclock
   	${VALA_C}
 )
 
-add_definitions(-w -O0)
+# null coalescing operator does not work as expected in Color class if -ftree-dse is enabled
+add_definitions(-w -fno-tree-dse)
 
 # explicitly add libraries (needed e.g. for Fedora 13+)
 target_link_libraries(wordclock -lm)
