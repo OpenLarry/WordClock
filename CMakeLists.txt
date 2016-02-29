@@ -20,3 +20,5 @@ macro(make_compile_directory directory)
 endmacro(make_compile_directory)
 
 add_subdirectory(src)
+add_subdirectory(conf)
+add_subdirectory(icons)

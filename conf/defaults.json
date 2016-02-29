@@ -1,0 +1,1453 @@
+{
+  "save-time" : 60,
+  "objects" : {
+    "clockrenderer" : {
+      "active" : "default-MonoColor",
+      "configurations" : {
+        "default" : {
+          "matrix" : [
+            "NoBlack",
+            "Time"
+          ],
+          "dots" : [
+            "NoBlack",
+            "Time"
+          ],
+          "backlight" : [
+            "Background",
+            "Seconds"
+          ]
+        },
+        "default-MonoColor" : {
+          "matrix" : [
+            "NoBlack",
+            "Time-MonoColor"
+          ],
+          "dots" : [
+            "NoBlack",
+            "Time-MonoColor"
+          ],
+          "backlight" : [
+            "Background",
+            "Seconds-MonoColor"
+          ]
+        },
+        "digit" : {
+          "matrix" : [
+            "Black",
+            "Digit"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Black",
+            "Scala",
+            "Hours"
+          ]
+        },
+        "gamma" : {
+          "matrix" : [
+            "GammaTest"
+          ],
+          "dots" : [
+            "GammaTest"
+          ],
+          "backlight" : [
+            "GammaTest"
+          ]
+        },
+        "image" : {
+          "matrix" : [
+            "Black",
+            "Image"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Black"
+          ]
+        },
+        "night" : {
+          "matrix" : [
+            "Black",
+            "String"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Black"
+          ]
+        },
+        "off" : {
+          "matrix" : [
+            "Black"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Black"
+          ]
+        },
+        "ticker" : {
+          "matrix" : [
+            "Black",
+            "StringBright"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Background",
+            "Seconds"
+          ]
+        },
+        "watchhands" : {
+          "matrix" : [
+            "NoBlack",
+            "Time-MonoColor"
+          ],
+          "dots" : [
+            "NoBlack",
+            "Time-MonoColor"
+          ],
+          "backlight" : [
+            "Background",
+            "WH-Scala",
+            "WH-Seconds",
+            "WH-Minutes",
+            "WH-Hours"
+          ]
+        },
+        "weather" : {
+          "matrix" : [
+            "Black",
+            "Weather"
+          ],
+          "dots" : [
+            "Black"
+          ],
+          "backlight" : [
+            "Black"
+          ]
+        }
+      },
+      "renderers" : {
+        "Background" : {
+          "color" : {
+            "h" : 40,
+            "s" : 50,
+            "v" : 1
+          },
+          "-type" : "WordClockColorRenderer"
+        },
+        "Black" : {
+          "color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 0
+          },
+          "-type" : "WordClockColorRenderer"
+        },
+        "Color" : {
+          "color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 230
+          },
+          "-type" : "WordClockColorRenderer"
+        },
+        "Digit" : {
+          "background-color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 0
+          },
+          "foreground-color" : {
+            "h" : 0,
+            "s" : 255,
+            "v" : 200
+          },
+          "format" : "%M",
+          "font-name" : "WordClockMicrosoftSansSerifFont",
+          "-type" : "WordClockBigDigitRenderer"
+        },
+        "GammaTest" : {
+          "-type" : "WordClockGammaTestRenderer"
+        },
+        "Hours" : {
+          "smooth" : true,
+          "width" : 1,
+          "rotate-time" : 43200,
+          "color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 120
+            },
+            "max-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 255
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "Image" : {
+          "path" : "weather/09d.png",
+          "-type" : "WordClockImageRenderer"
+        },
+        "NoBlack" : {
+          "color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 0,
+              "s" : 0,
+              "v" : 25
+            },
+            "max-color" : {
+              "h" : 0,
+              "s" : 0,
+              "v" : 50
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "-type" : "WordClockColorRenderer"
+        },
+        "Scala" : {
+          "interval" : 5,
+          "width" : 1,
+          "offset" : 0,
+          "color" : {
+            "h" : 0,
+            "s" : 255,
+            "v" : 255
+          },
+          "-type" : "WordClockScalaRenderer"
+        },
+        "Seconds" : {
+          "smooth" : true,
+          "width" : 3,
+          "rotate-time" : 60,
+          "color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 70
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "max-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 200
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "Seconds-MonoColor" : {
+          "smooth" : true,
+          "width" : 3,
+          "rotate-time" : 60,
+          "color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 70
+            },
+            "max-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 255
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "String" : {
+          "left-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 25
+            },
+            "max-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 200
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "right-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 25
+            },
+            "max-color" : {
+              "h" : 120,
+              "s" : 255,
+              "v" : 200
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "speed" : 10,
+          "add-spacing" : 0,
+          "font-name" : "WordClockHugeMicrosoftSansSerifFont",
+          "time-format" : true,
+          "string" : "%k:%M",
+          "-type" : "WordClockStringRenderer"
+        },
+        "StringBright" : {
+          "left-color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 150
+          },
+          "right-color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 150
+          },
+          "speed" : 10,
+          "add-spacing" : 1,
+          "font-name" : "WordClockMicrosoftSansSerifFont",
+          "time-format" : true,
+          "string" : " %A %d.%m.%Y %k:%M-%S ",
+          "-type" : "WordClockStringRenderer"
+        },
+        "Time" : {
+          "words-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 70
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "max-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 200
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "dots-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 70
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "max-color" : {
+              "timespan" : 3600,
+              "basic-color" : {
+                "h" : 0,
+                "s" : 255,
+                "v" : 200
+              },
+              "-type" : "WordClockHueRotateColor"
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "fade-secs" : 1,
+          "display-it-is" : true,
+          "frontpanel-name" : "WordClockRhineRuhrGermanFrontPanel",
+          "-type" : "WordClockTimeRenderer"
+        },
+        "Time-MonoColor" : {
+          "words-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 70
+            },
+            "max-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 255
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "dots-color" : {
+            "min-brightness" : 0,
+            "max-brightness" : 1850,
+            "min-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 70
+            },
+            "max-color" : {
+              "h" : 160,
+              "s" : 255,
+              "v" : 255
+            },
+            "-type" : "WordClockBrightnessSensorColor"
+          },
+          "fade-secs" : 1,
+          "display-it-is" : true,
+          "frontpanel-name" : "WordClockRhineRuhrGermanFrontPanel",
+          "-type" : "WordClockTimeRenderer"
+        },
+        "WH-Hours" : {
+          "smooth" : false,
+          "width" : 1,
+          "rotate-time" : 43200,
+          "color" : {
+            "h" : 0,
+            "s" : 255,
+            "v" : 255
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "WH-Minutes" : {
+          "smooth" : true,
+          "width" : 1,
+          "rotate-time" : 3600,
+          "color" : {
+            "h" : 120,
+            "s" : 255,
+            "v" : 255
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "WH-Scala" : {
+          "interval" : 5,
+          "width" : 1,
+          "offset" : 0,
+          "color" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 120
+          },
+          "-type" : "WordClockScalaRenderer"
+        },
+        "WH-Seconds" : {
+          "smooth" : true,
+          "width" : 1,
+          "rotate-time" : 60,
+          "color" : {
+            "h" : 240,
+            "s" : 255,
+            "v" : 255
+          },
+          "-type" : "WordClockWatchHandRenderer"
+        },
+        "Weather" : {
+          "icon-path" : "/usr/share/wordclock/weather_markus/%s.png",
+          "-type" : "WordClockOWMWeatherRenderer"
+        }
+      },
+      "-type" : "WordClockClockRenderer"
+    },
+    "message" : {
+      "error-color" : {
+        "h" : 0,
+        "s" : 255,
+        "v" : 200
+      },
+      "warning-color" : {
+        "h" : 60,
+        "s" : 255,
+        "v" : 200
+      },
+      "info-color" : {
+        "h" : 0,
+        "s" : 0,
+        "v" : 200
+      },
+      "success-color" : {
+        "h" : 120,
+        "s" : 255,
+        "v" : 200
+      },
+      "background-color" : {
+        "h" : 0,
+        "s" : 0,
+        "v" : 0
+      },
+      "speed" : 15,
+      "add-spacing" : 2,
+      "font-name" : "WordClockMicrosoftSansSerifFont",
+      "-type" : "WordClockMessageOverlay"
+    },
+    "sensorsobserver" : {
+      "thresholds" : {
+      },
+      "-type" : "WordClockSensorsObserver"
+    },
+    "signalrouter" : {
+      "sinks" : {
+        "button0,1" : [
+          {
+            "years" : 0,
+            "months" : 0,
+            "days" : 0,
+            "hours" : 1,
+            "minutes" : 0,
+            "seconds" : 0,
+            "-type" : "WordClockDateTimeModifierSink"
+          }
+        ],
+        "button1,1" : [
+          {
+            "years" : 0,
+            "months" : 0,
+            "days" : 0,
+            "hours" : 0,
+            "minutes" : 1,
+            "seconds" : 0,
+            "-type" : "WordClockDateTimeModifierSink"
+          }
+        ],
+        "button2,1" : [
+          {
+            "-type" : "WordClockWpsPbcSink"
+          }
+        ],
+        "remote,B" : [
+          {
+            "settings" : [
+              {
+                "h" : 200,
+                "s" : 255
+              },
+              {
+                "h" : 240,
+                "s" : 255
+              },
+              {
+                "h" : 260,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,B1" : [
+          {
+            "settings" : [
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/min-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 50
+              },
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 35
+              },
+              {
+                "h" : 240,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,B2" : [
+          {
+            "settings" : [
+              {
+                "h" : 200,
+                "s" : 255
+              },
+              {
+                "h" : 240,
+                "s" : 255
+              },
+              {
+                "h" : 260,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,B4" : [
+          {
+            "settings" : [
+              1,
+              0
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time/fade-secs",
+              "/objects/clockrenderer/renderers/Time-MonoColor/fade-secs"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              "Blend ON",
+              "Blend OFF"
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/remote,B4/2/text"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "text" : "Blend ON",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          },
+          {
+            "settings" : [
+              3,
+              1
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Seconds/width",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/width"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              false,
+              true
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Seconds/smooth",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/smooth"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,DOWN" : [
+          {
+            "settings" : [
+              6,
+              5,
+              4,
+              3,
+              2,
+              1
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Seconds/width"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              220,
+              200,
+              150,
+              100,
+              50,
+              0
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color/v"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,FADE" : [
+          {
+            "settings" : [
+              "default",
+              "night",
+              "default-MonoColor",
+              "ticker",
+              "digit",
+              "watchhands",
+              "image"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/active",
+              "/objects/signalrouter/sinks/timeobserver,ON0700/0/settings/0",
+              "/objects/signalrouter/sinks/signalrouter,userevent/0/settings/0"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              "Farbwechsel",
+              "Nacht",
+              "Farbwahl",
+              "Ticker",
+              "Digital",
+              "Zeiger",
+              "Symbole"
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/remote,FADE/2/text"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "text" : "Farbwahl",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ],
+        "remote,FLASH" : [
+          {
+            "settings" : [
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 50
+              },
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 35
+              },
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 25
+              },
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 25
+              },
+              {
+                "h" : 0,
+                "s" : 0,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/min-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,G" : [
+          {
+            "settings" : [
+              {
+                "h" : 80,
+                "s" : 255
+              },
+              {
+                "h" : 120,
+                "s" : 255
+              },
+              {
+                "h" : 160,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,G1" : [
+          {
+            "settings" : [
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/min-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 50
+              },
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 35
+              },
+              {
+                "h" : 120,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,G2" : [
+          {
+            "settings" : [
+              {
+                "h" : 80,
+                "s" : 255
+              },
+              {
+                "h" : 120,
+                "s" : 255
+              },
+              {
+                "h" : 160,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,G4" : [
+          {
+            "settings" : [
+              "/usr/share/wordclock/weather_markus/01d.png",
+              "/usr/share/wordclock/weather_markus/02d.png",
+              "/usr/share/wordclock/weather_markus/03d.png",
+              "/usr/share/wordclock/weather_markus/04d.png",
+              "/usr/share/wordclock/weather_markus/09d.png",
+              "/usr/share/wordclock/weather_markus/10d.png",
+              "/usr/share/wordclock/weather_markus/11d.png",
+              "/usr/share/wordclock/weather_markus/13d.png",
+              "/usr/share/wordclock/weather_markus/50d.png",
+              "/usr/share/wordclock/weather_markus/01n.png",
+              "/usr/share/wordclock/weather_markus/02n.png",
+              "/usr/share/wordclock/weather_markus/03n.png",
+              "/usr/share/wordclock/weather_markus/04n.png",
+              "/usr/share/wordclock/weather_markus/09n.png",
+              "/usr/share/wordclock/weather_markus/10n.png",
+              "/usr/share/wordclock/weather_markus/11n.png",
+              "/usr/share/wordclock/weather_markus/13n.png",
+              "/usr/share/wordclock/weather_markus/50n.png"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Image/path"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,OFF" : [
+          {
+            "settings" : [
+              88888888,
+              10800,
+              3600,
+              1200,
+              0
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay",
+              "/objects/signalrouter/sinks/signalrouter,userevent/2/delay"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              "on",
+              "3h",
+              "1h",
+              "20min",
+              "off"
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/remote,OFF/2/text",
+              "/objects/signalrouter/sinks/remote,ON/2/text"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "text" : "20min",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ],
+        "remote,ON" : [
+          {
+            "settings" : [
+              0,
+              1200,
+              3600,
+              10800,
+              88888888
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay",
+              "/objects/signalrouter/sinks/signalrouter,userevent/2/delay"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              "off",
+              "20min",
+              "1h",
+              "3h",
+              "on"
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/remote,ON/2/text",
+              "/objects/signalrouter/sinks/remote,OFF/2/text"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "text" : "20min",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ],
+        "remote,R" : [
+          {
+            "settings" : [
+              {
+                "h" : 320,
+                "s" : 255
+              },
+              {
+                "h" : 0,
+                "s" : 255
+              },
+              {
+                "h" : 40,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,R1" : [
+          {
+            "settings" : [
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 25
+              },
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/min-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 50
+              },
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 35
+              },
+              {
+                "h" : 0,
+                "s" : 255,
+                "v" : 0
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/NoBlack/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,R2" : [
+          {
+            "settings" : [
+              {
+                "h" : 320,
+                "s" : 255
+              },
+              {
+                "h" : 0,
+                "s" : 255
+              },
+              {
+                "h" : 40,
+                "s" : 255
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,R3" : [
+          {
+            "-type" : "WordClockInfoSink"
+          }
+        ],
+        "remote,R4" : [
+          {
+            "delay" : 3,
+            "sink" : {
+              "-type" : "WordClockOWMWeatherSink"
+            },
+            "-type" : "WordClockSignalDelayerSink"
+          },
+          {
+            "delay" : 4,
+            "sink" : {
+              "settings" : [
+                "default-MonoColor"
+              ],
+              "paths" : [
+                "/objects/clockrenderer/active"
+              ],
+              "cyclic" : true,
+              "synchronize" : true,
+              "-type" : "WordClockJsonModifierSink"
+            },
+            "-type" : "WordClockSignalDelayerSink"
+          },
+          {
+            "settings" : [
+              "weather"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/active"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,SMOOTH" : [
+          {
+            "settings" : [
+              "RUHR",
+              "WEST",
+              "OST"
+            ],
+            "paths" : [
+              "/objects/signalrouter/sinks/remote,SMOOTH/2/text"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              "WordClockRhineRuhrGermanFrontPanel",
+              "WordClockWestGermanFrontPanel",
+              "WordClockEastGermanFrontPanel"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time/frontpanel-name",
+              "/objects/clockrenderer/renderers/Time-MonoColor/frontpanel-name"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "text" : "RUHR",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ],
+        "remote,STROBE" : [
+          {
+            "settings" : [
+              {
+                "h" : 40,
+                "s" : 50
+              },
+              {
+                "h" : 0,
+                "s" : 0
+              },
+              {
+                "h" : 160,
+                "s" : 50
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,UP" : [
+          {
+            "settings" : [
+              0,
+              50,
+              100,
+              150,
+              200,
+              220
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color/v"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "settings" : [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Seconds/width"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "remote,W" : [
+          {
+            "settings" : [
+              {
+                "h" : 40,
+                "s" : 50
+              },
+              {
+                "h" : 0,
+                "s" : 0
+              },
+              {
+                "h" : 160,
+                "s" : 50
+              }
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
+              "/objects/clockrenderer/renderers/Seconds-MonoColor/color/max-color"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "signalrouter,userevent" : [
+          {
+            "settings" : [
+              "default-MonoColor"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/active"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "delay" : 1200,
+            "sink" : {
+              "settings" : [
+                "off"
+              ],
+              "paths" : [
+                "/objects/clockrenderer/active"
+              ],
+              "cyclic" : true,
+              "synchronize" : true,
+              "-type" : "WordClockJsonModifierSink"
+            },
+            "-type" : "WordClockSignalDelayerSink"
+          },
+          {
+            "delay" : 1200,
+            "sink" : {
+              "settings" : [
+                1
+              ],
+              "paths" : [
+                "/objects/clockrenderer/renderers/Background/color/v",
+                "/objects/clockrenderer/renderers/Seconds/width"
+              ],
+              "cyclic" : true,
+              "synchronize" : true,
+              "-type" : "WordClockJsonModifierSink"
+            },
+            "-type" : "WordClockSignalDelayerSink"
+          }
+        ],
+        "timeobserver,OFF0000" : [
+          {
+            "settings" : [
+              "off"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/active"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "msec" : 500,
+            "freq" : 1500,
+            "volume" : 255,
+            "-type" : "WordClockBuzzer"
+          },
+          {
+            "text" : "Clock OFF",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ],
+        "timeobserver,ON0700" : [
+          {
+            "settings" : [
+              "default-MonoColor"
+            ],
+            "paths" : [
+              "/objects/clockrenderer/active"
+            ],
+            "cyclic" : true,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          },
+          {
+            "msec" : 500,
+            "freq" : 2500,
+            "volume" : 255,
+            "-type" : "WordClockBuzzer"
+          },
+          {
+            "text" : "Clock ON",
+            "count" : 1,
+            "message-type" : "INFO",
+            "-type" : "WordClockMessageSink"
+          }
+        ]
+      },
+      "userevent-sources" : [
+        "button0",
+        "button1",
+        "button2",
+        "motion",
+        "remote",
+        "timeobserver"
+      ],
+      "-type" : "WordClockSignalRouter"
+    },
+    "timeobserver" : {
+      "events" : {
+        "OFF0000" : [
+          {
+            "interval" : 1440,
+            "start" : 0
+          }
+        ],
+        "ON0700" : [
+          {
+            "interval" : 1440,
+            "start" : 420
+          }
+        ]
+      },
+      "-type" : "WordClockTimeObserver"
+    },
+    "weather" : {
+      "language" : "de",
+      "location" : {
+        "refresh-interval" : 86400,
+        "-type" : "WordClockGoogleLocationProvider"
+      },
+      "refresh-interval" : 1800,
+      "-type" : "WordClockOWMWeatherProvider"
+    }
+  }
+}
