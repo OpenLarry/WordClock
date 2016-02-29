@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.OWMWeatherRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
-	const string ICON_PATH = "weather/%s.png";
+	public string icon_path { get; set; default = "/usr/share/wordclock/weather/%s.png"; }
 	
 	private ImageRenderer renderer = new ImageRenderer();
 	
@@ -14,7 +14,7 @@ public class WordClock.OWMWeatherRenderer : GLib.Object, Jsonable, ClockRenderab
 		
 		if(info==null || info.weather.size == 0) return true;
 		
-		renderer.path = ICON_PATH.printf(info.weather[0].icon);
+		renderer.path = icon_path.printf(info.weather[0].icon);
 		
 		return renderer.render_matrix(matrix);
 	}

@@ -128,7 +128,7 @@ public class WordClock.Main : GLib.Object {
 		
 		weather = new OWMWeatherProvider();
 		
-		settings = new Settings("settings.json");
+		settings = new Settings("/etc/wordclock/settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
@@ -149,24 +149,31 @@ public class WordClock.Main : GLib.Object {
 				
 				message.info("Loading defaults...");
 				stdout.puts("Loading default settings!\n");
-				settings.load("defaults.json");
+				settings.load("/etc/wordclock/defaults.json");
 			}else{
 				try {
 					settings.load();
 				} catch ( Error e ) {
-					stderr.printf("Error: %s\n", e.message);
+					if( !(e is FileError.NOENT) ) {
+						stderr.printf("Error: %s", e.message);
+
+						
+						Buzzer.beep(200,2000,255);
+						Thread.usleep(200000);
+						Buzzer.beep(200,2000,255);
+						Thread.usleep(200000);
+						Buzzer.beep(200,2000,255);
+						
+						message.error("Loading settings failed! Resetting to defaults...");
+						stderr.puts("Loading settings failed!\n");
+					}
 					
-					Buzzer.beep(200,2000,255);
-					Thread.usleep(200000);
-					Buzzer.beep(200,2000,255);
-					Thread.usleep(200000);
-					Buzzer.beep(200,2000,255);
-					
-					message.error("Loading settings failed! Loading defaults...");
-					stderr.puts("Loading settings failed! Loading default settings!\n");
-					settings.load("defaults.json");
+
+					stdout.puts("Loading default settings!\n");
+					settings.load("/etc/wordclock/defaults.json");
 				}
 			}
+			
 			stdout.puts("Settings loaded!\n");
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);

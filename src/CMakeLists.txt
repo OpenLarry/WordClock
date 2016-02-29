@@ -157,5 +157,5 @@ install(TARGETS
 	wordclock
 RUNTIME
 DESTINATION
-	bin
+	/usr/sbin
 )
