@@ -41,7 +41,7 @@ public class WordClock.BigDigitRenderer : GLib.Object, Jsonable, ClockRenderable
 		}
 		
 		
-		string time = new DateTime.now_local().format(format);
+		string time = new DateTime.now(Main.timezone).format(format);
 		
 		char str_1 = time[1];
 		char str_10 = time[0];

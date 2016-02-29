@@ -20,7 +20,7 @@ public class WordClock.BigTimeRenderer : GLib.Object, Jsonable, ClockRenderable,
 	 * @return Continue
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
-		var time = new DateTime.now_local();
+		var time = new DateTime.now(Main.timezone);
 		
 		render_number(leds_matrix, (uint8) time.get_hour()/10, 2, 0, this.hours_color);
 		render_number(leds_matrix, (uint8) time.get_hour()%10, 6, 0, this.hours_color);

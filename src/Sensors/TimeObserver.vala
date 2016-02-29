@@ -9,7 +9,7 @@ public class WordClock.TimeObserver : GLib.Object, Jsonable, SignalSource {
 	
 	public TimeObserver() {
 		GLib.Timeout.add_seconds( 60, () => {
-			var datetime = new DateTime.now_local();
+			var datetime = new DateTime.now(Main.timezone);
 		
 			uint time = (uint) ((datetime.to_unix() + datetime.get_utc_offset() / 1000000) % 604800) / 60;
 		

@@ -42,7 +42,7 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	 * @return Continue
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
-		var time = new DateTime.now_local();
+		var time = new DateTime.now(Main.timezone);
 		
 		string str;
 		if(this.time_format) {

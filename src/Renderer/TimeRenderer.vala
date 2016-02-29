@@ -29,7 +29,7 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	 * @return Continue
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
-		var time = new DateTime.now_local();
+		var time = new DateTime.now(Main.timezone);
 		
 		// words - smooth fading
 		if(time.get_minute() % 5 == 4 && 60.0 - time.get_seconds() < this.fade_secs) {
@@ -77,7 +77,7 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	}
 	
 	public bool render_dots( Color[] leds_dots ) {
-		var time = new DateTime.now_local();
+		var time = new DateTime.now(Main.timezone);
 		
 		// smooth fading
 		uint8 fade;

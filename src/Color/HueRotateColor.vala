@@ -13,7 +13,7 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 			// ignore timeout if no other reference is held anymore
 			if(this.ref_count == 1) return GLib.Source.REMOVE;
 			
-			this.hue_by_time( new DateTime.now_local() );
+			this.hue_by_time( new DateTime.now(Main.timezone) );
 			return GLib.Source.CONTINUE;
 		});
 	}
@@ -41,6 +41,6 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
 		Jsonable.default_from_json( this, node, path );
-		this.hue_by_time( new DateTime.now_local() );
+		this.hue_by_time( new DateTime.now(Main.timezone) );
 	}
 }

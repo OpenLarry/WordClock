@@ -16,7 +16,7 @@ public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderabl
 	}
 	
 	public bool render_backlight( Color[] leds_backlight ) {
-		var time = new DateTime.now_local();
+		var time = new DateTime.now(Main.timezone);
 		
 		double seconds = time.get_hour() * 3600 + time.get_minute() * 60 + time.get_seconds();
 		double position = Math.fmod( seconds, this.rotate_time ) * leds_backlight.length / this.rotate_time;

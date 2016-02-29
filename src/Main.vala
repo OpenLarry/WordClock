@@ -6,6 +6,8 @@ using SDLImage;
  * @version 1.0
  */
 public class WordClock.Main : GLib.Object {
+	public static TimeZone timezone;
+	
 	public static HardwareInfo hwinfo;
 	public static Settings settings;
 	public static MessageOverlay message;
@@ -23,6 +25,9 @@ public class WordClock.Main : GLib.Object {
 		
 		Intl.setlocale( LocaleCategory.ALL, "" );
 		Intl.setlocale( LocaleCategory.NUMERIC, "C" );
+		
+		// cache timezone
+		timezone = new TimeZone.local();
 		
 		// Register Types: http://valadoc.org/#!api=gobject-2.0/GLib.Type.from_name
 		Type? type = typeof(Color);
