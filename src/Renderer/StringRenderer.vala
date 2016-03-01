@@ -7,8 +7,8 @@ using WordClock;
 public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
 	public Color left_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public Color right_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
-	public uint8 speed { get; set; default = 10; }
-	public uint8 add_spacing { get; set; default = 0; }
+	public uint8 speed { get; set; default = 15; }
+	public uint8 add_spacing { get; set; default = 1; }
 	
 	public string font_name {
 		owned get {
