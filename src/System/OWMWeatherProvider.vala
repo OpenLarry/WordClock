@@ -6,11 +6,11 @@ using WordClock;
  */
 public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	const string OWM_API = "http://api.openweathermap.org/data/2.5/weather";
-	const string OWM_APPID = "44db6a862fba0b067b1930da0d769e98";
 	
 	const uint RETRY_COUNT = 10;
 	const uint RETRY_INTERVAL = 60;
 	
+	public string appid { get; set; default = "0123456789abcdef0123456789abcdef"; }
 	public string language { get; set; default = "de"; }
 	
 	public LocationProvider location {
@@ -105,7 +105,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		query.insert("lon",location.lng.to_string());
 		query.insert("units","metric");
 		query.insert("lang","de");
-		query.insert("appid",OWM_APPID);
+		query.insert("appid",this.appid);
 		
 		uri.set_query_from_form( query );
 		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
