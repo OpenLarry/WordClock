@@ -10,7 +10,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 	private Socket sock;
 	private SocketSource source;
 	
-	public NetworkColor() {
+	construct {
 		this.socket_connect();
 	}
 	
@@ -25,6 +25,8 @@ public class WordClock.NetworkColor : Color, Jsonable {
 			
 			this.source = sock.create_source(IOCondition.IN);
 			this.source.set_callback( (s, cond) => {
+				if(this.ref_count == 1) return GLib.Source.REMOVE;
+				
 				try {
 					uint8 rgb[3];
 					size_t read = s.receive(rgb);
@@ -37,7 +39,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 					stderr.printf (e.message);
 				}
 				
-				return true;
+				return GLib.Source.CONTINUE;
 			});
 			
 			
