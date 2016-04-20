@@ -6,9 +6,6 @@ using WordClock;
  */
 public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 	const string INTERFACE = "wlan0";
-	const string IWCONFIG = "iwconfig %s";
-	const string HOSTNAME = "hostname";
-	const string KERNEL = "uname -sr";
 	
 	public void action () {
 		string output, ip = "none", wlan = "none", hostname = "none", kernel = "unknown";
@@ -32,9 +29,13 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 			}
 		}
 		
-		
+		/* NOTE
+		 * For some reason SpawnFlags MUST NOT contain SEARCH_PATH and MUST contain LEAVE_DESCRIPTORS_OPEN
+		 * If not, glib functions g_malloc() and opendir() hang randomly with buildroot and the child process does not terminate. Don't know.
+		 * For this reason Process.spawn_command_line_sync can not be used!
+		 */
 		try{
-			Process.spawn_command_line_sync(IWCONFIG, out output);
+			Process.spawn_sync("/sbin", {"iwconfig", INTERFACE}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 			
 			Regex regex = /ESSID:"(.*?)"/;
 			MatchInfo match_info;
@@ -46,7 +47,7 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 		}
 		
 		try{
-			Process.spawn_command_line_sync(HOSTNAME, out output);
+			Process.spawn_sync("/bin", {"hostname"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 			
 			hostname = output;
 		}catch(Error e) {
@@ -54,7 +55,7 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 		}
 		
 		try{
-			Process.spawn_command_line_sync(KERNEL, out output);
+			Process.spawn_sync("/bin", {"uname","-sr"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 			
 			kernel = output;
 		}catch(Error e) {

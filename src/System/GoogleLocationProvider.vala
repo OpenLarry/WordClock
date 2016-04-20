@@ -5,7 +5,6 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
-	const string IWLIST = "nice -10 iwlist wlan0 scan";
 	const string GOOGLE_LOCATION_API = "https://maps.googleapis.com/maps/api/browserlocation/json";
 	
 	const uint RETRY_COUNT = 10;
@@ -86,7 +85,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		
 		string output;
 		try{
-			Process.spawn_command_line_sync(IWLIST, out output);
+			Process.spawn_sync("/bin", {"nice","-10","iwlist","wlan0","scan"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 			
 			Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
 			MatchInfo match_weather;

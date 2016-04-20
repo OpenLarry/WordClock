@@ -5,11 +5,6 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
-	const string WPA_WPS_PBC = "wpa_cli wps_pbc";
-	const string WPA_WPS_CANCEL = "wpa_cli wps_cancel";
-	const string WPA_STATUS = "wpa_cli status";
-	const string NTP_RESTART = "systemctl restart ntp";
-	
 	private static Cancellable cancellable = null;
 	private static Thread<int> thread;
 	
@@ -34,12 +29,12 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	private static int run_wps() {
 		Main.message.info("WPS",-1);
 		try{
-			Process.spawn_command_line_sync(WPA_WPS_PBC);
+			Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_pbc"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
 			
 			string output="";
 			do {
 				Buzzer.beep(100,2000,25);
-				Process.spawn_command_line_sync(WPA_STATUS, out output);
+				Process.spawn_sync("/usr/sbin", {"wpa_cli","status"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 				stdout.printf("WPS: %s\n", output);
 				Thread.usleep(1000000);
 			} while(!cancellable.is_cancelled() && (output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED") || output.contains("wpa_state=INTERFACE_DISABLED")));
@@ -47,7 +42,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 			Main.message.stop();
 			
 			if(cancellable.is_cancelled()) {
-				Process.spawn_command_line_sync(WPA_WPS_CANCEL);
+				Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_cancel"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 				
 				Main.message.info("Cancelled!");
 			}else if(output.contains("wpa_state=COMPLETED")) {
@@ -64,8 +59,6 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				Thread.usleep(200000);
 				Buzzer.beep(200,1000,25);
 			}
-			
-			Process.spawn_command_line_sync(NTP_RESTART);
 		}catch(Error e) {
 			stderr.printf("%s\n",e.message);
 		}

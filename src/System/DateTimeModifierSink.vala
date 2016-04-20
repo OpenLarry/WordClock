@@ -16,7 +16,9 @@ public class WordClock.DateTimeModifierSink : GLib.Object, Jsonable, SignalSink 
 	
 	public void action () {
 		try{
-			Process.spawn_command_line_sync(DATE_CMD.printf( new DateTime.now(Main.timezone).add_full(this.years,this.months,this.days,this.hours,this.minutes,this.seconds).format("%T") ));
+			string date = new DateTime.now(Main.timezone).add_full(this.years,this.months,this.days,this.hours,this.minutes,this.seconds).format("%T");
+			
+			Process.spawn_sync("/bin", {"date","+%T","-s",date}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
 		}catch(Error e) {
 			stderr.printf("%s\n",e.message);
 		}
