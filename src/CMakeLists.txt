@@ -135,7 +135,7 @@ PACKAGES
 	linux
 OPTIONS 
 	--thread
-	--target-glib 2.42
+	--target-glib 2.46
 	# --debug
 # GENERATE_HEADER
 	# wordclock
