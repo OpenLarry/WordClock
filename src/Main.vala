@@ -57,6 +57,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(ScalaRenderer);
 		type = typeof(ImageRenderer);
 		type = typeof(OWMWeatherRenderer);
+		type = typeof(Tpm2NetRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);

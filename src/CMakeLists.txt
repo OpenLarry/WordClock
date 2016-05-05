@@ -89,6 +89,7 @@ set(VALA_SRC
 	Renderer/ScalaRenderer.vala
 	Renderer/ImageRenderer.vala
 	Renderer/OWMWeatherRenderer.vala
+	Renderer/Tpm2NetRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
