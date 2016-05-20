@@ -81,7 +81,13 @@ public class WordClock.RestServer : Soup.Server {
 					case "PUT":
 						try{
 							Main.settings.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ), path.substring(9) );
-							Main.settings.deferred_save();
+							
+							// save immediately if complete configuration is updated
+							if(path.substring(9) == "") {
+								Main.settings.save();
+							}else{
+								Main.settings.deferred_save();
+							}
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);
