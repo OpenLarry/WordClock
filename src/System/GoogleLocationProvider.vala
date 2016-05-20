@@ -1,3 +1,4 @@
+
 using WordClock;
 
 /**
@@ -76,7 +77,10 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	}
 	
 	public void refresh() throws Error {
-		Soup.Session ses = new Soup.SessionSync();
+		Soup.Session ses = new Soup.Session();
+		ses.proxy_resolver = null;
+		ses.ssl_strict = false;
+		ses.tls_database = null;
 		Soup.URI uri = new Soup.URI(GOOGLE_LOCATION_API);
 		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
 		

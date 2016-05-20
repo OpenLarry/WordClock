@@ -44,42 +44,37 @@ namespace Lirc {
 
 	public class Listener : Object
 	{
-		private SocketClient listener_socket;
+		private Socket socket;
 		private Context con;
-		private SocketConnection connection;
 		
 		public Listener(Context con, MainContext? loop_context = null) throws Error
 		{
 			
 			this.con = con;
-			this.listener_socket = new SocketClient ();
-			this.listener_socket.family = SocketFamily.UNIX;
+			this.socket = new Socket(SocketFamily.UNIX, SocketType.STREAM, SocketProtocol.DEFAULT);
+			this.socket.connect( this.con.socket_address );
 			
-			this.connection = this.listener_socket.connect (this.con.socket_address) ;
 			if (loop_context != null)
 			{
-				var socket_source_in = this.connection.socket.create_source (IOCondition.IN);
+				// segmentation fault without casting! bug in glib?
+				var socket_source_in = (SocketSource) this.socket.create_source (IOCondition.IN);
 				socket_source_in.set_callback (this.listener_callback);
 				socket_source_in.attach(loop_context);
-				
-				var socket_source_die = this.connection.socket.create_source (IOCondition.ERR + IOCondition.HUP);
-				socket_source_die.set_callback (this.listener_dies);
-				socket_source_die.attach(loop_context);			
 			}
 				
 		}
-		private bool listener_callback (Socket listener, IOCondition event) 
+		private bool listener_callback() 
 		{
-			if (event == IOCondition.IN && !this.connection.is_closed())
+			if (!this.socket.is_closed())
 			{
 				var buffer = new uint8[2048]; //I can't imagine that anything would be longer than this.
 				try
 				{
-					this.connection.input_stream.read(buffer);
+					this.socket.receive(buffer);
 				}
-				catch (IOError err)
+				catch (Error err)
 				{
-					return listener_dies (listener, event);
+					return listener_dies();
 				}
 				if (this.con.verbose)
 				{
@@ -100,13 +95,13 @@ namespace Lirc {
 				string device_conf          = (string) device_conf_buffer;
 				this.button (device_conf, interpreted_key_code, repetition_number);
 			}
-			else if (event == IOCondition.IN) 
+			else
 			{
-				return listener_dies (listener, event);
+				return listener_dies();
 			}
 			return true;
 		}
-		private bool listener_dies (Socket listener, IOCondition event)
+		private bool listener_dies ()
 		{
 			if (this.con.verbose)
 			{
@@ -121,7 +116,7 @@ namespace Lirc {
 		{
 			try
 			{
-				this.connection.socket.close();
+				this.socket.close();
 			}
 			catch (Error e)
 			{	//do nothing.

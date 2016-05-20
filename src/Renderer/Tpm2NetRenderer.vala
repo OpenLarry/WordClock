@@ -24,13 +24,14 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 			this.sock = new Socket(SocketFamily.IPV4, SocketType.DATAGRAM, SocketProtocol.UDP);
 			this.sock.bind(new InetSocketAddress.from_string("0.0.0.0", this.port), true);
 			
-			this.source = sock.create_source(IOCondition.IN);
-			this.source.set_callback( (s, cond) => {
+			// segmentation fault without casting! bug in glib?
+			this.source = (SocketSource) sock.create_source(IOCondition.IN);
+			this.source.set_callback( () => {
 				if(this.ref_count == 1) return GLib.Source.REMOVE;
 				
 				try {
 					uint8 rgb[518];
-					size_t read = s.receive(rgb);
+					this.sock.receive(rgb);
 					
 					if(rgb[0] == 0x9C && rgb[1] == 0xDA) {
 						lock(this.dataframe) {

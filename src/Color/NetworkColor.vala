@@ -23,13 +23,14 @@ public class WordClock.NetworkColor : Color, Jsonable {
 			this.sock = new Socket(SocketFamily.IPV4, SocketType.DATAGRAM, SocketProtocol.UDP);
 			this.sock.bind(new InetSocketAddress.from_string("0.0.0.0", this.port), true);
 			
-			this.source = sock.create_source(IOCondition.IN);
-			this.source.set_callback( (s, cond) => {
+			// segmentation fault without casting! bug in glib?
+			this.source = (SocketSource) sock.create_source(IOCondition.IN);
+			this.source.set_callback( () => {
 				if(this.ref_count == 1) return GLib.Source.REMOVE;
 				
 				try {
-					uint8 rgb[3];
-					size_t read = s.receive(rgb);
+					uint8 rgb[3] = {0};
+					ssize_t read = this.sock.receive(rgb);
 					
 					if(read == 3) {
 						//stdout.printf("Received color: %u,%u,%u\n", rgb[0],rgb[1],rgb[2]);

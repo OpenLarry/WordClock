@@ -9,7 +9,7 @@ include(FindVala)
 include(ValaPrecompile)
 include(GetGitRevisionDescription)
 
-find_package(Vala "0.30" REQUIRED)
+find_package(Vala "0.32" REQUIRED)
 
 git_describe(GIT_DESCRIBE)
 
