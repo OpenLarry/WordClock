@@ -76,6 +76,10 @@ public class WordClock.Main : GLib.Object {
 		
 		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		
+		// display version only
+		if(args.length == 2 && args[1] == "-v") {
+			return 0;
+		}
 		
 		cancellable = new Cancellable();
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
