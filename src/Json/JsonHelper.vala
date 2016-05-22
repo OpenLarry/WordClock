@@ -112,6 +112,9 @@ namespace WordClock.JsonHelper {
 			if(ser != null && path == "" && node.get_node_type() == Json.NodeType.OBJECT && node.get_object().has_member("-type") && ser.get_class().get_type().name() != node.get_object().get_string_member("-type") ) {
 				ser = null;
 			}
+			if(ser != null && path == "" && node.get_node_type() == Json.NodeType.OBJECT && !node.get_object().has_member("-type") && ser.get_class().get_type().name() != val.type().name() ) {
+				ser = null;
+			}
 			
 			if(ser == null) {
 				Type type;
