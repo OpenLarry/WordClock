@@ -10,8 +10,6 @@ public class WordClock.Main : GLib.Object {
 	
 	public static HardwareInfo hwinfo;
 	public static Settings settings;
-	public static MessageOverlay message;
-	public static OWMWeatherProvider weather;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -130,9 +128,9 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
 		signalrouter.add_source("timeobserver", timeobserver);
 		
-		message = new MessageOverlay( renderer );
+		MessageOverlay message = new MessageOverlay( renderer );
 		
-		weather = new OWMWeatherProvider();
+		OWMWeatherProvider weather = new OWMWeatherProvider();
 		
 		Lua lua = new Lua();
 		

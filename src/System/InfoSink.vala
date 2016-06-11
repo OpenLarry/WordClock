@@ -62,6 +62,6 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 			stderr.printf("%s\n",e.message);
 		}
 		
-		Main.message.info(@"WordClock $(Version.GIT_DESCRIBE)  IP: $ip  Host: $hostname  WLAN: $wlan  Kernel: $kernel");
+		(Main.settings.objects["message"] as MessageOverlay).info(@"WordClock $(Version.GIT_DESCRIBE)  IP: $ip  Host: $hostname  WLAN: $wlan  Kernel: $kernel");
 	}
 }

@@ -27,7 +27,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	}
 	
 	private static int run_wps() {
-		Main.message.info("WPS",-1);
+		(Main.settings.objects["message"] as MessageOverlay).info("WPS",-1);
 		try{
 			Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_pbc"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
 			
@@ -39,21 +39,21 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				Thread.usleep(1000000);
 			} while(!cancellable.is_cancelled() && (output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED") || output.contains("wpa_state=INTERFACE_DISABLED")));
 			
-			Main.message.stop();
+			(Main.settings.objects["message"] as MessageOverlay).stop();
 			
 			if(cancellable.is_cancelled()) {
 				Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_cancel"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 				
-				Main.message.info("Cancelled!");
+				(Main.settings.objects["message"] as MessageOverlay).info("Cancelled!");
 			}else if(output.contains("wpa_state=COMPLETED")) {
 				cancellable.cancel();
-				Main.message.success("Completed!");
+				(Main.settings.objects["message"] as MessageOverlay).success("Completed!");
 				
 				Buzzer.beep(100,3000,25);
 				Buzzer.beep(400,4000,25);
 			}else{
 				cancellable.cancel();
-				Main.message.error("Error!");
+				(Main.settings.objects["message"] as MessageOverlay).error("Error!");
 				
 				Buzzer.beep(200,1000,25);
 				Thread.usleep(200000);
