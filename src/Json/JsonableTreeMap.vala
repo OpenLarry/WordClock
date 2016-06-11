@@ -11,6 +11,12 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 		if(!this.value_type.is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
 	}
 	
+	private string[] immutable_keys = {};
+	
+	public void set_keys_immutable() {
+		this.immutable_keys = this.keys.to_array();
+	}
+	
 	public Json.Node to_json( string path = "" ) throws JsonError {
 		if(!this.value_type.is_a(typeof(Jsonable))) throw new JsonError.INVALID_VALUE_TYPE("Value does not implement interface Jsonable!");
 		
@@ -49,10 +55,16 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 				this.unset(property);
 			}else{
 				Value val = Value( this.value_type );
+				
+				string type_before = "";
 				if(this.has_key(property)) {
 					val.take_object( (Jsonable) this.get(property) );
+					type_before = val.get_object().get_class().get_type().name();
 				}
 				JsonHelper.value_from_json( node, ref val, subpath );
+				string type_after = val.get_object().get_class().get_type().name();
+				if(property in this.immutable_keys && type_after != type_before) throw new JsonError.IMMUTABLE_KEY("Can't change object type! Key %s is immutable!".printf(property));
+				
 				this.set(property, val.dup_object());
 			}
 		}else{
@@ -65,10 +77,16 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 					this.unset(name);
 				}else{
 					Value val = Value( this.value_type );
+					
+					string type_before = "";
 					if(this.has_key(name)) {
 						val.take_object( (Jsonable) this.get(name) );
+						type_before = val.get_object().get_class().get_type().name();
 					}
 					JsonHelper.value_from_json( member, ref val );
+					string type_after = val.get_object().get_class().get_type().name();
+					if(name in this.immutable_keys && type_after != type_before) throw new JsonError.IMMUTABLE_KEY("Can't change object type! Key %s is immutable!".printf(name));
+					
 					this.set(name, val.dup_object());
 				}
 			}
@@ -76,7 +94,9 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 			// Remove elements
 			string[] keys = {};
 			foreach(string key in this.keys) {
-				if(!node.get_object().has_member(key)) keys += key;
+				if(!node.get_object().has_member(key) && !(key in this.immutable_keys)) {
+					keys += key;
+				}
 			}
 			foreach(string key in keys) {
 				this.unset(key);

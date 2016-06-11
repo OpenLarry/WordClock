@@ -144,6 +144,7 @@ public class WordClock.Main : GLib.Object {
 		settings.objects["timeobserver"] = timeobserver;
 		settings.objects["weather"] = weather;
 		settings.objects["lua"] = lua;
+		settings.objects.set_keys_immutable();
 		
 		try{
 			// Process button interrupts
