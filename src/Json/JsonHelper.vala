@@ -74,7 +74,7 @@ namespace WordClock.JsonHelper {
 			if(val.holds(typeof(bool))) {
 				node.set_boolean( val.get_boolean() );
 			}else if(val.holds(typeof(char))) {
-				node.set_int( val.get_char() );
+				node.set_int( val.get_schar() );
 			}else if(val.holds(typeof(uchar))) {
 				node.set_int( val.get_uchar() );
 			}else if(val.holds(typeof(int))) {
@@ -148,7 +148,7 @@ namespace WordClock.JsonHelper {
 			if(val.holds(typeof(bool))) {
 				val.set_boolean( node.get_boolean() );
 			}else if(val.holds(typeof(char))) {
-				val.set_char( (char) node.get_int() );
+				val.set_schar( (int8) node.get_int() );
 			}else if(val.holds(typeof(uchar))) {
 				val.set_uchar( (uchar) node.get_int() );
 			}else if(val.holds(typeof(int))) {

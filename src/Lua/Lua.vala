@@ -108,7 +108,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 			if(val.holds(typeof(bool))) {
 				this.vm.push_boolean( val.get_boolean() ? 1 : 0 );
 			}else if(val.holds(typeof(char))) {
-				this.vm.push_integer( val.get_char() );
+				this.vm.push_integer( val.get_schar() );
 			}else if(val.holds(typeof(uchar))) {
 				this.vm.push_integer( val.get_uchar() );
 			}else if(val.holds(typeof(int))) {
