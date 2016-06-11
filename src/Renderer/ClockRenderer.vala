@@ -81,47 +81,57 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	}
 	
 	public void render( Color[,] leds ) {
-		lock(overwrite_matrix) {
-			ClockConfiguration config = this.configurations[this.active];
-			if(config == null) return;
-			
-			bool ret = true;
-			
-			if(this.overwrite_matrix != null) {
-				foreach( MatrixRenderer matrix in this.overwrite_matrix ) {
-					if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
-				}
-			}else if(config != null) {
-				foreach( JsonableString name in config.matrix ) {
-					MatrixRenderer matrix = this.renderers[name.to_string()] as MatrixRenderer;
-					if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
-				}
+		ClockConfiguration config = this.configurations[this.active];
+		if(config == null) return;
+		
+		MatrixRenderer[]? overwrite_matrix;
+		DotsRenderer[]? overwrite_dots;
+		BacklightRenderer[]? overwrite_backlight;
+		
+		lock(this.overwrite_matrix) {
+			overwrite_matrix = this.overwrite_matrix;
+			overwrite_dots = this.overwrite_dots;
+			overwrite_backlight = this.overwrite_backlight;
+		}
+		
+		bool ret = true;
+		
+		if(overwrite_matrix != null) {
+			foreach( MatrixRenderer matrix in overwrite_matrix ) {
+				if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
 			}
-			
-			if(this.overwrite_dots != null) {
-				foreach( DotsRenderer dots in this.overwrite_dots ) {
-					if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
-				}
-			}else if(config != null) {
-				foreach( JsonableString name in config.dots ) {
-					DotsRenderer dots = this.renderers[name.to_string()] as DotsRenderer;
-					if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
-				}
+		}else if(config != null) {
+			foreach( JsonableString name in config.matrix ) {
+				MatrixRenderer matrix = this.renderers[name.to_string()] as MatrixRenderer;
+				if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
 			}
-			
-			if(this.overwrite_backlight != null) {
-				foreach( BacklightRenderer backlight in this.overwrite_backlight ) {
-					if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
-				}
-			}else if(config != null) {
-				foreach( JsonableString name in config.backlight ) {
-					BacklightRenderer backlight = this.renderers[name.to_string()] as BacklightRenderer;
-					if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
-				}
+		}
+		
+		if(overwrite_dots != null) {
+			foreach( DotsRenderer dots in overwrite_dots ) {
+				if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
 			}
-			
-			if(!ret) {
-				if(this.overwrite_matrix != null || this.overwrite_dots != null || this.overwrite_backlight != null) {
+		}else if(config != null) {
+			foreach( JsonableString name in config.dots ) {
+				DotsRenderer dots = this.renderers[name.to_string()] as DotsRenderer;
+				if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
+			}
+		}
+		
+		if(overwrite_backlight != null) {
+			foreach( BacklightRenderer backlight in overwrite_backlight ) {
+				if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
+			}
+		}else if(config != null) {
+			foreach( JsonableString name in config.backlight ) {
+				BacklightRenderer backlight = this.renderers[name.to_string()] as BacklightRenderer;
+				if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
+			}
+		}
+		
+		if(!ret) {
+			lock(this.overwrite_matrix) {
+				if(overwrite_matrix != null || overwrite_dots != null || overwrite_backlight != null) {
 					this.overwrite_matrix = null;
 					this.overwrite_dots = null;
 					this.overwrite_backlight = null;

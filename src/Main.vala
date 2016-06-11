@@ -58,6 +58,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(ImageRenderer);
 		type = typeof(OWMWeatherRenderer);
 		type = typeof(Tpm2NetRenderer);
+		type = typeof(LuaRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);
@@ -133,6 +134,8 @@ public class WordClock.Main : GLib.Object {
 		
 		weather = new OWMWeatherProvider();
 		
+		Lua lua = new Lua();
+		
 		settings = new Settings("/etc/wordclock/settings.json");
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
@@ -140,6 +143,7 @@ public class WordClock.Main : GLib.Object {
 		settings.objects["message"] = message;
 		settings.objects["timeobserver"] = timeobserver;
 		settings.objects["weather"] = weather;
+		settings.objects["lua"] = lua;
 		
 		try{
 			// Process button interrupts
@@ -183,6 +187,22 @@ public class WordClock.Main : GLib.Object {
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);
 			return 1;
+		}
+		
+		
+		stdout.puts("Run Lua script...\n");
+		
+		LuaSignals.init(lua, signalrouter);
+		LuaSettings.init(lua, settings);
+		LuaHwinfo.init(lua, hwinfo);
+		LuaMessage.init(lua, message);
+		LuaSink.init(lua);
+		LuaBuzzer.init(lua);
+		LuaRenderer.init(lua);
+		try {
+			lua.run();
+		}catch(LuaError e) {
+			stderr.printf("Lua error: %s\n", e.message);
 		}
 		
 		try{

@@ -6,6 +6,7 @@ pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(GEE REQUIRED gee-0.8)
 pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
 pkg_check_modules(SDL REQUIRED sdl)
+pkg_check_modules(LUAJIT REQUIRED luajit)
 
 set(CFLAGS
 	${GOBJECT_CFLAGS} ${GOBJECT_CFLAGS_OTHER}
@@ -15,6 +16,7 @@ set(CFLAGS
 	${GEE_CFLAGS} ${GEE_OTHER}
 	${JSON_GLIB_CFLAGS} ${JSON_GLIB_OTHER}
 	${SDL_CFLAGS} ${SDL_OTHER}
+	${LUAJIT_CFLAGS} ${LUAJIT_OTHER}
 )
 add_definitions(${CFLAGS})
 
@@ -27,6 +29,7 @@ set(LIBS
 	${JSON_GLIB_LIBRARIES}
 	${SDL_LIBRARIES}
 	SDL_image
+	${LUAJIT_LIBRARIES}
 )
 link_libraries(${LIBS})
 
@@ -38,6 +41,7 @@ set(LIB_PATHS
 	${GEE_LIBRARY_DIRS}
 	${JSON_GLIB_LIBRARY_DIRS}
 	${SDL_LIBRARY_DIRS}
+	${LUAJIT_LIBRARY_DIRS}
 )
 link_directories(${LIB_PATHS})
 
@@ -48,6 +52,13 @@ set(VALA_SRC
 	Main.vala
 	RestServer.vala
 	Settings.vala
+	Lua/Lua.vala
+	Lua/LuaSignals.vala
+	Lua/LuaSettings.vala
+	Lua/LuaMessage.vala
+	Lua/LuaBuzzer.vala
+	Lua/LuaSink.vala
+	Lua/LuaHwinfo.vala
 	Color/Color.vala
 	Color/HueRotateColor.vala
 	Color/BrightnessSensorColor.vala
@@ -90,6 +101,7 @@ set(VALA_SRC
 	Renderer/ImageRenderer.vala
 	Renderer/OWMWeatherRenderer.vala
 	Renderer/Tpm2NetRenderer.vala
+	Renderer/LuaRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
@@ -130,6 +142,7 @@ PACKAGES
 	json-glib-1.0
 	sdl
 	sdl-image
+	lua
 	# poppler-glib
 	# gtk+-2.0
 	posix

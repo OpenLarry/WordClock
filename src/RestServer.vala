@@ -9,6 +9,7 @@ public class WordClock.RestServer : Soup.Server {
 	const uint16 PORT = 8080;
 	
 	private ArrayList<Soup.WebsocketConnection> hwinfo_connections = new ArrayList<Soup.WebsocketConnection>();
+	private ArrayList<Soup.WebsocketConnection> lua_log_connections = new ArrayList<Soup.WebsocketConnection>();
 	
 	/**
 	 * Creates a new HTTP REST server instance with JSON interface
@@ -19,12 +20,13 @@ public class WordClock.RestServer : Soup.Server {
 		this.add_handler("/", request);
 		
 		this.add_websocket_handler("/hwinfo", null, null, this.request_hwinfo);
-		this.connect_hwinfo();
+		this.add_websocket_handler("/lua-log", null, null, this.request_lua_log);
+		this.connect_signals();
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
 	}
 	
-	private void connect_hwinfo() {
+	private void connect_signals() {
 		Main.hwinfo.gpios.foreach( (e) => {
 			e.value.action.connect( () => {
 				this.update_hwinfo("gpios",e.key,e.value);
@@ -39,6 +41,7 @@ public class WordClock.RestServer : Soup.Server {
 			
 			return true;
 		});
+		(Main.settings.objects["lua"] as Lua).message.connect(this.update_lua_log);
 	}
 	
 	private void request_hwinfo( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
@@ -66,6 +69,25 @@ public class WordClock.RestServer : Soup.Server {
 				}
 			} catch ( Error e ) {
 				stderr.printf("Error: %s\n", e.message);
+			}
+		}
+	}
+	
+	private void request_lua_log( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
+		this.lua_log_connections.add(connection);
+		connection.send_text((Main.settings.objects["lua"] as Lua).get_log());
+	}
+	
+	private void update_lua_log(string message) {
+		if(this.lua_log_connections.size > 0) {
+			for(int i=0;i<this.lua_log_connections.size;i++) {
+				var con = this.lua_log_connections[i];
+				if(con.get_state() == Soup.WebsocketState.OPEN) {
+					con.send_text(message+"\n");
+				}else{
+					this.lua_log_connections.remove(con);
+					i--;
+				}
 			}
 		}
 	}
@@ -124,6 +146,37 @@ public class WordClock.RestServer : Soup.Server {
 						}
 						
 						msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path.index_of("/lua") == 0 ) {
+			switch(msg.method) {
+				case "GET":
+					try{
+						string data = (Main.settings.objects["lua"] as Lua).read_script();
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, data.data);
+						
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				case "PUT":
+					try{
+						(Main.settings.objects["lua"] as Lua).write_script((string) msg.request_body.flatten().data);
+						// (Main.settings.objects["lua"] as Lua).reset();
+						(Main.settings.objects["lua"] as Lua).run();
+						
+						
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, "true".data);
 						msg.set_status(200);
 					} catch( Error e ) {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);

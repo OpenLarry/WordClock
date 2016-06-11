@@ -477,6 +477,11 @@
       },
       "-type" : "WordClockClockRenderer"
     },
+    "lua" : {
+      "script" : "/etc/wordclock/script.lua",
+      "log-size" : 50,
+      "-type" : "WordClockLua"
+    },
     "message" : {
       "error-color" : {
         "h" : 0,

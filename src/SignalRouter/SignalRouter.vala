@@ -12,6 +12,25 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 		(a,b) => { return a.to_string() == b.to_string(); }
 	); }
 	
+	
+	public class SignalFuncWrapper {
+		public Regex regex;
+		public unowned SignalFunc f;
+		public bool before;
+		
+		public SignalFuncWrapper(Regex regex, SignalFunc f, bool before) {
+			this.regex = regex;
+			this.f = f;
+			this.before = before;
+		}
+	}
+	
+	public delegate bool SignalFunc( uint id, string signal_name );
+	protected TreeMap<uint,SignalFuncWrapper> signal_funcs = new TreeMap<uint,SignalFuncWrapper>();
+	protected uint signal_funcs_count = 0;
+	
+	
+	
 	public void add_source( string source_name, SignalSource source ) {
 		sources[source_name] = source;
 		source.action.connect( (name) => {
@@ -25,12 +44,34 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 			this.action("signalrouter","userevent");
 		}
 		
-		var sinks = this.sinks[source_name+","+action_name];
-		if(sinks == null) return;
-		
-		
-		foreach(var sink in sinks) {
-			sink.action();
+		string signal_name = source_name+","+action_name;
+		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
+			if(entry.value.before && entry.value.regex.match(signal_name)) {
+				if(!entry.value.f(entry.key, signal_name)) return;
+			}
 		}
+		
+		var sinks = this.sinks[signal_name];
+		if(sinks != null) {
+			foreach(var sink in sinks) {
+				sink.action();
+			}
+		}
+		
+		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
+			if(!entry.value.before && entry.value.regex.match(signal_name)) {
+				if(!entry.value.f(entry.key, signal_name)) return;
+			}
+		}
+	}
+	
+	public uint add_signal_func( Regex regex, SignalFunc func, bool before = false ) {
+		this.signal_funcs[this.signal_funcs_count] = new SignalFuncWrapper(regex,func,before);
+		
+		return this.signal_funcs_count++;
+	}
+	
+	public bool remove_signal_func( uint id ) {
+		return this.signal_funcs.unset(id);
 	}
 }
