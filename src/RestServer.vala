@@ -164,6 +164,9 @@ public class WordClock.RestServer : Soup.Server {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, data.data);
 						
 						msg.set_status(200);
+					} catch( IOError.NOT_FOUND e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, "".data);
+						msg.set_status(204);
 					} catch( Error e ) {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
 						msg.set_status(400);
