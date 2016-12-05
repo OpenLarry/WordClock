@@ -20,6 +20,7 @@ public class WordClock.LuaSignals : GLib.Object {
 			LuaSignals.lua_reffuncs = new TreeMap<uint,int>();
 			lua.register_func("register_signal", register_signal);
 			lua.register_func("unregister_signal", unregister_signal);
+			lua.register_func("fire_signal", fire_signal);
 		});
 		
 		lua.deinit.connect(() => {
@@ -89,6 +90,14 @@ public class WordClock.LuaSignals : GLib.Object {
 		lua.push_value(val);
 		
 		return 1;
+	}
+	
+	private static int fire_signal(LuaVM vm) {
+		string signal_name = vm.to_string(1);
+		
+		signal_router.fire_signal(signal_name);
+		
+		return 0;
 	}
 	
 	private static bool handle_signal(uint id, string signal_name) {
