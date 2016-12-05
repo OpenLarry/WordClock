@@ -96,6 +96,24 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		}
 	}
 	
+	public void call_reffunction( int reffunc, Value[] params = {}, Value[] ret = {} ) throws LuaError {
+		lock(this.vm) {
+			this.vm.raw_geti(PseudoIndex.REGISTRY, reffunc);
+			foreach(Value param in params) this.push_value(param);
+			
+			if(this.vm.pcall(params.length, ret.length) != 0) {
+				Value error = Value(typeof(string));
+				this.pop_value(ref error);
+				this.log_message((string) error);
+				throw new LuaError.CALL_ERROR((string) error);
+			}else{
+				for(uint i=0;i<ret.length;i++) {
+					this.pop_value(ref ret[i]);
+				}
+			}
+		}
+	}
+	
 	public bool push_value( Value val ) {
 		if(val.type().is_object()) {
 			if(val.get_object() == null) {
