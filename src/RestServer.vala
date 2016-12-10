@@ -41,6 +41,13 @@ public class WordClock.RestServer : Soup.Server {
 			
 			return true;
 		});
+		Main.hwinfo.system.foreach( (e) => {
+			e.value.update.connect( () => {
+				this.update_hwinfo("system",e.key,e.value);
+			});
+			
+			return true;
+		});
 		(Main.settings.objects["lua"] as Lua).message.connect(this.update_lua_log);
 	}
 	

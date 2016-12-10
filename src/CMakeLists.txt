@@ -113,6 +113,9 @@ set(VALA_SRC
 	Sensors/Lirc.vala
 	Sensors/IrRemote.vala
 	Sensors/TimeObserver.vala
+	Sensors/SystemSensor.vala
+	Sensors/CpuLoad.vala
+	Sensors/MemoryUsage.vala
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala

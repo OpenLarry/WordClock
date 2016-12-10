@@ -106,6 +106,9 @@ public class WordClock.Main : GLib.Object {
 		hwinfo.gpios["button2"] = new Gpio(23);
 		hwinfo.gpios["motion"] = new Gpio(7);
 		
+		hwinfo.system["cpuload"] = new CpuLoad();
+		hwinfo.system["memoryusage"] = new MemoryUsage();
+		
 		
 		var sensorsobserver = new SensorsObserver(hwinfo);
 		
