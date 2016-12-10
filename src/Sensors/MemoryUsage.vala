@@ -15,6 +15,9 @@ public class WordClock.MemoryUsage : GLib.Object, Jsonable, SystemSensor {
 	
 	public MemoryUsage( uint interval = 5) {
 		GLib.Timeout.add_seconds(interval, () => {
+			// ignore timeout if no other reference is held anymore
+			if(this.ref_count == 1) return GLib.Source.REMOVE;
+			
 			this.read();
 			return GLib.Source.CONTINUE;
 		});

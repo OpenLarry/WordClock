@@ -14,8 +14,11 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 		this.hwinfo = hwinfo;
 		
 		GLib.Timeout.add_seconds(interval, () => {
+			// ignore timeout if no other reference is held anymore
+			if(this.ref_count == 1) return GLib.Source.REMOVE;
+			
 			this.check();
-			return true;
+			return GLib.Source.CONTINUE;
 		});
 	}
 	

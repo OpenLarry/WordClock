@@ -23,6 +23,9 @@ public class WordClock.TimeObserver : GLib.Object, Jsonable, SignalSource {
 		this.t1 = this.t2;
 		uint sleep = (uint) (SLEEP_TIME - (get_time() % SLEEP_TIME));
 		GLib.Timeout.add_seconds( sleep, () => {
+			// ignore timeout if no other reference is held anymore
+			if(this.ref_count == 1) return GLib.Source.REMOVE;
+			
 			this.t2 = get_time();
 			int64 dt = this.t2 - this.t1;
 			

@@ -41,7 +41,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 				}catch( Error e ) {
 					stderr.printf("Error: %s\n", e.message);
 				}
-				return false;
+				return GLib.Source.REMOVE;
 			});
 		}
 	}

@@ -49,6 +49,9 @@ public class WordClock.CpuLoad : GLib.Object, Jsonable, SystemSensor {
 	
 	public CpuLoad( uint interval = 2) {
 		GLib.Timeout.add_seconds(interval, () => {
+			// ignore timeout if no other reference is held anymore
+			if(this.ref_count == 1) return GLib.Source.REMOVE;
+			
 			this.read();
 			return GLib.Source.CONTINUE;
 		});

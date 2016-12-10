@@ -38,6 +38,9 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		if(this.timeout > 0) GLib.Source.remove(this.timeout);
 		if(this.refresh_interval > 0) {
 			this.timeout = GLib.Timeout.add_seconds(this.refresh_interval, () => {
+				// ignore timeout if no other reference is held anymore
+				if(this.ref_count == 1) return GLib.Source.REMOVE;
+				
 				this.threaded_refresh();
 				return GLib.Source.CONTINUE;
 			});
