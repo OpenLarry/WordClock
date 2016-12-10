@@ -147,6 +147,14 @@ public class WordClock.Main : GLib.Object {
 		settings.objects["lua"] = lua;
 		settings.objects.set_keys_immutable();
 		
+		LuaSignals.init(lua, signalrouter);
+		LuaSettings.init(lua, settings);
+		LuaHwinfo.init(lua, hwinfo);
+		LuaMessage.init(lua, message);
+		LuaSink.init(lua);
+		LuaBuzzer.init(lua);
+		LuaRenderer.init(lua);
+		
 		try{
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
@@ -161,9 +169,18 @@ public class WordClock.Main : GLib.Object {
 				message.info("Loading defaults...");
 				stdout.puts("Loading default settings!\n");
 				settings.load("/etc/wordclock/defaults.json");
+				stdout.puts("Settings loaded!\n");
 			}else{
 				try {
 					settings.load();
+					stdout.puts("Settings loaded!\n");
+				
+					stdout.puts("Run Lua script...\n");
+					try {
+						lua.run();
+					}catch(LuaError e) {
+						stderr.printf("Lua error: %s\n", e.message);
+					}
 				} catch ( Error e ) {
 					if( !(e is FileError.NOENT) ) {
 						stderr.printf("Error: %s", e.message);
@@ -182,30 +199,15 @@ public class WordClock.Main : GLib.Object {
 
 					stdout.puts("Loading default settings!\n");
 					settings.load("/etc/wordclock/defaults.json");
+					stdout.puts("Settings loaded!\n");
 				}
 			}
 			
-			stdout.puts("Settings loaded!\n");
 		} catch( Error e ) {
 			stderr.printf("Error: %s\n", e.message);
 			return 1;
 		}
 		
-		
-		stdout.puts("Run Lua script...\n");
-		
-		LuaSignals.init(lua, signalrouter);
-		LuaSettings.init(lua, settings);
-		LuaHwinfo.init(lua, hwinfo);
-		LuaMessage.init(lua, message);
-		LuaSink.init(lua);
-		LuaBuzzer.init(lua);
-		LuaRenderer.init(lua);
-		try {
-			lua.run();
-		}catch(LuaError e) {
-			stderr.printf("Lua error: %s\n", e.message);
-		}
 		
 		try{
 			stdout.puts("Starting REST server...\n");
@@ -239,6 +241,7 @@ public class WordClock.Main : GLib.Object {
 		
 		Buzzer.beep(100,2000,10);
 		Buzzer.beep(400,4000,10);
+		
 		
 		loop.run();
 		
