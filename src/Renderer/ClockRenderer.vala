@@ -16,17 +16,31 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	private MatrixRenderer[]? overwrite_matrix = null;
 	private DotsRenderer[]? overwrite_dots = null;
 	private BacklightRenderer[]? overwrite_backlight = null;
+	private uint overwrite_id = 0;
 	
 	public ClockRenderer( ClockWiring wiring, LedDriver driver ) {
 		this.wiring = wiring;
 		this.driver = driver;
 	}
 	
-	public void set_overwrite( MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight ) {
-		lock(overwrite_matrix) {
+	public uint set_overwrite( MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight ) {
+		lock(this.overwrite_matrix) {
 			this.overwrite_matrix = matrix;
 			this.overwrite_dots = dots;
 			this.overwrite_backlight = backlight;
+			return ++this.overwrite_id;
+		}
+	}
+	
+	public bool reset_overwrite( uint overwrite_id ) {
+		lock(this.overwrite_matrix) {
+			if(overwrite_id != this.overwrite_id) return false;
+			if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) return false;
+			
+			this.overwrite_matrix = null;
+			this.overwrite_dots = null;
+			this.overwrite_backlight = null;
+			return true;
 		}
 	}
 	

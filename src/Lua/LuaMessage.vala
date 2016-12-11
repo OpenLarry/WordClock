@@ -31,14 +31,23 @@ public class WordClock.LuaMessage : GLib.Object {
 			type = MessageType.from_string(message_type);
 		}
 		
-		message_overlay.message(text, type, count);
 		
-		return 0;
+		Value val = Value(typeof(uint));
+		val.set_uint(message_overlay.message(text, type, count));
+		
+		lua.push_value(val);
+		
+		return 1;
 	}
 	
 	private static int stop_message(LuaVM vm) {
-		message_overlay.stop();
+		int id = vm.to_integer(1);
 		
-		return 0;
+		Value val = Value(typeof(bool));
+		val.set_boolean(message_overlay.stop(id));
+		
+		lua.push_value(val);
+		
+		return 1;
 	}
 }

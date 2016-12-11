@@ -15,13 +15,12 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	public string font_name { get; set; default = "WordClockMicrosoftSansSerifFont"; }
 	
 	protected ClockRenderer renderer;
-	protected bool infinite = false;
 	
 	public MessageOverlay( ClockRenderer renderer ) {
 		this.renderer = renderer;
 	}
 	
-	public void message( string str, MessageType type = MessageType.INFO, int count = 1 ) {
+	public uint message( string str, MessageType type = MessageType.INFO, int count = 1 ) {
 		StringRenderer str_renderer = new StringRenderer();
 		str_renderer.string = str;
 		str_renderer.time_format = false;
@@ -29,8 +28,6 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 		str_renderer.speed = this.speed;
 		str_renderer.add_spacing = this.add_spacing;
 		str_renderer.font_name = this.font_name;
-		
-		if(count < 0) this.infinite = true;
 		
 		ColorRenderer background = new ColorRenderer();
 		background.color = this.background_color;
@@ -54,29 +51,27 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 			break;
 		}
 		
-		this.renderer.set_overwrite( { background, str_renderer }, { background }, { background } );
+		return this.renderer.set_overwrite( { background, str_renderer }, { background }, { background } );
 	}
 	
-	public void error( string str, int count = 1 ) {
-		this.message( str, MessageType.ERROR, count );
+	public uint error( string str, int count = 1 ) {
+		return this.message( str, MessageType.ERROR, count );
 	}
 	
-	public void warning( string str, int count = 1 ) {
-		this.message( str, MessageType.WARNING, count );
+	public uint warning( string str, int count = 1 ) {
+		return this.message( str, MessageType.WARNING, count );
 	}
 	
-	public void info( string str, int count = 1 ) {
-		this.message( str, MessageType.INFO, count );
+	public uint info( string str, int count = 1 ) {
+		return this.message( str, MessageType.INFO, count );
 	}
 	
-	public void success( string str, int count = 1 ) {
-		this.message( str, MessageType.SUCCESS, count );
+	public uint success( string str, int count = 1 ) {
+		return this.message( str, MessageType.SUCCESS, count );
 	}
 	
-	public void stop() {
-		if(this.infinite) {
-			this.renderer.set_overwrite( null, null, null );
-		}
+	public bool stop(uint id) {
+		return this.renderer.reset_overwrite(id);
 	}
 }
 
