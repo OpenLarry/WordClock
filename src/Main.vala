@@ -108,6 +108,7 @@ public class WordClock.Main : GLib.Object {
 		
 		hwinfo.system["cpuload"] = new CpuLoad();
 		hwinfo.system["memoryusage"] = new MemoryUsage();
+		hwinfo.system["leddriver"] = driver;
 		
 		
 		var sensorsobserver = new SensorsObserver(hwinfo);

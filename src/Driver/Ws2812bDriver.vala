@@ -4,8 +4,10 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
+public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemSensor {
 	const string DEVICE = "/dev/fb0";
+	
+	public uint current_fps { get; private set; default = 0; }
 	
 	private int fd;
 	private weak uint16 *fb;
@@ -199,6 +201,14 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			
 			if(timer.elapsed() > 1) {
 				stdout.printf("%u fps\n", frame);
+				
+				this.current_fps = frame;
+				// call update function in main thread, need to safe time here!
+				GLib.Timeout.add_seconds(0, () => {
+					this.update();
+					return GLib.Source.REMOVE;
+				});
+				
 				frame = 0;
 				timer.start();
 			}else{
@@ -212,6 +222,13 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver {
 			this.encode_to_fb(bottom);
 			bottom = !bottom;
 		}
+		
+		this.current_fps = 0;
+		// call update function in main thread, need to safe time here!
+		GLib.Timeout.add_seconds(0, () => {
+			this.update();
+			return GLib.Source.REMOVE;
+		});
 		
 		// black screen
 		for(int i=0;i<this.leds.length[0];i++) {
