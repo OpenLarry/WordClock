@@ -29,6 +29,7 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 			}
 		}
 		
+		// get wlan ESSID
 		/* NOTE
 		 * For some reason SpawnFlags MUST NOT contain SEARCH_PATH and MUST contain LEAVE_DESCRIPTORS_OPEN
 		 * If not, glib functions g_malloc() and opendir() hang randomly with buildroot and the child process does not terminate. Don't know.
@@ -46,21 +47,15 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 			stderr.printf("%s\n",e.message);
 		}
 		
-		try{
-			Process.spawn_sync("/bin", {"hostname"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-			
-			hostname = output;
-		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
+		// get hostname
+		char[] str = "                ".to_utf8();
+		if(Posix.gethostname(str) == 0) {
+			hostname = (string) str;
 		}
 		
-		try{
-			Process.spawn_sync("/bin", {"uname","-sr"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-			
-			kernel = output;
-		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
-		}
+		// get kernel version
+		Posix.utsname utsname = Posix.utsname();
+		kernel = @"$(utsname.sysname) $(utsname.release)";
 		
 		(Main.settings.objects["message"] as MessageOverlay).info(@"WordClock $(Version.GIT_DESCRIBE)  IP: $ip  Host: $hostname  WLAN: $wlan  Kernel: $kernel");
 	}
