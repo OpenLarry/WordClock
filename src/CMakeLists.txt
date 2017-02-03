@@ -130,6 +130,7 @@ set(VALA_SRC
 	System/StaticLocationProvider.vala
 	System/OWMWeatherProvider.vala
 	System/OWMWeatherSink.vala
+	System/WirelessNetworks.vala
 	Statistic.vala
 	Version.vala
 )

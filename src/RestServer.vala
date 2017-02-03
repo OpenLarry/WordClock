@@ -11,6 +11,8 @@ public class WordClock.RestServer : Soup.Server {
 	private ArrayList<Soup.WebsocketConnection> hwinfo_connections = new ArrayList<Soup.WebsocketConnection>();
 	private ArrayList<Soup.WebsocketConnection> lua_log_connections = new ArrayList<Soup.WebsocketConnection>();
 	
+	private WirelessNetworks wirelessnetworks = new WirelessNetworks();
+	
 	/**
 	 * Creates a new HTTP REST server instance with JSON interface
 	 * @param port Port number
@@ -188,6 +190,74 @@ public class WordClock.RestServer : Soup.Server {
 						
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, "true".data);
 						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path.index_of("/wirelessnetworks") == 0 ) {
+			switch(msg.method) {
+				case "GET":
+					try{
+						string data = JsonHelper.to_string( wirelessnetworks.get_networks().to_json(path.substring(13) ) );
+						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
+						
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				case "POST":
+					try{
+						WirelessNetwork network = new WirelessNetwork();
+						network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
+						
+						uint id = wirelessnetworks.add_network(network);
+						
+						msg.set_response("application/json", Soup.MemoryUse.COPY, id.to_string().data);
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				case "PUT":
+					try{
+						uint id = 0;
+						if(path.scanf("/wirelessnetworks/%u", out id) == 1) {
+							WirelessNetwork network = new WirelessNetwork();
+							network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
+							
+							wirelessnetworks.edit_network(id, network);
+							
+							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
+							msg.set_status(200);
+						}else{
+							msg.set_response("text/plain", Soup.MemoryUse.COPY, "Missing ID!".data);
+							msg.set_status(400);
+						}
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				case "DELETE":
+					try{
+						uint id = 0;
+						if(path.scanf("/wirelessnetworks/%u", out id) == 1) {
+							wirelessnetworks.remove_network(id);
+							
+							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
+							msg.set_status(200);
+						}else{
+							msg.set_response("text/plain", Soup.MemoryUse.COPY, "Missing ID!".data);
+							msg.set_status(400);
+						}
 					} catch( Error e ) {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
 						msg.set_status(400);
