@@ -240,17 +240,21 @@ public class WordClock.Main : GLib.Object {
 			return driver.start(renderer);
 		});
 		
-		Buzzer.beep(100,2000,10);
-		Buzzer.beep(400,4000,10);
-		
+		// Parameter -s skips beep sound
+		if(args.length <= 1 || args[1] != "-s") {
+			Buzzer.beep(100,2000,10);
+			Buzzer.beep(400,4000,10);
+		}
 		
 		loop.run();
 		
-		
 		stdout.puts("Terminating. Waiting for threads...\n");
 		
-		Buzzer.beep(100,4000,10);
-		Buzzer.beep(100,2000,10);
+		// Parameter -s skips beep sound
+		if(args.length <= 1 || args[1] != "-s") {
+			Buzzer.beep(100,4000,10);
+			Buzzer.beep(100,2000,10);
+		}
 		
 		Lradc.stop();
 		try{
