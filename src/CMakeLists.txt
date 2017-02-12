@@ -153,7 +153,7 @@ PACKAGES
 	linux
 OPTIONS 
 	--thread
-	--target-glib 2.48
+	--target-glib 2.50
 	# --debug
 # GENERATE_HEADER
 	# wordclock
