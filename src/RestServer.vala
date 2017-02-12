@@ -203,7 +203,7 @@ public class WordClock.RestServer : Soup.Server {
 			switch(msg.method) {
 				case "GET":
 					try{
-						string data = JsonHelper.to_string( wirelessnetworks.get_networks().to_json(path.substring(13) ) );
+						string data = JsonHelper.to_string( wirelessnetworks.get_networks().to_json(path.substring(17) ) );
 						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 						
 						msg.set_status(200);
