@@ -123,6 +123,7 @@ set(VALA_SRC
 	System/WpsPbcSink.vala
 	System/DateTimeModifierSink.vala
 	System/MessageOverlay.vala
+	System/SystemInfo.vala
 	System/InfoSink.vala
 	System/MessageSink.vala
 	System/LocationProvider.vala

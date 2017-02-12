@@ -19,7 +19,7 @@ public class WordClock.RestServer : Soup.Server {
 	 * @param control LEDControl object which parses the request
 	 */
 	public RestServer( ) throws GLib.Error {
-		this.add_handler("/", request);
+		this.add_handler("/", this.request);
 		
 		this.add_websocket_handler("/hwinfo", null, null, this.request_hwinfo);
 		this.add_websocket_handler("/lua-log", null, null, this.request_lua_log);
@@ -258,6 +258,23 @@ public class WordClock.RestServer : Soup.Server {
 							msg.set_response("text/plain", Soup.MemoryUse.COPY, "Missing ID!".data);
 							msg.set_status(400);
 						}
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path.index_of("/systeminfo") == 0 ) {
+			switch(msg.method) {
+				case "GET":
+					try{
+						string data = JsonHelper.to_string( new SystemInfo().to_json(path.substring(11) ) );
+						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
+						
+						msg.set_status(200);
 					} catch( Error e ) {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
 						msg.set_status(400);
