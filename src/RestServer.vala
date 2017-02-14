@@ -21,6 +21,8 @@ public class WordClock.RestServer : Soup.Server {
 	public RestServer( ) throws GLib.Error {
 		this.add_handler("/", this.request);
 		
+		this.add_early_handler("/update", this.update);
+		
 		this.add_websocket_handler("/hwinfo", null, null, this.request_hwinfo);
 		this.add_websocket_handler("/lua-log", null, null, this.request_lua_log);
 		this.connect_signals();
@@ -51,6 +53,91 @@ public class WordClock.RestServer : Soup.Server {
 			return true;
 		});
 		(Main.settings.objects["lua"] as Lua).message.connect(this.update_lua_log);
+	}
+	
+	private void update( Soup.Server server, Soup.Message msg, string path, HashTable<string,string>? query, Soup.ClientContext client) {
+		msg.response_headers.append("Access-Control-Allow-Origin", "*");
+		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
+		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+		
+		switch(msg.method ) {
+			case "OPTIONS":
+				msg.set_status(200);
+				return;
+			case "POST":
+				msg.request_body.set_accumulate(false);
+				int64 content_length = msg.request_headers.get_content_length();
+				
+				try{
+					FirmwareUpdate firmware_update = new FirmwareUpdate();
+					
+					ulong body_signal = 0, chunk_signal = 0, finished_signal = 0;
+					int64 size = 0;
+					
+					chunk_signal = msg.got_chunk.connect((chunk) => {
+						try{
+							firmware_update.write_chunk(chunk.get_as_bytes());
+							size += chunk.length;
+						} catch ( Error e ) {
+							// disconnect signals, remove cyclic reference
+							msg.disconnect(chunk_signal);
+							msg.disconnect(body_signal);
+							msg.disconnect(finished_signal);
+							
+							firmware_update.abort();
+							msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+							try {
+								firmware_update.wait_close();
+							} catch ( Error e ) {
+								msg.set_response("text/plain", Soup.MemoryUse.COPY, ("\n"+e.message).data);
+							}
+							msg.set_status(500);
+						}
+					});
+					
+					body_signal = msg.got_body.connect(() => {
+						if(content_length == size) {
+							try{
+								firmware_update.finish();
+							} catch( Error e ) {
+								msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+								msg.set_status(500);
+							}
+							try{
+								firmware_update.wait_close();
+								
+								msg.set_response("text/plain", Soup.MemoryUse.COPY, "success".data);
+								msg.set_status(200);
+							} catch( Error e ) {
+								msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+								msg.set_status(500);
+							}
+						}else{
+							firmware_update.abort();
+							msg.set_response("text/plain", Soup.MemoryUse.COPY, "Data too short!".data);
+							msg.set_status(500);
+						}
+					});
+					
+					finished_signal = msg.finished.connect(() => { 
+						// disconnect signals, remove cyclic reference
+						msg.disconnect(chunk_signal);
+						msg.disconnect(body_signal);
+						msg.disconnect(finished_signal);
+					});
+				} catch( Error e ) {
+					// just close connection and abort file transfer
+					try {
+						client.steal_connection().close();
+					} catch ( Error e ) {
+						stderr.printf("Error: %s\n", e.message);
+					}
+				}
+			break;
+			default:
+				msg.set_status(405);
+			break;
+		}
 	}
 	
 	private void request_hwinfo( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
