@@ -15,7 +15,11 @@ namespace WordClock.JsonHelper {
 		Json.Generator generator = new Json.Generator();
 		generator.pretty = pretty;
 		generator.set_root(obj.to_json());
-		generator.to_file(path);
+		
+		var file = GLib.File.new_for_path( path );
+		var ostream = file.replace(null, true, FileCreateFlags.REPLACE_DESTINATION);
+		var dostream = new GLib.DataOutputStream( ostream );
+		generator.to_stream(dostream);
 	}
 	
 	public static string to_string( Json.Node node, bool pretty = false ) {
