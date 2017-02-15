@@ -2,7 +2,7 @@
   "save-time" : 60,
   "objects" : {
     "clockrenderer" : {
-      "active" : "default-MonoColor",
+      "active" : "default",
       "configurations" : {
         "default" : {
           "matrix" : [
@@ -140,7 +140,7 @@
           "color" : {
             "h" : 40,
             "s" : 50,
-            "v" : 1
+            "v" : 100
           },
           "-type" : "WordClockColorRenderer"
         },
@@ -200,7 +200,7 @@
           "-type" : "WordClockWatchHandRenderer"
         },
         "Image" : {
-          "path" : "weather/09d.png",
+          "path" : "/usr/share/wordclock/weather_markus/09d.png",
           "-type" : "WordClockImageRenderer"
         },
         "NoBlack" : {
@@ -234,7 +234,7 @@
         },
         "Seconds" : {
           "smooth" : true,
-          "width" : 3,
+          "width" : 1,
           "rotate-time" : 60,
           "color" : {
             "min-brightness" : 0,
@@ -263,18 +263,18 @@
         },
         "Seconds-MonoColor" : {
           "smooth" : true,
-          "width" : 3,
+          "width" : 1,
           "rotate-time" : 60,
           "color" : {
             "min-brightness" : 0,
             "max-brightness" : 1850,
             "min-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 70
             },
             "max-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 255
             },
@@ -395,12 +395,12 @@
             "min-brightness" : 0,
             "max-brightness" : 1850,
             "min-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 70
             },
             "max-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 255
             },
@@ -410,12 +410,12 @@
             "min-brightness" : 0,
             "max-brightness" : 1850,
             "min-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 70
             },
             "max-color" : {
-              "h" : 160,
+              "h" : 40,
               "s" : 255,
               "v" : 255
             },
@@ -545,6 +545,14 @@
         "button2,1" : [
           {
             "-type" : "WordClockWpsPbcSink"
+          }
+        ],
+        "motion,1-" : [
+          {
+            "msec" : 300,
+            "freq" : 1500,
+            "volume" : 255,
+            "-type" : "WordClockBuzzer"
           }
         ],
         "remote,B" : [
@@ -783,7 +791,7 @@
             "-type" : "WordClockJsonModifierSink"
           },
           {
-            "text" : "Farbwahl",
+            "text" : "Farbwechsel",
             "count" : 1,
             "message-type" : "INFO",
             "-type" : "WordClockMessageSink"
@@ -983,11 +991,10 @@
               10800,
               3600,
               1200,
-              0
+              1
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay",
-              "/objects/signalrouter/sinks/signalrouter,userevent/2/delay"
+              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay"
             ],
             "cyclic" : false,
             "synchronize" : true,
@@ -1010,7 +1017,7 @@
             "-type" : "WordClockJsonModifierSink"
           },
           {
-            "text" : "20min",
+            "text" : "3h",
             "count" : 1,
             "message-type" : "INFO",
             "-type" : "WordClockMessageSink"
@@ -1019,15 +1026,14 @@
         "remote,ON" : [
           {
             "settings" : [
-              0,
+              1,
               1200,
               3600,
               10800,
               88888888
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay",
-              "/objects/signalrouter/sinks/signalrouter,userevent/2/delay"
+              "/objects/signalrouter/sinks/signalrouter,userevent/1/delay"
             ],
             "cyclic" : false,
             "synchronize" : true,
@@ -1050,7 +1056,7 @@
             "-type" : "WordClockJsonModifierSink"
           },
           {
-            "text" : "20min",
+            "text" : "3h",
             "count" : 1,
             "message-type" : "INFO",
             "-type" : "WordClockMessageSink"
@@ -1326,7 +1332,7 @@
         "signalrouter,userevent" : [
           {
             "settings" : [
-              "default-MonoColor"
+              "default"
             ],
             "paths" : [
               "/objects/clockrenderer/active"
@@ -1336,7 +1342,7 @@
             "-type" : "WordClockJsonModifierSink"
           },
           {
-            "delay" : 1200,
+            "delay" : 10800,
             "sink" : {
               "settings" : [
                 "off"
@@ -1349,25 +1355,22 @@
               "-type" : "WordClockJsonModifierSink"
             },
             "-type" : "WordClockSignalDelayerSink"
-          },
-          {
-            "delay" : 1200,
-            "sink" : {
-              "settings" : [
-                1
-              ],
-              "paths" : [
-                "/objects/clockrenderer/renderers/Background/color/v",
-                "/objects/clockrenderer/renderers/Seconds/width"
-              ],
-              "cyclic" : true,
-              "synchronize" : true,
-              "-type" : "WordClockJsonModifierSink"
-            },
-            "-type" : "WordClockSignalDelayerSink"
           }
         ],
-        "timeobserver,OFF0000" : [
+        "timeobserver,OFF0000-" : [
+          {
+            "settings" : [
+              50
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color/v"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
+        ],
+        "timeobserver,OFF0100-" : [
           {
             "settings" : [
               "off"
@@ -1392,7 +1395,7 @@
             "-type" : "WordClockMessageSink"
           }
         ],
-        "timeobserver,ON0700" : [
+        "timeobserver,ON0700-" : [
           {
             "settings" : [
               "default-MonoColor"
@@ -1416,6 +1419,19 @@
             "message-type" : "INFO",
             "-type" : "WordClockMessageSink"
           }
+        ],
+        "timeobserver,ON2000-" : [
+          {
+            "settings" : [
+              200
+            ],
+            "paths" : [
+              "/objects/clockrenderer/renderers/Background/color/v"
+            ],
+            "cyclic" : false,
+            "synchronize" : true,
+            "-type" : "WordClockJsonModifierSink"
+          }
         ]
       },
       "userevent-sources" : [
@@ -1436,16 +1452,29 @@
             "start" : 0
           }
         ],
+        "OFF0100" : [
+          {
+            "interval" : 1440,
+            "start" : 60
+          }
+        ],
         "ON0700" : [
           {
             "interval" : 1440,
             "start" : 420
+          }
+        ],
+        "ON2000" : [
+          {
+            "interval" : 1440,
+            "start" : 1200
           }
         ]
       },
       "-type" : "WordClockTimeObserver"
     },
     "weather" : {
+      "appid" : "bcbc80cb4c5b17e26c9ccc1e011cd1b9",
       "language" : "de",
       "location" : {
         "refresh-interval" : 86400,
