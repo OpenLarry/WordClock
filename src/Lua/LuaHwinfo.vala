@@ -32,7 +32,7 @@ public class WordClock.LuaHwinfo : GLib.Object {
 			lua.log_message("Error: "+e.message);
 			
 			val = Value(typeof(bool));
-			val.set_boolean(true);
+			val.set_boolean(false);
 		}
 		
 		lua.push_value(val);
