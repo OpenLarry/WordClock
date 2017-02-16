@@ -75,6 +75,10 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		return { this.h, this.s, this.v };
 	}
 	
+	public uint8[] get_rgb( ) {
+		return { this.r_no_gamma, this.g_no_gamma, this.b_no_gamma };
+	}
+	
 	/**
 	 * Convert rgb to hsv values
 	 * http://stackoverflow.com/a/14733008
