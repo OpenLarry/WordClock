@@ -7,42 +7,57 @@ using WordClock, Lua;
 public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, BacklightRenderer, DotsRenderer {
 	public static Lua lua;
 	
-	private static Color[,] matrix;
-	private static Color[] backlight;
-	private static Color[] dots;
+	private static Color[,]? matrix = null;
+	private static Color[]? backlight = null;
+	private static Color[]? dots = null;
 	
 	public string matrix_function { get; set; default = ""; }
 	public string backlight_function { get; set; default = ""; }
 	public string dots_function { get; set; default = ""; }
 	
+	public enum RendererType {
+		MATRIX,
+		BACKLIGHT,
+		DOTS
+	}
+	public enum ColorModel {
+		RGB,
+		HSV
+	}
+	public enum Operation {
+		SET,
+		GET
+	}
+	
 	public static void init( Lua lua ) {
 		LuaRenderer.lua = lua;
 		
 		lua.init.connect(() => {
-			lua.register_func("set_matrix_led_rgb", set_matrix_led_rgb);
-			lua.register_func("set_backlight_led_rgb", set_backlight_led_rgb);
-			lua.register_func("set_dots_led_rgb", set_dots_led_rgb);
-			lua.register_func("set_matrix_led_hsv", set_matrix_led_hsv);
-			lua.register_func("set_backlight_led_hsv", set_backlight_led_hsv);
-			lua.register_func("set_dots_led_hsv", set_dots_led_hsv);
+			lua.register_func("set_matrix_led_rgb", (v) => {return led_operation(v,RendererType.MATRIX,ColorModel.RGB,Operation.SET);});
+			lua.register_func("set_backlight_led_rgb", (v) => {return led_operation(v,RendererType.BACKLIGHT,ColorModel.RGB,Operation.SET);});
+			lua.register_func("set_dots_led_rgb", (v) => {return led_operation(v,RendererType.DOTS,ColorModel.RGB,Operation.SET);});
+			lua.register_func("set_matrix_led_hsv", (v) => {return led_operation(v,RendererType.MATRIX,ColorModel.HSV,Operation.SET);});
+			lua.register_func("set_backlight_led_hsv", (v) => {return led_operation(v,RendererType.BACKLIGHT,ColorModel.HSV,Operation.SET);});
+			lua.register_func("set_dots_led_hsv", (v) => {return led_operation(v,RendererType.DOTS,ColorModel.HSV,Operation.SET);});
 			
-			lua.register_func("get_matrix_led_rgb", get_matrix_led_rgb);
-			lua.register_func("get_backlight_led_rgb", get_backlight_led_rgb);
-			lua.register_func("get_dots_led_rgb", get_dots_led_rgb);
-			lua.register_func("get_matrix_led_hsv", get_matrix_led_hsv);
-			lua.register_func("get_backlight_led_hsv", get_backlight_led_hsv);
-			lua.register_func("get_dots_led_hsv", get_dots_led_hsv);
+			lua.register_func("get_matrix_led_rgb", (v) => {return led_operation(v,RendererType.MATRIX,ColorModel.RGB,Operation.GET);});
+			lua.register_func("get_backlight_led_rgb", (v) => {return led_operation(v,RendererType.BACKLIGHT,ColorModel.RGB,Operation.GET);});
+			lua.register_func("get_dots_led_rgb", (v) => {return led_operation(v,RendererType.DOTS,ColorModel.RGB,Operation.GET);});
+			lua.register_func("get_matrix_led_hsv", (v) => {return led_operation(v,RendererType.MATRIX,ColorModel.HSV,Operation.GET);});
+			lua.register_func("get_backlight_led_hsv", (v) => {return led_operation(v,RendererType.BACKLIGHT,ColorModel.HSV,Operation.GET);});
+			lua.register_func("get_dots_led_hsv", (v) => {return led_operation(v,RendererType.DOTS,ColorModel.HSV,Operation.GET);});
 		});
 	}
 	
 	public bool render_matrix( Color[,] matrix ) {
 		LuaRenderer.matrix = matrix;
-		
 		try {
 			lua.call_function(this.matrix_function, { matrix.length[0], matrix.length[1] });
 		} catch( LuaError e ) {
 			stderr.printf("Lua error: %s\n", e.message);
 		}
+		
+		LuaRenderer.matrix = null;
 		
 		return true;
 	}
@@ -54,6 +69,7 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		} catch( LuaError e ) {
 			stderr.printf("Lua error: %s\n", e.message);
 		}
+		LuaRenderer.backlight = null;
 		
 		return true;
 	}
@@ -65,173 +81,103 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		} catch( LuaError e ) {
 			stderr.printf("Lua error: %s\n", e.message);
 		}
+		LuaRenderer.dots = null;
 		
 		return true;
 	}
 	
-	public static int set_matrix_led_rgb( LuaVM vm ) {
-		int x,y,r,g,b,a;
-		pop_color_value(vm, true, out x, out y, out r, out g, out b, out a);
+	public static int led_operation( LuaVM vm, RendererType type, ColorModel model, Operation op ) {
+		int x=0,y=0,rh=0,gs=0,bv=0,a=0;
 		
-		if(a == 255) {
-			matrix[x,y].set_rgb((uint8) r,(uint8) g,(uint8) b);
-		}else{
-			matrix[x,y].mix_with( new Color.from_rgb((uint8) r,(uint8) g,(uint8) b), (uint8) a );
-		}
-		
-		
-		return 0;
-	}
-	
-	public static int set_backlight_led_rgb( LuaVM vm ) {
-		int x,r,g,b,a;
-		pop_color_value(vm, false, out x, null, out r, out g, out b, out a);
-		
-		if(a == 255) {
-			backlight[x].set_rgb((uint8) r,(uint8) g,(uint8) b);
-		}else{
-			backlight[x].mix_with( new Color.from_rgb((uint8) r,(uint8) g,(uint8) b), (uint8) a );
-		}
-		
-		return 0;
-	}
-	
-	public static int set_dots_led_rgb( LuaVM vm ) {
-		int x,r,g,b,a;
-		pop_color_value(vm, false, out x, null, out r, out g, out b, out a);
-		
-		if(a == 255) {
-			dots[x].set_rgb((uint8) r,(uint8) g,(uint8) b);
-		}else{
-			dots[x].mix_with( new Color.from_rgb((uint8) r,(uint8) g,(uint8) b), (uint8) a );
-		}
-		
-		return 0;
-	}
-	
-	public static int set_matrix_led_hsv( LuaVM vm ) {
-		int x,y,h,s,v,a;
-		pop_color_value(vm, true, out x, out y, out h, out s, out v, out a);
-		
-		if(a == 255) {
-			matrix[x,y].set_hsv((uint16) h,(uint8) s,(uint8) v);
-		}else{
-			matrix[x,y].mix_with( new Color.from_hsv((uint16) h,(uint8) s,(uint8) v), (uint8) a );
-		}
-		
-		return 0;
-	}
-	
-	public static int set_backlight_led_hsv( LuaVM vm ) {
-		int x,h,s,v,a;
-		pop_color_value(vm, false, out x, null, out h, out s, out v, out a);
-		
-		if(a == 255) {
-			backlight[x].set_hsv((uint16) h,(uint8) s,(uint8) v);
-		}else{
-			backlight[x].mix_with( new Color.from_hsv((uint16) h,(uint8) s,(uint8) v), (uint8) a );
-		}
-		
-		return 0;
-	}
-	
-	public static int set_dots_led_hsv( LuaVM vm ) {
-		int x,h,s,v,a;
-		pop_color_value(vm, false, out x, null, out h, out s, out v, out a);
-		
-		if(a == 255) {
-			dots[x].set_hsv((uint16) h,(uint8) s,(uint8) v);
-		}else{
-			dots[x].mix_with( new Color.from_hsv((uint16) h,(uint8) s,(uint8) v), (uint8) a );
-		}
-		
-		return 0;
-	}
-	
-	public static int get_matrix_led_rgb( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		int y = vm.to_integer(2);
-		
-		push_rgb_value(matrix[x,y].get_rgb());
-		
-		return 3;
-	}
-	
-	public static int get_backlight_led_rgb( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		
-		push_rgb_value(backlight[x].get_rgb());
-		
-		return 3;
-	}
-	
-	public static int get_dots_led_rgb( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		
-		push_rgb_value(dots[x].get_rgb());
-		
-		return 3;
-	}
-	
-	public static int get_matrix_led_hsv( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		int y = vm.to_integer(2);
-		
-		push_hsv_value(matrix[x,y].get_hsv());
-		
-		return 3;
-	}
-	
-	public static int get_backlight_led_hsv( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		
-		push_hsv_value(backlight[x].get_hsv());
-		
-		return 3;
-	}
-	
-	public static int get_dots_led_hsv( LuaVM vm ) {
-		int x = vm.to_integer(1);
-		
-		push_hsv_value(dots[x].get_hsv());
-		
-		return 3;
-	}
-	
-	private static void pop_color_value( LuaVM vm, bool with_y, out int x, out int y, out int rh, out int gs, out int bv, out int a) {
 		x = vm.to_integer(1);
-		if(with_y) {
+		if(type == RendererType.MATRIX) {
 			y = vm.to_integer(2);
-			rh = vm.to_integer(3);
-			gs = vm.to_integer(4);
-			bv = vm.to_integer(5);
-			a = vm.is_number(6) ? vm.to_integer(6) : 255;
+			if(op == Operation.SET) {
+				rh = vm.to_integer(3);
+				gs = vm.to_integer(4);
+				bv = vm.to_integer(5);
+				a = vm.is_number(6) ? vm.to_integer(6) : 255;
+			}
 		}else{
-			y = -1;
-			rh = vm.to_integer(2);
-			gs = vm.to_integer(3);
-			bv = vm.to_integer(4);
-			a = vm.is_number(5) ? vm.to_integer(5) : 255;
+			if(op == Operation.SET) {
+				rh = vm.to_integer(2);
+				gs = vm.to_integer(3);
+				bv = vm.to_integer(4);
+				a = vm.is_number(5) ? vm.to_integer(5) : 255;
+			}
+		}
+		
+		Color color;
+		switch(type) {
+			case RendererType.MATRIX:
+				if(matrix == null) return fail_null();
+				color = matrix[x,y];
+			break;
+			case RendererType.BACKLIGHT:
+				if(backlight == null) return fail_null();
+				color = backlight[x];
+			break;
+			case RendererType.DOTS:
+				if(dots == null) return fail_null();
+				color = dots[x];
+			break;
+			default: // can not happen, but compiler fails otherwise
+				color = null;
+			break;
+		}
+		
+		if(op == Operation.SET) {
+			switch(model) {
+				case ColorModel.RGB:
+					if(a == 255) {
+						color.set_rgb((uint8) rh,(uint8) gs,(uint8) bv);
+					}else{
+						color.mix_with( new Color.from_rgb((uint8) rh,(uint8) gs,(uint8) bv), (uint8) a );
+					}
+				break;
+				case ColorModel.HSV:
+					if(a == 255) {
+						color.set_hsv((uint16) rh,(uint8) gs,(uint8) bv);
+					}else{
+						color.mix_with( new Color.from_hsv((uint16) rh,(uint8) gs,(uint8) bv), (uint8) a );
+					}
+				break;
+			}
+			
+			return 0;
+		}else{
+			switch(model) {
+				case ColorModel.RGB:
+					uint8[] rgb = color.get_rgb();
+					
+					Value val = Value(typeof(uint));
+					val.set_uint(rgb[0]);
+					lua.push_value(val);
+					val.set_uint(rgb[1]);
+					lua.push_value(val);
+					val.set_uint(rgb[2]);
+					lua.push_value(val);
+				break;
+				case ColorModel.HSV:
+					uint16[] hsv = color.get_hsv();
+					
+					Value val = Value(typeof(uint));
+					val.set_uint(hsv[0]);
+					lua.push_value(val);
+					val.set_uint(hsv[1]);
+					lua.push_value(val);
+					val.set_uint(hsv[2]);
+					lua.push_value(val);
+				break;
+			}
+			
+			return 3;
 		}
 	}
 	
-	private static void push_rgb_value( uint8[] rgb ) {
-		Value val = Value(typeof(uint));
-		val.set_uint(rgb[0]);
-		lua.push_value(val);
-		val.set_uint(rgb[1]);
-		lua.push_value(val);
-		val.set_uint(rgb[2]);
-		lua.push_value(val);
-	}
-	
-	private static void push_hsv_value( uint16[] rgb ) {
-		Value val = Value(typeof(uint));
-		val.set_uint(rgb[0]);
-		lua.push_value(val);
-		val.set_uint(rgb[1]);
-		lua.push_value(val);
-		val.set_uint(rgb[2]);
-		lua.push_value(val);
+	public static int fail_null() {
+		lua.log_message("Illegal led setting/getting outside render function!");
+		stderr.puts("Illegal led setting/getting outside render function!\n");
+		return 0;
 	}
 }
