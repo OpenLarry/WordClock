@@ -188,27 +188,30 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		bool bottom = true;
 		int arg = 0;
 		
-		uint frame = 0;
+		
 		var timer = new GLib.Timer();
+		uint last_print = 0;
+		uint last_frame = 0;
 		timer.start();
 		
 		while(this.cancellable == null || !this.cancellable.is_cancelled()) {
 			renderer.render( this.leds );
 			
-			if(timer.elapsed() > 1) {
-				stdout.printf("%u fps\n", frame);
+			this.frame++;
+			
+			if((uint) timer.elapsed() > last_print) {
+				last_print = (uint) timer.elapsed();
 				
-				this.current_fps = frame;
+				stdout.printf("%u fps\n", this.frame - last_frame);
+				this.current_fps = this.frame - last_frame;
+				
 				// call update function in main thread, need to safe time here!
 				GLib.Timeout.add_seconds(0, () => {
 					this.update();
 					return GLib.Source.REMOVE;
 				});
 				
-				frame = 0;
-				timer.start();
-			}else{
-				frame++;
+				last_frame = this.frame;
 			}
 			
 			// wait for vsync
