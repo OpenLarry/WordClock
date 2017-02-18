@@ -4,18 +4,13 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemSensor {
+public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	const string DEVICE = "/dev/fb0";
-	
-	public uint current_fps { get; private set; default = 0; }
 	
 	private int fd;
 	private weak uint16 *fb;
-	private weak Linux.Framebuffer.VarScreenInfo fb_var; 
+	private weak Linux.Framebuffer.VarScreenInfo fb_var;
 	
-	private GLib.Cancellable? cancellable;
-	
-	private uint8 fps = 25;
 	private Color[,] leds;
 	private uint8[] ports;
 	
@@ -26,7 +21,8 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemS
 	 * @param cancellable Cancellable object to stop running driver
 	 */
 	public Ws2812bDriver( uint8[] ports, int leds, GLib.Cancellable? cancellable = null ) {
-		this.cancellable = cancellable;
+		base(cancellable);
+		
 		this.ports = ports;
 		
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
@@ -164,7 +160,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemS
 	 * Avoid this function if driver is running, results in weird vsync buffering.
 	 * @param fps Frames per second
 	 */
-	public void set_fps( uint8 fps ) {
+	public override void set_fps( uint8 fps ) {
 		if(this.fps == fps) return;
 		
 		this.fps = fps;
@@ -188,7 +184,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemS
 	 * @param renderer Active frame renderer
 	 * @return Result code
 	 */
-	public int start( FrameRenderer renderer ) {
+	public override int start( FrameRenderer renderer ) {
 		bool bottom = true;
 		int arg = 0;
 		
@@ -196,7 +192,7 @@ public class WordClock.Ws2812bDriver : GLib.Object, LedDriver, Jsonable, SystemS
 		var timer = new GLib.Timer();
 		timer.start();
 		
-		while(!this.cancellable.is_cancelled()) {
+		while(this.cancellable == null || !this.cancellable.is_cancelled()) {
 			renderer.render( this.leds );
 			
 			if(timer.elapsed() > 1) {
