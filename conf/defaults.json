@@ -477,6 +477,11 @@
       },
       "-type" : "WordClockClockRenderer"
     },
+    "filteredmotion" : {
+      "min-high-time" : 0.05,
+      "min-low-time" : -1,
+      "-type" : "WordClockFilteredGpio"
+    },
     "lua" : {
       "script" : "/etc/wordclock/script.lua",
       "log-size" : 50,
@@ -1438,7 +1443,7 @@
         "button0",
         "button1",
         "button2",
-        "motion",
+        "filteredmotion",
         "remote",
         "timeobserver"
       ],

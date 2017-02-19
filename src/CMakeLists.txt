@@ -110,6 +110,7 @@ set(VALA_SRC
 	Sensors/HardwareInfo.vala
 	Sensors/SensorsObserver.vala
 	Sensors/Gpio.vala
+	Sensors/FilteredGpio.vala
 	Sensors/Lirc.vala
 	Sensors/IrRemote.vala
 	Sensors/TimeObserver.vala

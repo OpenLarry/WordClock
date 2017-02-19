@@ -105,11 +105,11 @@ public class WordClock.Main : GLib.Object {
 		hwinfo.gpios["button1"] = new Gpio(91);
 		hwinfo.gpios["button2"] = new Gpio(23);
 		hwinfo.gpios["motion"] = new Gpio(7);
+		var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
 		
 		hwinfo.system["cpuload"] = new CpuLoad();
 		hwinfo.system["memoryusage"] = new MemoryUsage();
 		hwinfo.system["leddriver"] = driver;
-		
 		
 		var sensorsobserver = new SensorsObserver(hwinfo);
 		
@@ -127,6 +127,7 @@ public class WordClock.Main : GLib.Object {
 		signalrouter.add_source("button0", hwinfo.gpios["button0"]);
 		signalrouter.add_source("button1", hwinfo.gpios["button1"]);
 		signalrouter.add_source("button2", hwinfo.gpios["button2"]);
+		signalrouter.add_source("filteredmotion", filteredmotion);
 		signalrouter.add_source("motion", hwinfo.gpios["motion"]);
 		signalrouter.add_source("remote", remote);
 		signalrouter.add_source("sensorsobserver", sensorsobserver);
@@ -146,6 +147,7 @@ public class WordClock.Main : GLib.Object {
 		settings.objects["timeobserver"] = timeobserver;
 		settings.objects["weather"] = weather;
 		settings.objects["lua"] = lua;
+		settings.objects["filteredmotion"] = filteredmotion;
 		settings.objects.set_keys_immutable();
 		
 		LuaSignals.init(lua, signalrouter);
