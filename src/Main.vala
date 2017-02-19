@@ -1,6 +1,9 @@
 using WordClock;
 using SDLImage;
 
+[CCode (cheader_filename = "stdio.h")]
+extern void setlinebuf (Posix.FILE file);
+
 /**
  * @author Aaron Larisch
  * @version 1.0
@@ -16,6 +19,8 @@ public class WordClock.Main : GLib.Object {
 	private static MainLoop loop;
 	
     public static int main(string[] args) {
+		setlinebuf(Posix.stdout);
+		
 		if( !Thread.supported() ) {
 			stderr.printf("Cannot run without threads.\n");
 			return -1;
