@@ -202,7 +202,6 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			if((uint) timer.elapsed() > last_print) {
 				last_print = (uint) timer.elapsed();
 				
-				stdout.printf("%u fps\n", this.frame - last_frame);
 				this.current_fps = this.frame - last_frame;
 				
 				// call update function in main thread, need to safe time here!
