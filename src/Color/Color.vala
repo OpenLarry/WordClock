@@ -18,6 +18,8 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	protected uint8  s = 0;
 	protected uint8  v = 0;
 	
+	protected uint last_update_frame = uint.MAX;
+	
 	private static uint8[] gamma_correction = {};
 	
 	const double GAMMA = 2.2;
@@ -148,6 +150,15 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		return;
 	}
 	
+	protected virtual void update(uint framediff) {}
+	protected void check_update() {
+		uint frame = (Main.hwinfo.system["leddriver"] as LedDriver).frame;
+		if(this.last_update_frame != frame) {
+			this.update(frame - this.last_update_frame);
+			this.last_update_frame = frame;
+		}
+	}
+	
 	/**
 	 * Mixes this color with another, allows daisy chaining
 	 * @param color The other color
@@ -156,8 +167,10 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	 */
 	public Color mix_with( Color color, uint8 percent = 127, bool gamma_fade = true ) {
 		if(percent == 0) {
+			this.check_update();
 			return this;
 		}else if(percent == 255) {
+			color.check_update();
 			this.r = color.r;
 			this.g = color.g;
 			this.b = color.b;
@@ -167,12 +180,17 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.h = color.h;
 			this.s = color.s;
 			this.v = color.v;
+			this.last_update_frame = color.last_update_frame;
 		}else if(gamma_fade) {
+			color.check_update();
+			this.check_update();
 			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) color.r_no_gamma)*percent) / 255 );
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
 			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) color.b_no_gamma)*percent) / 255 );
 			this.do_gamma_correction();
 		}else{
+			color.check_update();
+			this.check_update();
 			this.r = (uint8) ( (((uint16) this.r)*(255-percent) + ((uint16) color.r)*percent) / 255 );
 			this.g = (uint8) ( (((uint16) this.g)*(255-percent) + ((uint16) color.g)*percent) / 255 );
 			this.b = (uint8) ( (((uint16) this.b)*(255-percent) + ((uint16) color.b)*percent) / 255 );
@@ -182,6 +200,8 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	}
 	
 	public Color clone() {
+		this.check_update();
+		
 		var ret = new Color();
 		
 		ret.r = this.r;
@@ -193,6 +213,8 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		ret.h = this.h;
 		ret.s = this.s;
 		ret.v = this.v;
+		
+		ret.last_update_frame = this.last_update_frame;
 		
 		return ret;
 	}

@@ -10,18 +10,38 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	public Color min_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
 	public Color max_color { get; set; default = new Color.from_hsv( 0, 0, 255 ); }
 	
+	private uint8 actual_alpha = 0;
+	private float brightness = 0;
+	const int8 MAX_ALPHA_DIFF = 5;
+	
 	construct {
-		Main.hwinfo.lradcs["brightness"].update.connect( this.update );
+		Main.hwinfo.lradcs["brightness"].update.connect( this.update_brightness );
 	}
 	
-	private void update() {
-		float brightness = Main.hwinfo.lradcs["brightness"].median;
+	private void update_brightness() {
+		this.brightness = Main.hwinfo.lradcs["brightness"].median;
+	}
+	
+	protected override void update(uint framediff) {
+		uint8 alpha = this.calc_alpha(this.brightness);
+		
+		// clip to in16 range
+		if(framediff > 255/MAX_ALPHA_DIFF) framediff = 255/MAX_ALPHA_DIFF + 1;
+		
+		int16 diff = alpha - this.actual_alpha;
+		diff = diff.clamp( -MAX_ALPHA_DIFF*(int16) framediff, MAX_ALPHA_DIFF*(int16) framediff );
+		this.actual_alpha += (int8) diff;
+		
+		this.mix_with( this.min_color.clone().mix_with( this.max_color, this.actual_alpha ), 255 );
+	}
+	
+	private uint8 calc_alpha( float brightness ) {
 		if(brightness >= this.max_brightness) {
-			this.mix_with( this.max_color, 255 );
+			return 255;
 		}else if(brightness <= this.min_brightness) {
-			this.mix_with( this.min_color, 255 );
+			return 0;
 		}else{
-			this.mix_with( this.min_color.clone().mix_with( this.max_color, (uint8) Math.roundf((brightness-this.min_brightness)*255/(this.max_brightness-this.min_brightness)) ), 255 );
+			return (uint8) Math.roundf((brightness-this.min_brightness)*255/(this.max_brightness-this.min_brightness));
 		}
 	}
 	
@@ -31,6 +51,5 @@ public class WordClock.BrightnessSensorColor : Color, Jsonable {
 	
 	public override void from_json(Json.Node node, string path = "") throws JsonError {
 		Jsonable.default_from_json( this, node, path );
-		this.update();
 	}
 }
