@@ -48,6 +48,8 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	}
 	
 	public void trigger_signal( string signal_name ) {
+		debug("Trigger signal %s", signal_name);
+		
 		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
 			if(entry.value.before && entry.value.regex.match(signal_name)) {
 				if(!entry.value.f(entry.key, signal_name)) return;

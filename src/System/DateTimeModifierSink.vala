@@ -18,7 +18,7 @@ public class WordClock.DateTimeModifierSink : GLib.Object, Jsonable, SignalSink 
 			
 			Process.spawn_sync("/bin", {"date","-u","-s",date}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
 		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
+			warning(e.message);
 		}
 	}
 }

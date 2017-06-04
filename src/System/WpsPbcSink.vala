@@ -18,7 +18,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				try{
 					thread = new Thread<int>.try("WPS PBC", run_wps);
 				}catch(Error e) {
-					stderr.printf("%s\n",e.message);
+					warning(e.message);
 				}
 			}else{
 				cancellable.cancel();
@@ -30,6 +30,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	
 	private static int run_wps() {
 		message_id = (Main.settings.objects["message"] as MessageOverlay).info("WPS",-1);
+		debug("Starting wps");
 		try{
 			Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_pbc"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
 			
@@ -37,13 +38,14 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 			do {
 				Buzzer.beep(100,2000,25);
 				Process.spawn_sync("/usr/sbin", {"wpa_cli","status"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-				stdout.printf("WPS: %s\n", output);
+				debug("Status wpa_cli: %s", output);
 				Thread.usleep(1000000);
 			} while(!cancellable.is_cancelled() && (output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED") || output.contains("wpa_state=INTERFACE_DISABLED")));
 			
 			(Main.settings.objects["message"] as MessageOverlay).stop(message_id);
 			
 			if(cancellable.is_cancelled()) {
+				debug("Cancel wps");
 				Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_cancel"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 				
 				(Main.settings.objects["message"] as MessageOverlay).info("Cancelled!");
@@ -56,13 +58,15 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 			}else{
 				cancellable.cancel();
 				(Main.settings.objects["message"] as MessageOverlay).error("Error!");
+				warning("WPS failed");
 				
 				Buzzer.beep(200,1000,25);
 				Thread.usleep(200000);
 				Buzzer.beep(200,1000,25);
 			}
+			debug("Finished wps");
 		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
+			warning(e.message);
 		}
 		return 0;
 	}

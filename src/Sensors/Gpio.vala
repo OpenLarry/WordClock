@@ -49,16 +49,16 @@ public class WordClock.Gpio : GLib.Object, SignalSource, Jsonable {
 				size_t length = -1;
 
 				if (condition == IOCondition.HUP) {
-					stdout.printf ("The connection has been broken.\n");
-					return false;
+					warning("The connection has been broken");
+					return Source.REMOVE;
 				}
 
 				try {
 					source.seek_position(0, SeekType.SET);
 					IOStatus status = source.read_line (out str_return, out length, out terminator_pos);
 					if (status == IOStatus.EOF) {
-						stdout.printf("EOF\n");
-						return false;
+						warning("Unexpected EOF");
+						return Source.REMOVE;
 					}
 					
 					this.value = str_return == "1\n";
@@ -70,21 +70,21 @@ public class WordClock.Gpio : GLib.Object, SignalSource, Jsonable {
 						this.first = false;
 					}
 					
-					return true;
+					return Source.CONTINUE;
 				} catch (IOChannelError e) {
-					stdout.printf ("IOChannelError: %s\n", e.message);
-					return false;
+					warning("IOChannelError: %s", e.message);
+					return Source.REMOVE;
 				} catch (ConvertError e) {
-					stdout.printf ("ConvertError: %s\n", e.message);
-					return false;
+					warning("ConvertError: %s", e.message);
+					return Source.REMOVE;
 				}
 			});
 			
 			if(stat == 0) {
-				stderr.printf ("Cannot add watch on IOChannel.\n");
+				warning("Cannot add watch on IOChannel");
 			}
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 }

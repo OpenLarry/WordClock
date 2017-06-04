@@ -28,7 +28,7 @@ public class WordClock.LuaHwinfo : GLib.Object {
 			val = Value(typeof(string));
 			val.set_string(json);
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 			lua.log_message("Error: "+e.message);
 			
 			val = Value(typeof(bool));

@@ -27,7 +27,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 				while ( match_info.next() );
 			}
 		} catch ( RegexError e ) {
-			stderr.printf("%s\n", e.message);
+			warning(e.message);
 		}
 		
 		return map;

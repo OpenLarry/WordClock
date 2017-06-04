@@ -47,7 +47,7 @@ public class WordClock.MemoryUsage : GLib.Object, Jsonable, SystemSensor {
 			
 			this.update();
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 }

@@ -19,7 +19,7 @@ public interface WordClock.Font : GLib.Object {
 		try {
 			str = GLib.convert(s, s.length, "ISO-8859-1", "UTF-8");
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 			return r;
 		}
 		

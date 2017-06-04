@@ -20,21 +20,21 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	 * @param leds Number of LEDs per strip
 	 * @param cancellable Cancellable object to stop running driver
 	 */
-	public Ws2812bDriver( uint8[] ports, int leds, GLib.Cancellable? cancellable = null ) {
+	public Ws2812bDriver( uint8[] ports, int leds, Cancellable? cancellable = null ) {
 		base(cancellable);
 		
 		this.ports = ports;
 		
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
-		GLib.assert(this.fd>=0); GLib.debug("device opened");
+		assert(this.fd>=0); debug("Framebuffer device opened");
 		
 		// blank screen - disabled because of driver bug
 		// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
-		// GLib.assert(ret==0); GLib.debug("blank screen");
+		// assert(ret==0);
 		
 		// get frambuffer settings
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
-		GLib.assert(ret==0); GLib.debug("got screeninfo");
+		assert(ret==0);
 		
 		// resolution
 		this.fb_var.xres = 142; // [3 colors] x [8 bit] x [6 FB-bit per bit] - (2 bit hsync)
@@ -61,7 +61,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// put frambuffer settings
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
-		GLib.assert(ret==0); GLib.debug("put screeninfo");
+		assert(ret==0);
 		
 		// init LED array
 		this.leds = new Color[this.ports.length,leds];
@@ -73,13 +73,13 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// map framebuffer into memory
 		this.fb = Posix.mmap(null, this.fb_var.xres_virtual * this.fb_var.yres_virtual * sizeof(uint16), Posix.PROT_READ|Posix.PROT_WRITE, Posix.MAP_SHARED, this.fd, 0);
-		GLib.assert(this.fb!=null); GLib.debug("mmap framebuffer");
+		assert(this.fb!=null);
 		
 		this.clear_fb();
 		
 		// unblank screen - disabled because of driver bug
 		// ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 0 /*FB_BLANK_UNBLANK const missing in vala*/);
-		// GLib.assert(ret==0); GLib.debug("unblank screen");
+		// assert(ret==0);
 		
 		this.encode_to_fb(false);
 	}
@@ -143,7 +143,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		// switch front- and backbuffer
 		this.fb_var.yoffset = (bottom) ? this.fb_var.yres : 0;
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPAN_DISPLAY, &this.fb_var);
-		GLib.assert(ret==0); GLib.debug("pan display");
+		assert(ret==0);
 	}
 	
 	/**
@@ -163,11 +163,13 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	public override void set_fps( uint8 fps ) {
 		if(this.fps == fps) return;
 		
+		debug("Set fps rate to %u", fps);
+		
 		this.fps = fps;
 		
 		// get frambuffer settings
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOGET_VSCREENINFO, &this.fb_var);
-		GLib.assert(ret==0); GLib.debug("got screeninfo");
+		assert(ret==0);
 		
 		this.fb_var.vsync_len = (uint32)
 			(1000000000000/fps
@@ -176,7 +178,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// put frambuffer settings
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
-		GLib.assert(ret==0); GLib.debug("put screeninfo");
+		assert(ret==0);
 	}
 	
 	/**
@@ -189,7 +191,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		int arg = 0;
 		
 		
-		var timer = new GLib.Timer();
+		var timer = new Timer();
 		uint last_print = 0;
 		uint last_frame = 0;
 		timer.start();
@@ -205,9 +207,9 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 				this.current_fps = this.frame - last_frame;
 				
 				// call update function in main thread, need to safe time here!
-				GLib.Timeout.add_seconds(0, () => {
+				Timeout.add_seconds(0, () => {
 					this.update();
-					return GLib.Source.REMOVE;
+					return Source.REMOVE;
 				});
 				
 				last_frame = this.frame;
@@ -215,7 +217,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			
 			// wait for vsync
 			var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
-			GLib.assert(ret==0); GLib.debug("wait for vsync");
+			assert(ret==0);
 			
 			this.encode_to_fb(bottom);
 			bottom = !bottom;
@@ -223,9 +225,9 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		this.current_fps = 0;
 		// call update function in main thread, need to safe time here!
-		GLib.Timeout.add_seconds(0, () => {
+		Timeout.add_seconds(0, () => {
 			this.update();
-			return GLib.Source.REMOVE;
+			return Source.REMOVE;
 		});
 		
 		// black screen
@@ -237,24 +239,24 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// wait for vsync - start render previous frame
 		var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
-		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		assert(ret==0);
 		
 		this.encode_to_fb(bottom);
 		bottom = !bottom;
 		
 		// wait for vsync - start render black frame
 		ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
-		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		assert(ret==0);
 		
 		// wait for vsync - finished render black frame
 		ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
-		GLib.assert(ret==0); GLib.debug("wait for vsync");
+		assert(ret==0);
 		
 		this.clear_fb();
 		
 		// blank screen - disabled because of driver bug
 		// var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 1 /*FB_BLANK_NORMAL const missing in vala*/);
-		// GLib.assert(ret==0); GLib.debug("blank screen");
+		// assert(ret==0);
 			
 		return 0;
 	}

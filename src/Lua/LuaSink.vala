@@ -18,7 +18,8 @@ public class WordClock.LuaSink : GLib.Object, Jsonable, SignalSink {
 		try{
 			lua.call_function( this.function, { JsonHelper.to_string( this.parameter.to_json() ) } );
 		}catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning("Lua error: %s", e.message);
+			lua.log_message("Error: "+e.message);
 		}
 	}
 }

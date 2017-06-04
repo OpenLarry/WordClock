@@ -81,7 +81,7 @@ public class WordClock.CpuLoad : GLib.Object, Jsonable, SystemSensor {
 			
 			if(sum[0] > 0 && sum[1] > 0) this.update();
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 }

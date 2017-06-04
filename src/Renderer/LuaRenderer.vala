@@ -54,7 +54,7 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		try {
 			lua.call_function(this.matrix_function, { matrix.length[0], matrix.length[1] });
 		} catch( LuaError e ) {
-			stderr.printf("Lua error: %s\n", e.message);
+			warning("Lua error: %s", e.message);
 		}
 		
 		LuaRenderer.matrix = null;
@@ -67,7 +67,7 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		try {
 			lua.call_function(this.backlight_function, { backlight.length });
 		} catch( LuaError e ) {
-			stderr.printf("Lua error: %s\n", e.message);
+			warning("Lua error: %s", e.message);
 		}
 		LuaRenderer.backlight = null;
 		
@@ -79,7 +79,7 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		try {
 			lua.call_function(this.dots_function, { dots.length });
 		} catch( LuaError e ) {
-			stderr.printf("Lua error: %s\n", e.message);
+			warning("Lua error: %s", e.message);
 		}
 		LuaRenderer.dots = null;
 		
@@ -177,7 +177,7 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 	
 	public static int fail_null() {
 		lua.log_message("Illegal led setting/getting outside render function!");
-		stderr.puts("Illegal led setting/getting outside render function!\n");
+		warning("Illegal led setting/getting outside render function");
 		return 0;
 	}
 }

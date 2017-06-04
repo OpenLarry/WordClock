@@ -17,7 +17,7 @@ public class WordClock.IrRemote : GLib.Object, SignalSource {
 			this.context = new Lirc.Context(PROG);
 			this.listener = new Lirc.Listener(this.context, loop_context);
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 			return;
 		}
 		

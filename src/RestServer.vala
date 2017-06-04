@@ -19,6 +19,8 @@ public class WordClock.RestServer : Soup.Server {
 	 * @param control LEDControl object which parses the request
 	 */
 	public RestServer( ) throws GLib.Error {
+		debug("Starting REST server");
+		
 		this.add_handler("/", this.request);
 		
 		this.add_early_handler("/update", this.update);
@@ -28,6 +30,8 @@ public class WordClock.RestServer : Soup.Server {
 		this.connect_signals();
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
+		
+		debug("Server running");
 	}
 	
 	private void connect_signals() {
@@ -56,6 +60,8 @@ public class WordClock.RestServer : Soup.Server {
 	}
 	
 	private void update( Soup.Server server, Soup.Message msg, string path, HashTable<string,string>? query, Soup.ClientContext client) {
+		debug("Request: %s %s (%s, %lli)", msg.method, path, msg.request_headers.get_content_type(null) ?? "none", msg.request_headers.get_content_length());
+		
 		msg.response_headers.append("Access-Control-Allow-Origin", "*");
 		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
 		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
@@ -63,6 +69,8 @@ public class WordClock.RestServer : Soup.Server {
 		switch(msg.method ) {
 			case "OPTIONS":
 				msg.set_status(200);
+				
+				debug("Response: %u (%s, %lli)", msg.status_code, msg.response_headers.get_content_type(null) ?? "none", msg.response_body.length);
 				return;
 			case "POST":
 				msg.request_body.set_accumulate(false);
@@ -92,6 +100,8 @@ public class WordClock.RestServer : Soup.Server {
 								msg.set_response("text/plain", Soup.MemoryUse.COPY, ("\n"+e.message).data);
 							}
 							msg.set_status(500);
+							
+							debug("Response: %u (%s, %lli)", msg.status_code, msg.response_headers.get_content_type(null) ?? "none", msg.response_body.length);
 						}
 					});
 					
@@ -117,6 +127,8 @@ public class WordClock.RestServer : Soup.Server {
 							msg.set_response("text/plain", Soup.MemoryUse.COPY, "Data too short!".data);
 							msg.set_status(500);
 						}
+						
+						debug("Response: %u (%s, %lli)", msg.status_code, msg.response_headers.get_content_type(null) ?? "none", msg.response_body.length);
 					});
 					
 					finished_signal = msg.finished.connect(() => { 
@@ -130,22 +142,25 @@ public class WordClock.RestServer : Soup.Server {
 					try {
 						client.steal_connection().close();
 					} catch ( Error e ) {
-						stderr.printf("Error: %s\n", e.message);
+						warning(e.message);
 					}
 				}
 			break;
 			default:
 				msg.set_status(405);
+				debug("Response: %u (%s, %lli)", msg.status_code, msg.response_headers.get_content_type(null) ?? "none", msg.response_body.length);
 			break;
 		}
 	}
 	
 	private void request_hwinfo( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
+		debug("WebSocket request: %s", path);
+		
 		this.hwinfo_connections.add(connection);
 		try {
 			connection.send_text(JsonHelper.to_string(Main.hwinfo.to_json()));
 		} catch ( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -161,15 +176,18 @@ public class WordClock.RestServer : Soup.Server {
 					}else{
 						this.hwinfo_connections.remove(con);
 						i--;
+						debug("WebSocket connection closed");
 					}
 				}
 			} catch ( Error e ) {
-				stderr.printf("Error: %s\n", e.message);
+				warning(e.message);
 			}
 		}
 	}
 	
 	private void request_lua_log( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
+		debug("WebSocket request: %s", path);
+		
 		this.lua_log_connections.add(connection);
 		connection.send_text((Main.settings.objects["lua"] as Lua).get_log());
 	}
@@ -183,6 +201,7 @@ public class WordClock.RestServer : Soup.Server {
 				}else{
 					this.lua_log_connections.remove(con);
 					i--;
+					debug("WebSocket connection closed");
 				}
 			}
 		}
@@ -198,16 +217,15 @@ public class WordClock.RestServer : Soup.Server {
 	 * @param client Client instance
 	 */
 	private void request( Soup.Server server, Soup.Message msg, string path, HashTable<string,string>? query, Soup.ClientContext client) {
+		debug("Request: %s %s (%s, %lli)", msg.method, path, msg.request_headers.get_content_type(null) ?? "none", msg.request_headers.get_content_length());
+		
 		msg.response_headers.append("Access-Control-Allow-Origin", "*");
 		msg.response_headers.append("Access-Control-Allow-Headers", "accept, content-type");
 		msg.response_headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 		
 		if(msg.method == "OPTIONS") {
 			msg.set_status(200);
-			return;
-		}
-		
-		if(path == "/") {
+		}else if(path == "/") {
 			switch(msg.method) {
 				case "GET":
 					msg.set_response("text/html", Soup.MemoryUse.COPY, @"<h1>WordClock $(Version.GIT_DESCRIBE)</h1>".data);
@@ -374,5 +392,7 @@ public class WordClock.RestServer : Soup.Server {
 		}else{
 			msg.set_status(404);
 		}
+		
+		debug("Response: %u (%s, %lli)", msg.status_code, msg.response_headers.get_content_type(null) ?? "none", msg.response_body.length);
 	}
 } 

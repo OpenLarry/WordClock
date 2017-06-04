@@ -8,7 +8,7 @@ public class WordClock.JsonableArrayList<G> : Gee.ArrayList<G>, Jsonable {
 	public JsonableArrayList(owned EqualDataFunc<G>? equal_func = null) {
 		base((owned) equal_func);
 		
-		if(!this.element_type.is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
+		if(!this.element_type.is_a(typeof(Jsonable))) error("Value does not implement Jsonable interface!");
 	}
 	
 	public Json.Node to_json( string path = "" ) throws JsonError {

@@ -15,7 +15,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 				try {
 					this.run();
 				}catch(LuaError e) {
-					stderr.printf("Lua error: %s\n", e.message);
+					warning("Lua error: %s", e.message);
 				}
 			}else{
 				this._script = value;
@@ -50,6 +50,8 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 				this_map.unset(this.vm);
 			}
 			
+			debug("Run Lua script");
+			
 			// new lua instance
 			this.vm = new LuaVM();
 			this_map[this.vm] = this;
@@ -69,7 +71,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 				throw new LuaError.SCRIPT_ERROR((string) error);
 			}else{
 				this.log_message("Lua script %s loaded!".printf(this.script));
-				stdout.printf("Lua script %s loaded!\n",this.script);
+				debug("Lua script %s loaded",this.script);
 			}
 		}
 	}
@@ -119,7 +121,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 			if(val.get_object() == null) {
 				this.vm.push_nil();
 			}else{
-				stderr.puts("Can't push object on lua stack!\n");
+				warning("Can't push object on lua stack!");
 				return false;
 			}
 		}else{
@@ -148,7 +150,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 			}else if(val.holds(typeof(string))) {
 				this.vm.push_string( val.get_string() );
 			}else{
-				stderr.puts("Can't push unknown value type on lua stack!\n");
+				warning("Can't push unknown value type on lua stack!");
 				return false;
 			}
 		}
@@ -166,7 +168,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		}else if(this.vm.is_string(-1) && val.holds(typeof(string))) {
 			val.set_string(this.vm.to_string(-1));
 		}else{
-			stderr.printf("Can't pop return value from lua stack into %s variable!\n", val.type().name());
+			warning("Can't pop return value from lua stack into %s variable!", val.type().name());
 			return false;
 		}
 		
@@ -215,7 +217,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		}
 		
 		that.log_message(output);
-		stdout.printf("%s\n", output);
+		GLib.print("%s\n", output);
 		
 		return 0;
 	}

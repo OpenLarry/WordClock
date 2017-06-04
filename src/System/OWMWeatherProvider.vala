@@ -78,7 +78,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 			// set idle scheduling policy
 			Posix.Sched.Param param = { 0 };
 			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
-			GLib.assert(ret==0); GLib.debug("Set scheduler");
+			assert(ret==0);
 			
 			// retry on error
 			for(uint i=0;i<RETRY_COUNT;i++) {
@@ -86,7 +86,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 					this.refresh();
 					break;
 				} catch ( Error e ) {
-					stderr.printf("Error %s\n", e.message);
+					warning(e.message);
 					Thread.usleep(RETRY_INTERVAL*1000000);
 				}
 			}
@@ -97,6 +97,8 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	}
 	
 	public void refresh() throws Error {
+		debug("Starting refresh");
+		
 		LocationInfo? location = this.location.get_location();
 		if(location == null) return;
 		
@@ -114,6 +116,8 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		query.insert("appid",this.appid);
 		
 		uri.set_query_from_form( query );
+		
+		debug("Request URL %s", uri.to_string(false));
 		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
 		ses.send_message(msg);
 		
@@ -130,6 +134,8 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		weather.from_json( node );
 		this.weather = weather;
 		this.update();
+		
+		debug("Finished refresh");
 	}
 }
 

@@ -1,9 +1,6 @@
 using WordClock;
 using SDLImage;
 
-[CCode (cheader_filename = "stdio.h")]
-extern void setlinebuf (Posix.FILE file);
-
 /**
  * @author Aaron Larisch
  * @version 1.0
@@ -19,11 +16,27 @@ public class WordClock.Main : GLib.Object {
 	private static MainLoop loop;
 	
     public static int main(string[] args) {
-		setlinebuf(Posix.stdout);
+		Posix.openlog("wordclock", Posix.LOG_PID, Posix.LOG_LOCAL1);
+		Log.set_default_handler((log_domain, log_levels, message) => {
+			if(log_domain == "WordClock" || ((log_levels & LogLevelFlags.LEVEL_MASK) & (LogLevelFlags.LEVEL_ERROR | LogLevelFlags.LEVEL_CRITICAL | LogLevelFlags.LEVEL_WARNING | LogLevelFlags.LEVEL_MESSAGE)) > 0) {
+				int level;
+				switch(log_levels & LogLevelFlags.LEVEL_MASK) {
+					case LogLevelFlags.LEVEL_ERROR: level = Posix.LOG_ERR; break;
+					case LogLevelFlags.LEVEL_CRITICAL: level = Posix.LOG_ERR; break;
+					case LogLevelFlags.LEVEL_WARNING: level = Posix.LOG_WARNING; break;
+					case LogLevelFlags.LEVEL_MESSAGE: level = Posix.LOG_NOTICE; break;
+					case LogLevelFlags.LEVEL_INFO: level = Posix.LOG_INFO; break;
+					case LogLevelFlags.LEVEL_DEBUG: default: level = Posix.LOG_DEBUG; break;
+				}
+				
+				Posix.syslog(level, "%s\n", message);
+			}
+			
+			Log.default_handler(log_domain, log_levels, message);
+		});
 		
 		if( !Thread.supported() ) {
-			stderr.printf("Cannot run without threads.\n");
-			return -1;
+			error("Cannot run without threads");
 		}
 		
 		Intl.setlocale( LocaleCategory.ALL, "" );
@@ -78,7 +91,8 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(GoogleLocationProvider);
 		type = typeof(StaticLocationProvider);
 		
-		stdout.printf("WordClock %s\n\n", Version.GIT_DESCRIBE);
+		print("WordClock %s\n\n", Version.GIT_DESCRIBE);
+		debug("Starting WordClock %s", Version.GIT_DESCRIBE);
 		
 		// display version only
 		if(args.length == 2 && args[1] == "-v") {
@@ -174,56 +188,45 @@ public class WordClock.Main : GLib.Object {
 				Thread.usleep(200000);
 				Buzzer.beep(200,2000,255);
 				
-				message.info("Loading defaults...");
-				stdout.puts("Loading default settings!\n");
+				message.info("Loading default settings...");
+				debug("Loading default settings");
 				settings.load("/etc/wordclock/defaults.json");
-				stdout.puts("Settings loaded!\n");
 			}else{
 				try {
 					settings.load();
-					stdout.puts("Settings loaded!\n");
 				
-					stdout.puts("Run Lua script...\n");
 					try {
 						lua.run();
 					}catch(LuaError e) {
-						stderr.printf("Lua error: %s\n", e.message);
+						warning("Lua error: %s", e.message);
 					}
 				} catch ( Error e ) {
 					if( !(e is FileError.NOENT) ) {
-						stderr.printf("Error: %s", e.message);
-
-						
-						Buzzer.beep(200,2000,255);
-						Thread.usleep(200000);
-						Buzzer.beep(200,2000,255);
-						Thread.usleep(200000);
-						Buzzer.beep(200,2000,255);
-						
+						warning("Loading settings failed: %s", e.message);
 						message.error("Loading settings failed! Resetting to defaults...");
-						stderr.puts("Loading settings failed!\n");
+						
+						Buzzer.beep(200,2000,255);
+						Thread.usleep(200000);
+						Buzzer.beep(200,2000,255);
+						Thread.usleep(200000);
+						Buzzer.beep(200,2000,255);
 					}
 					
 
-					stdout.puts("Loading default settings!\n");
+					debug("Loading default settings");
 					settings.load("/etc/wordclock/defaults.json");
-					stdout.puts("Settings loaded!\n");
 				}
 			}
 			
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
-			return 1;
+			error(e.message);
 		}
 		
 		
 		try{
-			stdout.puts("Starting REST server...\n");
 			new RestServer();
-			stdout.puts("Running!\n");
 		} catch( Error e ) {
-			stdout.printf("Error %s\n", e.message);
-			return 2;
+			error(e.message);
 		}
 		
 		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
@@ -242,7 +245,7 @@ public class WordClock.Main : GLib.Object {
 			// set real-time scheduling policy
 			Posix.Sched.Param param = { 1 };
 			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
-			GLib.assert(ret==0); GLib.debug("Set scheduler");
+			assert(ret==0);
 			
 			return driver.start(renderer);
 		});
@@ -255,7 +258,7 @@ public class WordClock.Main : GLib.Object {
 		
 		loop.run();
 		
-		stdout.puts("Terminating. Waiting for threads...\n");
+		debug("Terminating. Waiting for threads");
 		
 		// Parameter -s skips beep sound
 		if(args.length <= 1 || args[1] != "-s") {
@@ -267,17 +270,21 @@ public class WordClock.Main : GLib.Object {
 		try{
 			settings.check_save();
 		}catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			critical(e.message);
 		}
 		
 		thread.join();
 		
-		stdout.puts("Bye!\n");
+		debug("Program end");
+		Posix.closelog();
+		
+		print("Bye!\n");
 		
 		return 0;
     }
 	
 	public static bool shutdown() {
+		debug("Shutdown triggered");
 		cancellable.cancel();
 		loop.quit();
 		

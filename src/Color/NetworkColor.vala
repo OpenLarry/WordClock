@@ -37,7 +37,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 						this.set_rgb(rgb[0],rgb[1],rgb[2]);
 					}
 				} catch (Error e) {
-					stderr.printf (e.message);
+					warning(e.message);
 				}
 				
 				return GLib.Source.CONTINUE;
@@ -46,7 +46,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 			
 			this.source.attach( MainContext.default() );
 		} catch (Error e) {
-			stderr.printf ("Error: %s\n", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -55,7 +55,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 			if(this.source != null) this.source.destroy();
 			if(this.sock != null) this.sock.close();
 		} catch (Error e) {
-			stderr.printf ("Error: %s\n", e.message);
+			warning(e.message);
 		}
 	}
 	

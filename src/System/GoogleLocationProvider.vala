@@ -61,7 +61,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 			// set idle scheduling policy
 			Posix.Sched.Param param = { 0 };
 			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
-			GLib.assert(ret==0); GLib.debug("Set scheduler");
+			assert(ret==0);
 			
 			// retry on error
 			for(uint i=0;i<RETRY_COUNT;i++) {
@@ -69,7 +69,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 					this.refresh();
 					break;
 				} catch ( Error e ) {
-					stderr.printf("Error %s\n", e.message);
+					warning(e.message);
 					Thread.usleep(RETRY_INTERVAL*1000000);
 				}
 			}
@@ -80,6 +80,8 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	}
 	
 	public void refresh() throws Error {
+		debug("Starting refresh");
+		
 		Soup.Session ses = new Soup.Session();
 		ses.proxy_resolver = null;
 		ses.ssl_strict = false;
@@ -102,10 +104,12 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				} while ( match_weather.next() );
 			}
 		}catch(Error e) {
-			stderr.printf("%s\n",e.message);
+			warning(e.message);
 		}
 		
 		uri.set_query_from_form( query );
+		
+		debug("Request URL %s", uri.to_string(false));
 		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
 		ses.send_message(msg);
 		
@@ -129,5 +133,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				this.update();
 			}
 		}
+		
+		debug("Finished refresh");
 	}
 }

@@ -60,7 +60,7 @@ namespace WordClock.JsonHelper {
 					if(node.get_node_type() == Json.NodeType.OBJECT) {
 						node.get_object().set_string_member( "-type", ser.get_class().get_type().name() );
 					}else{
-						stderr.puts("Invalid node type! Unable to append class name.\n");
+						critical("Invalid node type! Unable to append class name.\n");
 					}
 				}
 			}
@@ -183,18 +183,18 @@ namespace WordClock.JsonHelper {
 	public static void dump_foreach( string member_name, Json.Node member_node, string indent = "" ) {
 		switch(member_node.get_node_type()) {
 			case Json.NodeType.OBJECT:
-				stdout.printf("%s%s => %s\n", indent, member_name, member_node.type_name());
+				print("%s%s => %s\n", indent, member_name, member_node.type_name());
 				member_node.get_object().foreach_member( (a,b,c) => { dump_foreach(b,c,indent+"  "); } );
 			break;
 			case Json.NodeType.ARRAY:
-				stdout.printf("%s%s => %s\n", indent, member_name, member_node.type_name());
+				print("%s%s => %s\n", indent, member_name, member_node.type_name());
 				member_node.get_array().foreach_element( (a,b,c) => { dump_foreach("["+b.to_string()+"]",c,indent+"  "); } );
 			break;
 			case Json.NodeType.NULL:
-				stdout.printf("%s%s => NULL\n", indent, member_name);
+				print("%s%s => NULL\n", indent, member_name);
 			break;
 			default:
-				stdout.printf("%s%s => %s\n", indent, member_name, member_node.get_value().strdup_contents());
+				print("%s%s => %s\n", indent, member_name, member_node.get_value().strdup_contents());
 			break;
 		}
 	}

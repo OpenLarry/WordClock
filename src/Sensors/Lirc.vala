@@ -78,7 +78,7 @@ namespace Lirc {
 				}
 				if (this.con.verbose)
 				{
-					stderr.printf ("%s", (string) buffer);
+					debug((string) buffer);
 				}
 				uint8[] interpreted_key_code_buffer = new uint8[2048];
 				uint8[]  device_conf_buffer = new uint8[2048];
@@ -87,8 +87,8 @@ namespace Lirc {
 				
 				if (((string) buffer).scanf("%Lx %hhx %2047s %2047s\n", out raw_key_code, out repetition_number, interpreted_key_code_buffer, device_conf_buffer) < 4) 
 				{
-					stderr.printf ("Error: unexpected pattern: %s: %s", this.con.prog, (string) buffer);
-					return true;
+					warning("unexpected pattern: %s: %s", this.con.prog, (string) buffer);
+					return Source.CONTINUE;
 				};
 				
 				string interpreted_key_code = (string) interpreted_key_code_buffer;
@@ -99,16 +99,13 @@ namespace Lirc {
 			{
 				return listener_dies();
 			}
-			return true;
+			return Source.CONTINUE;
 		}
 		private bool listener_dies ()
 		{
-			if (this.con.verbose)
-			{
-				stderr.printf ("%s\n",  "Communication with socket interupted. Closing now.");
-			}
+			warning("Communication with socket interupted. Closing now");
 			this.died();
-			return true;
+			return Source.CONTINUE;
 		}
 		public signal void button (string device_conf, string interpreted_key_code, uint8 repetition_number);
 		public signal void died ();

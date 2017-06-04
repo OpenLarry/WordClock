@@ -91,7 +91,7 @@ public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 				dostream = new GLib.DataOutputStream( ostream );
 				dostream.put_string("%u\n".printf(0));
 			} catch( Error e ) {
-				stderr.printf("Error: %s", e.message);
+				warning(e.message);
 			}
 		}
 	}

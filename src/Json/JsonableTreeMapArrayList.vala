@@ -12,8 +12,8 @@ public class WordClock.JsonableTreeMapArrayList<V> : JsonableTreeMap<JsonableArr
 	public JsonableTreeMapArrayList(owned CompareDataFunc<string>? key_compare_func = null, owned EqualDataFunc<V>? value_equal_func = null) {
 		base((owned) key_compare_func, (owned) value_equal_func);
 		
-		if(!this.value_type.is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
-		if(!typeof(V).is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
+		if(!this.value_type.is_a(typeof(Jsonable))) error("Value does not implement Jsonable interface!\n");
+		if(!typeof(V).is_a(typeof(Jsonable))) error("Value does not implement Jsonable interface!\n");
 	}
 	
 	public new void from_json(Json.Node node, string path = "") throws JsonError {

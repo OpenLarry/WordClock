@@ -27,7 +27,7 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 			string[] parts = entry.key.split("-");
 			
 			if(parts.length != 2 || !this.hwinfo.lradcs.has_key(parts[0])) {
-				stderr.printf("Lradc channel does not exist!\n");
+				warning("Lradc channel does not exist");
 				return true;
 			}
 			
@@ -35,7 +35,7 @@ public class WordClock.SensorsObserver : GLib.Object, Jsonable, SignalSource {
 			
 			ParamSpec? pspec = lradc.get_class().find_property(parts[1]);
 			if(pspec == null) {
-				stderr.printf("Lradc property does not exist!\n");
+				warning("Lradc property does not exist");
 				return true;
 			}
 			

@@ -21,6 +21,8 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	}
 	
 	public uint message( string str, MessageType type = MessageType.INFO, int count = 1 ) {
+		debug("Display message: %s (%s)", str, type.to_string());
+		
 		StringRenderer str_renderer = new StringRenderer();
 		str_renderer.string = str;
 		str_renderer.time_format = false;

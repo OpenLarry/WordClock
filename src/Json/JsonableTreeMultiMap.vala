@@ -8,7 +8,7 @@ public class WordClock.JsonableTreeMultiMap<V> : Gee.TreeMultiMap<string,V>, Jso
 	public JsonableTreeMultiMap(owned CompareDataFunc<string>? key_compare_func = null, owned CompareDataFunc<V>? value_compare_func = null) {
 		base((owned) key_compare_func, (owned) value_compare_func);
 		
-		if(!this.value_type.is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
+		if(!this.value_type.is_a(typeof(Jsonable))) error("Value does not implement Jsonable interface!\n");
 	}
 	
 	public Json.Node to_json( string path = "" ) throws JsonError {

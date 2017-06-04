@@ -29,7 +29,7 @@ public class WordClock.LuaSettings : GLib.Object {
 			val = Value(typeof(string));
 			val.set_string(json);
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 			lua.log_message("Error: "+e.message);
 			
 			val = Value(typeof(bool));
@@ -54,7 +54,7 @@ public class WordClock.LuaSettings : GLib.Object {
 			
 			val.set_boolean(true);
 		} catch( Error e ) {
-			stderr.printf("Error: %s\n", e.message);
+			warning(e.message);
 			lua.log_message("Error: "+e.message);
 			
 			val.set_boolean(false);

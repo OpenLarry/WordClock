@@ -58,13 +58,13 @@ public class WordClock.LuaSignals : GLib.Object {
 				
 				val.set_int((int) id);
 			} catch ( RegexError e ) {
-				stderr.printf("Regex Error: %s\n", e.message);
+				warning("Regex error: %s", e.message);
 				lua.log_message("Regex Error: "+e.message);
 				
 				val.set_int(-1);
 			}
 		}else{
-			stderr.printf("Invalid function!");
+			warning("Invalid function");
 			lua.log_message("Invalid function!");
 			
 			val.set_int(-1);
@@ -108,10 +108,11 @@ public class WordClock.LuaSignals : GLib.Object {
 			}else if(lua_reffuncs.has_key(id)) {
 				lua.call_reffunction( lua_reffuncs[id], { signal_name }, ret );
 			}else{
-				stderr.puts("Function to Regex not found!\n"); // should not happen
+				critical("Function to Regex not found!\n"); // should not happen
 			}
 		} catch( LuaError e ) {
-			stderr.printf("Lua error: %s\n", e.message);
+			warning("Lua error: %s", e.message);
+			lua.log_message("Error: "+e.message);
 		}
 		
 		return (bool) ret[0];

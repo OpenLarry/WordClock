@@ -13,6 +13,8 @@ public class WordClock.FirmwareUpdate : GLib.Object {
 		if(running) throw new FirmwareUpdateError.IN_PROGRESS("Another update process is in progress!");
 		running = true;
 		
+		debug("Start firmware update");
+		
 		this.subprocess = new Subprocess(SubprocessFlags.STDIN_PIPE | SubprocessFlags.INHERIT_FDS, "/usr/sbin/flashimage", "-p");
 	}
 	
@@ -30,16 +32,24 @@ public class WordClock.FirmwareUpdate : GLib.Object {
 	}
 	
 	public void finish() throws Error {
+		debug("Finish firmware update");
+		
 		this.subprocess.get_stdin_pipe().flush();
 		this.subprocess.get_stdin_pipe().close();
 	}
 	
 	public void abort() {
+		debug("Abort firmware update");
+		
 		this.subprocess.force_exit();
 	}
 	
 	public void wait_close() throws Error {
+		debug("Wait for process termination");
+		
 		this.subprocess.wait_check();
+		
+		debug("Process ended");
 	}
 }
 

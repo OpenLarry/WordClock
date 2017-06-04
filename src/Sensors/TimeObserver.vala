@@ -30,7 +30,7 @@ public class WordClock.TimeObserver : GLib.Object, Jsonable, SignalSource {
 			int64 dt = this.t2 - this.t1;
 			
 			if (dt < 0 || dt >= 2 * 60) {
-				stdout.printf("TimeObserver: Time disparity of %"+int64.FORMAT+" seconds detected!\n", dt);
+				warning("Time disparity of %"+int64.FORMAT+" seconds detected!\n", dt);
 			}else{
 				foreach(var entry in this.events.entries) {
 					foreach(TimeEvent event in entry.value) {

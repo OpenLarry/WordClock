@@ -39,7 +39,7 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 						}
 					}
 				} catch (Error e) {
-					stderr.printf (e.message);
+					warning(e.message);
 				}
 				
 				return GLib.Source.CONTINUE;
@@ -48,7 +48,7 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 			
 			this.source.attach( MainContext.default() );
 		} catch (Error e) {
-			stderr.printf ("Error: %s\n", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -57,7 +57,7 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 			if(this.source != null) this.source.destroy();
 			if(this.sock != null) this.sock.close();
 		} catch (Error e) {
-			stderr.printf ("Error: %s\n", e.message);
+			warning(e.message);
 		}
 	}
 	

@@ -74,7 +74,7 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 			max = uint8.min( max, range[1] );
 		}
 		
-		if(min > max) stderr.printf("min FPS > max FPS !\n");
+		if(min > max) critical("min FPS > max FPS");
 		
 		driver.set_fps(min);
 	}

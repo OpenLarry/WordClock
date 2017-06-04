@@ -96,7 +96,7 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 			dos = new GLib.DataOutputStream( GLib.File.new_for_path( LRADC_BUFFER_ENABLE.printf(LRADC_DEVICE) ).append_to(FileCreateFlags.NONE) );
 			dos.put_string("0\n");
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -142,10 +142,10 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 			uint stat = channel.add_watch(IOCondition.IN, receive);
 			
 			if(stat == 0) {
-				stderr.printf ("Cannot add watch on IOChannel.\n");
+				warning("Cannot add watch on IOChannel");
 			}
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -159,7 +159,7 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 			
 			running = false;
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 	}
 	
@@ -184,16 +184,16 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 		size_t length = -1;
 
 		if (condition == IOCondition.HUP) {
-			stderr.printf ("The connection has been broken.\n");
-			return false;
+			warning("The connection has been broken");
+			return Source.REMOVE;
 		}
 
 		try {
 			IOStatus status = source.read_chars(buf, out length);
 			
 			if (status == IOStatus.EOF) {
-				stderr.printf("EOF\n");
-				return false;
+				warning("Unexpected EOF");
+				return Source.REMOVE;
 			}
 			
 			uint i=0;
@@ -218,13 +218,13 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 				i += 4;
 			}
 			
-			return true;
+			return Source.CONTINUE;
 		} catch (IOChannelError e) {
-			stderr.printf ("IOChannelError: %s\n", e.message);
-			return false;
+			warning("IOChannelError: %s", e.message);
+			return Source.REMOVE;
 		} catch (ConvertError e) {
-			stderr.printf ("ConvertError: %s\n", e.message);
-			return false;
+			warning("ConvertError: %s", e.message);
+			return Source.REMOVE;
 		}
 	}
 	
@@ -248,7 +248,7 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 			
 			this.scale = float.NAN;
 		} catch( Error e ) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 			return false;
 		}
 		
@@ -270,7 +270,7 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 				this.scale = this.read("scale");
 			}
 		}catch(Error e) {
-			stderr.printf("Error: %s", e.message);
+			warning(e.message);
 		}
 		
 		return (val + this.offset) * this.scale;

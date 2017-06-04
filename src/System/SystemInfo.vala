@@ -45,7 +45,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 					return match_info.fetch(1);
 				}
 			}catch(Error e) {
-				stderr.printf("%s\n",e.message);
+				warning(e.message);
 			}
 			return "none";
 		}
@@ -87,7 +87,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 				
 				return dis.read_line().chomp();
 			} catch( Error e ) {
-				stderr.printf("Error: %s\n", e.message);
+				warning(e.message);
 				return "none";
 			}
 		}
@@ -102,7 +102,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 				
 				return dis.read_line().chomp();
 			} catch( Error e ) {
-				stderr.printf("Error: %s\n", e.message);
+				warning(e.message);
 				return "none";
 			}
 		}

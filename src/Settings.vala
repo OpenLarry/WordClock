@@ -18,6 +18,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 	
 	public void load( string? path = null ) throws Error {
 		JsonHelper.load( this, path ?? this.path );
+		debug("Settings loaded");
 	}
 	
 	public void save( string? path = null ) throws Error {
@@ -26,6 +27,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 			this.timeout = 0;
 		}
 		JsonHelper.save( this, path ?? this.path, true );
+		debug("Settings saved");
 	}
 	
 	public void check_save() throws Error {
@@ -39,7 +41,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 				try{
 					this.save();
 				}catch( Error e ) {
-					stderr.printf("Error: %s\n", e.message);
+					warning(e.message);
 				}
 				return GLib.Source.REMOVE;
 			});

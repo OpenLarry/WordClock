@@ -8,7 +8,7 @@ public class WordClock.JsonableTreeMap<V> : Gee.TreeMap<string,V>, Jsonable {
 	public JsonableTreeMap(owned CompareDataFunc<V>? key_compare_func = null, owned EqualDataFunc<string>? value_equal_func = null) {
 		base((owned) key_compare_func, (owned) value_equal_func);
 		
-		if(!this.value_type.is_a(typeof(Jsonable))) stderr.puts("Value does not implement Jsonable interface!\n");
+		if(!this.value_type.is_a(typeof(Jsonable))) error("Value does not implement Jsonable interface!");
 	}
 	
 	private string[] immutable_keys = {};
