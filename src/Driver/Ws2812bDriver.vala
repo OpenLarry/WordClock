@@ -13,6 +13,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	
 	private Color[,] leds;
 	private uint8[] ports;
+	private bool bottom = false;
 	
 	/**
 	 * New instance of WS2812b driver for controlling RGB-LEDs via framebuffer
@@ -74,21 +75,12 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		// map framebuffer into memory
 		this.fb = Posix.mmap(null, this.fb_var.xres_virtual * this.fb_var.yres_virtual * sizeof(uint16), Posix.PROT_READ|Posix.PROT_WRITE, Posix.MAP_SHARED, this.fd, 0);
 		assert(this.fb!=null);
-		
-		this.clear_fb();
-		
-		// unblank screen - disabled because of driver bug
-		// ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOBLANK, 0 /*FB_BLANK_UNBLANK const missing in vala*/);
-		// assert(ret==0);
-		
-		this.encode_to_fb(false);
 	}
 	
 	/**
 	 * Encode LED color array into framebuffer LED timings
-	 * @param bottom top or bottom part of framebuffer (for vsync, odd or even frame)
 	 */
-	private void encode_to_fb(bool bottom) {
+	private void encode_to_fb() {
 		/*
 		 * Each display pixel (16 bit) is _part_ of one WS2812b bit for all 16 LED strips
 		 * Each WS2812b bit needs 6 pixels:
@@ -97,7 +89,8 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		 * One LED (3x8 bit) needs 3x8x6 - 2 = 142 pixels
 		 */
 		
-		uint pos = (bottom) ? this.fb_var.xres * this.fb_var.yres : 0;
+		// bottom top or bottom part of framebuffer (for vsync, odd or even frame)
+		uint pos = (this.bottom) ? this.fb_var.xres * this.fb_var.yres : 0;
 		
 		// fill framebuffer, generate LED timings
 		for(uint8 led=0; led<this.leds.length[1]; led++) {
@@ -141,9 +134,11 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		}
 		
 		// switch front- and backbuffer
-		this.fb_var.yoffset = (bottom) ? this.fb_var.yres : 0;
+		this.fb_var.yoffset = (this.bottom) ? this.fb_var.yres : 0;
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPAN_DISPLAY, &this.fb_var);
 		assert(ret==0);
+		
+		this.bottom = !this.bottom;
 	}
 	
 	/**
@@ -187,7 +182,6 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	 * @return Result code
 	 */
 	public override int start( FrameRenderer renderer ) {
-		bool bottom = true;
 		int arg = 0;
 		
 		
@@ -219,8 +213,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
 			assert(ret==0);
 			
-			this.encode_to_fb(bottom);
-			bottom = !bottom;
+			this.encode_to_fb();
 		}
 		
 		this.current_fps = 0;
@@ -241,8 +234,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
 		assert(ret==0);
 		
-		this.encode_to_fb(bottom);
-		bottom = !bottom;
+		this.encode_to_fb();
 		
 		// wait for vsync - start render black frame
 		ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
