@@ -389,6 +389,18 @@ public class WordClock.RestServer : Soup.Server {
 					msg.set_status(405);
 				break;
 			}
+		}else if( path.index_of("/signal/") == 0 && path.length > 8 ) {
+			switch(msg.method) {
+				case "POST":
+					(Main.settings.objects["signalrouter"] as SignalRouter).trigger_signal( path.substring(8) );
+					
+					msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
+					msg.set_status(200);
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
 		}else{
 			msg.set_status(404);
 		}

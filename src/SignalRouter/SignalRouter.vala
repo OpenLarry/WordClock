@@ -34,20 +34,18 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	public void add_source( string source_name, SignalSource source ) {
 		sources[source_name] = source;
 		source.action.connect( (name) => {
-			this.action( source_name, name );
+			this.trigger_signal( source_name+","+name );
 		});
 	}
 	
-	
-	protected void action ( string source_name, string action_name ) {
-		if(userevent_sources.contains(new JsonableString(source_name))) {
-			this.trigger_signal("signalrouter,userevent");
+	public void trigger_signal( string signal_name ) {
+		if(signal_name != "signalrouter,userevent") {
+			string[] parts = signal_name.split(",",2);
+			if(parts.length > 0 && userevent_sources.contains(new JsonableString(parts[0]))) {
+				this.trigger_signal("signalrouter,userevent");
+			}
 		}
 		
-		this.trigger_signal( source_name+","+action_name );
-	}
-	
-	public void trigger_signal( string signal_name ) {
 		debug("Trigger signal %s", signal_name);
 		
 		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
