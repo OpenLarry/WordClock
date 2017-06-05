@@ -16,6 +16,23 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	private bool bottom = false;
 	
 	/**
+	 * power consumption in watts
+	 */
+	public float power_consumption {
+		get {
+			uint sum = 0;
+			for(int i=0;i<this.leds.length[0];i++) {
+				for(int j=0;j<this.leds.length[1];j++) {
+					sum += this.leds[i,j].r;
+					sum += this.leds[i,j].g;
+					sum += this.leds[i,j].b;
+				}
+			}
+			return 0.00000000087198f * sum * sum + 0.00037150f * sum + 2.8f;
+		}
+	}
+	
+	/**
 	 * New instance of WS2812b driver for controlling RGB-LEDs via framebuffer
 	 * @param ports Used display ports
 	 * @param leds Number of LEDs per strip
