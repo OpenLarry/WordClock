@@ -80,6 +80,22 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		this.save_config();
 	}
 	
+	public JsonableArrayList<WirelessNetwork> scan_networks() throws SpawnError, RegexError {
+		string output;
+		Process.spawn_sync("/bin", {"nice","-10","iwlist","wlan0","scan"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
+
+		Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
+		MatchInfo match;
+		JsonableArrayList<WirelessNetwork> list = new JsonableArrayList<WirelessNetwork>();
+		if( regex.match( output, 0, out match ) ) {
+			do {
+				list.add(new WirelessNetwork.with_mac(match.fetch(2),match.fetch(1).replace(":","-")));
+			} while ( match.next() );
+		}
+		
+		return list;
+	}
+	
 	private void save_config() throws SpawnError, WirelessNetworkError {
 		string output = "";
 		Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, "save_config"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
@@ -94,12 +110,18 @@ public class WordClock.WirelessNetwork : GLib.Object, Jsonable {
 	public string psk { get; set; default = "*"; }
 	public bool enabled { get; set; default = false; }
 	public bool current { get; set; default = false; }
+	public string mac { get; set; default = ""; }
 	
 	public WirelessNetwork(string ssid = "", string psk = "*", bool enabled = false, bool current = false) {
 		this.ssid = ssid;
 		this.psk = psk;
 		this.enabled = enabled;
 		this.current = current;
+	}
+	
+	public WirelessNetwork.with_mac(string ssid, string mac) {
+		this.ssid = ssid;
+		this.mac = mac;
 	}
 }
 

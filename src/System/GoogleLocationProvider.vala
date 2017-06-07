@@ -92,19 +92,11 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		query.insert("browser","firefox");
 		query.insert("sensor","true");
 		
-		string output;
-		try{
-			Process.spawn_sync("/bin", {"nice","-10","iwlist","wlan0","scan"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-			
-			Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
-			MatchInfo match_weather;
-			if( regex.match( output, 0, out match_weather ) ) {
-				do {
-					query.insert("wifi","mac:"+match_weather.fetch(1).replace(":","-")+"|ssid:"+match_weather.fetch(2));
-				} while ( match_weather.next() );
-			}
-		}catch(Error e) {
-			warning(e.message);
+		
+		WirelessNetworks wireless = new WirelessNetworks();
+		JsonableArrayList<WirelessNetwork> networks = wireless.scan_networks();
+		foreach(WirelessNetwork network in networks) {
+			query.insert("wifi","mac:"+network.mac+"|ssid:"+network.ssid);
 		}
 		
 		uri.set_query_from_form( query );
