@@ -1,5 +1,6 @@
 
 using WordClock;
+using Gee;
 
 /**
  * @author Aaron Larisch
@@ -10,6 +11,9 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	
 	const uint RETRY_COUNT = 10;
 	const uint RETRY_INTERVAL = 60;
+	
+	const uint SCAN_COUNT = 3;
+	const uint SCAN_INTERVAL = 5;
 	
 	public uint refresh_interval {
 		get {
@@ -94,7 +98,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		
 		
 		WirelessNetworks wireless = new WirelessNetworks();
-		JsonableArrayList<WirelessNetwork> networks = wireless.scan_networks();
+		ArrayList<WirelessNetwork> networks = wireless.scan_networks(3);
 		foreach(WirelessNetwork network in networks) {
 			query.insert("wifi","mac:"+network.mac+"|ssid:"+network.ssid);
 		}

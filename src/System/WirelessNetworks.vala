@@ -1,4 +1,5 @@
 using WordClock;
+using Gee;
 
 /**
  * @author Aaron Larisch
@@ -80,20 +81,31 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		this.save_config();
 	}
 	
-	public JsonableArrayList<WirelessNetwork> scan_networks() throws SpawnError, RegexError {
-		string output;
-		Process.spawn_sync("/bin", {"nice","-10","iwlist","wlan0","scan"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
+	public JsonableArrayList<WirelessNetwork> scan_networks(uint8 scan_count = 1, uint8 scan_interval = 5) throws SpawnError, RegexError {
+		TreeSet<WirelessNetwork> networks = new TreeSet<WirelessNetwork>( (a,b) => {
+			int r = a.mac.ascii_casecmp(b.mac);
+			if(r!=0) return r;
+			return a.ssid.ascii_casecmp(b.ssid);
+		} );
+		
+		for(uint8 i=0; i<scan_count; i++) {
+			string output;
+			Process.spawn_sync("/bin", {"nice","-10","iwlist","wlan0","scan"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 
-		Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
-		MatchInfo match;
-		JsonableArrayList<WirelessNetwork> list = new JsonableArrayList<WirelessNetwork>();
-		if( regex.match( output, 0, out match ) ) {
-			do {
-				list.add(new WirelessNetwork.with_mac(match.fetch(2),match.fetch(1).replace(":","-")));
-			} while ( match.next() );
+			Regex regex = /Address: ((?:[\dA-F]{2}:){5}[\dA-F]{2})\n.*ESSID:"(\S+)"/;
+			MatchInfo match;
+			if( regex.match( output, 0, out match ) ) {
+				do {
+					networks.add(new WirelessNetwork.with_mac(match.fetch(2),match.fetch(1).replace(":","-")));
+				} while ( match.next() );
+			}
+			
+			if(i<scan_count-1) Thread.usleep(scan_interval*1000000);
 		}
 		
-		return list;
+		JsonableArrayList<WirelessNetwork> ret = new JsonableArrayList<WirelessNetwork>();
+		ret.add_all(networks);
+		return ret;
 	}
 	
 	private void save_config() throws SpawnError, WirelessNetworkError {
