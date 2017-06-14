@@ -16,6 +16,8 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	private MatrixRenderer[]? overwrite_matrix = null;
 	private DotsRenderer[]? overwrite_dots = null;
 	private BacklightRenderer[]? overwrite_backlight = null;
+	private SourceFunc? overwrite_callback = null;
+	private Cancellable? overwrite_cancellable = null;
 	private uint overwrite_id = 0;
 	
 	public ClockRenderer( ClockWiring wiring, LedDriver driver ) {
@@ -25,11 +27,42 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	
 	public uint set_overwrite( MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight ) {
 		lock(this.overwrite_matrix) {
+			if(this.overwrite_callback != null) {
+				SourceFunc callback = (owned) this.overwrite_callback;
+				Timeout.add_seconds(0, () => {
+					callback();
+					return Source.REMOVE;
+				});
+			}
+			
 			this.overwrite_matrix = matrix;
 			this.overwrite_dots = dots;
 			this.overwrite_backlight = backlight;
+			this.overwrite_callback = null;
+			this.overwrite_cancellable = null;
 			return ++this.overwrite_id;
 		}
+	}
+	
+	public async void async_overwrite(MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight, Cancellable? cancellable = null ) {
+		lock(this.overwrite_matrix) {
+			if(this.overwrite_callback != null) {
+				SourceFunc callback = (owned) this.overwrite_callback;
+				Timeout.add_seconds(0, () => {
+					callback();
+					return Source.REMOVE;
+				});
+			}
+			
+			this.overwrite_matrix = matrix;
+			this.overwrite_dots = dots;
+			this.overwrite_backlight = backlight;
+			this.overwrite_callback = async_overwrite.callback;
+			this.overwrite_cancellable = cancellable;
+			++this.overwrite_id;
+		}
+		
+		yield;
 	}
 	
 	public bool reset_overwrite( uint overwrite_id ) {
@@ -37,9 +70,19 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 			if(overwrite_id != this.overwrite_id) return false;
 			if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) return false;
 			
+			if(this.overwrite_callback != null) {
+				SourceFunc callback = (owned) this.overwrite_callback;
+				Timeout.add_seconds(0, () => {
+					callback();
+					return Source.REMOVE;
+				});
+			}
+			
 			this.overwrite_matrix = null;
 			this.overwrite_dots = null;
 			this.overwrite_backlight = null;
+			this.overwrite_callback = null;
+			this.overwrite_cancellable = null;
 			return true;
 		}
 	}
@@ -98,14 +141,18 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		ClockConfiguration config = this.configurations[this.active];
 		if(config == null) return;
 		
+		uint overwrite_id;
 		MatrixRenderer[]? overwrite_matrix;
 		DotsRenderer[]? overwrite_dots;
 		BacklightRenderer[]? overwrite_backlight;
+		Cancellable? overwrite_cancellable;
 		
 		lock(this.overwrite_matrix) {
 			overwrite_matrix = this.overwrite_matrix;
 			overwrite_dots = this.overwrite_dots;
 			overwrite_backlight = this.overwrite_backlight;
+			overwrite_cancellable = this.overwrite_cancellable;
+			overwrite_id = this.overwrite_id;
 		}
 		
 		bool ret = true;
@@ -143,15 +190,9 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 			}
 		}
 		
-		if(!ret) {
-			lock(this.overwrite_matrix) {
-				if(overwrite_matrix != null || overwrite_dots != null || overwrite_backlight != null) {
-					this.overwrite_matrix = null;
-					this.overwrite_dots = null;
-					this.overwrite_backlight = null;
-				}else{
-					this.active = "";
-				}
+		if(!ret || overwrite_cancellable != null && overwrite_cancellable.is_cancelled()) {
+			if(!this.reset_overwrite(overwrite_id)) {
+				this.active = "";
 			}
 		}
 	}
