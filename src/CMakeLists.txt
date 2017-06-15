@@ -6,6 +6,7 @@ pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(GEE REQUIRED gee-0.8)
 pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
 pkg_check_modules(SDL REQUIRED sdl)
+pkg_check_modules(SDL_IMAGE REQUIRED SDL_image)
 pkg_check_modules(LUAJIT REQUIRED luajit)
 
 set(CFLAGS
@@ -16,6 +17,7 @@ set(CFLAGS
 	${GEE_CFLAGS} ${GEE_OTHER}
 	${JSON_GLIB_CFLAGS} ${JSON_GLIB_OTHER}
 	${SDL_CFLAGS} ${SDL_OTHER}
+	${SDL_IMAGE_CFLAGS} ${SDL_IMAGE_OTHER}
 	${LUAJIT_CFLAGS} ${LUAJIT_OTHER}
 )
 add_definitions(${CFLAGS})
@@ -28,7 +30,7 @@ set(LIBS
 	${GEE_LIBRARIES}
 	${JSON_GLIB_LIBRARIES}
 	${SDL_LIBRARIES}
-	SDL_image
+	${SDL_IMAGE_LIBRARIES}
 	${LUAJIT_LIBRARIES}
 )
 link_libraries(${LIBS})
@@ -41,6 +43,7 @@ set(LIB_PATHS
 	${GEE_LIBRARY_DIRS}
 	${JSON_GLIB_LIBRARY_DIRS}
 	${SDL_LIBRARY_DIRS}
+	${SDL_IMAGE_LIBRARY_DIRS}
 	${LUAJIT_LIBRARY_DIRS}
 )
 link_directories(${LIB_PATHS})
