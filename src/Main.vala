@@ -35,6 +35,10 @@ public class WordClock.Main : GLib.Object {
 			Log.default_handler(log_domain, log_levels, message);
 		});
 		
+		Process.signal(ProcessSignal.ILL, () => { error("Illegal instruction"); });
+		Process.signal(ProcessSignal.FPE, () => { error("Floating-point exception"); });
+		Process.signal(ProcessSignal.SEGV, () => { error("Segmentation fault"); });
+		
 		if( !Thread.supported() ) {
 			error("Cannot run without threads");
 		}
