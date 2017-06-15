@@ -10,6 +10,6 @@ public class WordClock.MessageSink : GLib.Object, Jsonable, SignalSink {
 	public string message_type { get; set; default = "INFO"; }
 	
 	public void action () {
-		(Main.settings.objects["message"] as MessageOverlay).message(this.text, MessageType.from_string( this.message_type ), (int) this.count.clamp(1,int.MAX));
+		(Main.settings.objects["message"] as MessageOverlay).message.begin(this.text, MessageType.from_string( this.message_type ), (int) this.count.clamp(1,int.MAX));
 	}
 }

@@ -5,21 +5,25 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.OWMWeatherSink : GLib.Object, Jsonable, SignalSink {
-	private uint? message_id = null;
+	private Cancellable? message = null;
 	
 	public void action() {
+		this.async_action.begin();
+	}
+	
+	public async void async_action() {
 		// stop current message
-		if(this.message_id != null) {
-			if((Main.settings.objects["message"] as MessageOverlay).stop(this.message_id)) {
-				this.message_id = null;
-				return;
-			}
+		if(this.message != null) {
+			this.message.cancel();
+			return;
 		}
 		
 		OWMWeatherInfo? weather = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
 		if(weather==null) return;
 		
-		this.message_id = (Main.settings.objects["message"] as MessageOverlay).info( "%s: %.1f°C %s".printf( weather.name, weather.main.temp, weather.weather.size > 0 ? weather.weather[0].description : "") );
+		this.message = new Cancellable();
+		yield (Main.settings.objects["message"] as MessageOverlay).message( "%s: %.1f°C %s".printf( weather.name, weather.main.temp, weather.weather.size > 0 ? weather.weather[0].description : ""), MessageType.INFO, 1, this.message);
+		this.message = null;
 	}
 	
 }

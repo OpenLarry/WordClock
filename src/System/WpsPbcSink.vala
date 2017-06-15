@@ -8,7 +8,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	private static Cancellable cancellable = null;
 	private static Thread<int> thread;
 	
-	private static uint message_id;
+	private static Cancellable message;
 	
 	public void action () {
 		lock(cancellable) {
@@ -29,7 +29,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	}
 	
 	private static int run_wps() {
-		message_id = (Main.settings.objects["message"] as MessageOverlay).info("WPS",-1);
+		message = (Main.settings.objects["message"] as MessageOverlay).info("WPS",-1);
 		debug("Starting wps");
 		try{
 			Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_pbc"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
@@ -42,7 +42,7 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				Thread.usleep(1000000);
 			} while(!cancellable.is_cancelled() && (output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED") || output.contains("wpa_state=INTERFACE_DISABLED")));
 			
-			(Main.settings.objects["message"] as MessageOverlay).stop(message_id);
+			message.cancel();
 			
 			if(cancellable.is_cancelled()) {
 				debug("Cancel wps");

@@ -7,10 +7,13 @@ using WordClock, Lua, Gee;
 public class WordClock.LuaMessage : GLib.Object {
 	private static Lua lua;
 	private static MessageOverlay message_overlay;
+	private static TreeMap<uint, Cancellable> cancellable_map;
+	private static uint cancellable_id = 0;
 	
 	public static void init(Lua lua, MessageOverlay message_overlay) {
 		LuaMessage.message_overlay = message_overlay;
 		LuaMessage.lua = lua;
+		cancellable_map = new TreeMap<uint, Cancellable>();
 		
 		lua.init.connect(() => {
 			lua.register_func("message", message);
@@ -33,7 +36,12 @@ public class WordClock.LuaMessage : GLib.Object {
 		
 		
 		Value val = Value(typeof(uint));
-		val.set_uint(message_overlay.message(text, type, count));
+		cancellable_map[++cancellable_id] = new Cancellable();
+		uint id = cancellable_id;
+		message_overlay.message.begin(text, type, count, cancellable_map[cancellable_id], (obj,res) => {
+			cancellable_map.unset(id);
+		});
+		val.set_uint(cancellable_id);
 		
 		lua.push_value(val);
 		
@@ -44,7 +52,13 @@ public class WordClock.LuaMessage : GLib.Object {
 		int id = vm.to_integer(1);
 		
 		Value val = Value(typeof(bool));
-		val.set_boolean(message_overlay.stop(id));
+		if(cancellable_map[id] != null) {
+			cancellable_map[id].cancel();
+			
+			val.set_boolean(true);
+		}else{
+			val.set_boolean(false);
+		}
 		
 		lua.push_value(val);
 		

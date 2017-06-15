@@ -20,7 +20,7 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 		this.renderer = renderer;
 	}
 	
-	public uint message( string str, MessageType type = MessageType.INFO, int count = 1 ) {
+	public async void message( string str, MessageType type = MessageType.INFO, int count = 1, Cancellable? cancellable = null ) {
 		debug("Display message: %s (%s)", str, type.to_string());
 		
 		StringRenderer str_renderer = new StringRenderer();
@@ -53,27 +53,29 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 			break;
 		}
 		
-		return this.renderer.set_overwrite( { background, str_renderer }, { background }, { background } );
+		yield this.renderer.async_overwrite( { background, str_renderer }, { background }, { background }, cancellable );
+		
+		debug("Display message finished"); 
 	}
 	
-	public uint error( string str, int count = 1 ) {
-		return this.message( str, MessageType.ERROR, count );
+	public Cancellable error( string str, int count = 1, Cancellable cancellable = new Cancellable() ) {
+		this.message.begin( str, MessageType.ERROR, count, cancellable );
+		return cancellable;
 	}
 	
-	public uint warning( string str, int count = 1 ) {
-		return this.message( str, MessageType.WARNING, count );
+	public Cancellable warning( string str, int count = 1, Cancellable cancellable = new Cancellable() ) {
+		this.message.begin( str, MessageType.WARNING, count, cancellable );
+		return cancellable;
 	}
 	
-	public uint info( string str, int count = 1 ) {
-		return this.message( str, MessageType.INFO, count );
+	public Cancellable info( string str, int count = 1, Cancellable cancellable = new Cancellable() ) {
+		this.message.begin( str, MessageType.INFO, count, cancellable );
+		return cancellable;
 	}
 	
-	public uint success( string str, int count = 1 ) {
-		return this.message( str, MessageType.SUCCESS, count );
-	}
-	
-	public bool stop(uint id) {
-		return this.renderer.reset_overwrite(id);
+	public Cancellable success( string str, int count = 1, Cancellable cancellable = new Cancellable() ) {
+		this.message.begin( str, MessageType.SUCCESS, count, cancellable );
+		return cancellable;
 	}
 }
 

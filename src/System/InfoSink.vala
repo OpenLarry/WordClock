@@ -7,18 +7,22 @@ using WordClock;
 public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 	const string INTERFACE = "wlan0";
 	
-	private uint? message_id = null;
+	private Cancellable? message = null;
 	
-	public void action () {
+	public void action() {
+		this.async_action.begin();
+	}
+	
+	public async void async_action () {
 		// stop current message
-		if(this.message_id != null) {
-			if((Main.settings.objects["message"] as MessageOverlay).stop(this.message_id)) {
-				this.message_id = null;
-				return;
-			}
+		if(this.message != null) {
+			this.message.cancel();
+			return;
 		}
 		
 		SystemInfo systeminfo = new SystemInfo();
-		this.message_id = (Main.settings.objects["message"] as MessageOverlay).info(@"WordClock $(Version.GIT_DESCRIBE)  IP: $(systeminfo.ip)  Host: $(systeminfo.hostname)  WLAN: $(systeminfo.wlan)  Kernel: $(systeminfo.kernel)");
+		this.message = new Cancellable();
+		yield (Main.settings.objects["message"] as MessageOverlay).message(@"WordClock $(Version.GIT_DESCRIBE)  IP: $(systeminfo.ip)  Host: $(systeminfo.hostname)  WLAN: $(systeminfo.wlan)  Kernel: $(systeminfo.kernel)", MessageType.INFO, 1, this.message);
+		this.message = null;
 	}
 }
