@@ -218,7 +218,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 				this.current_fps = this.frame - last_frame;
 				
 				// call update function in main thread, need to safe time here!
-				Timeout.add_seconds(0, () => {
+				Idle.add(() => {
 					this.update();
 					return Source.REMOVE;
 				});
@@ -235,7 +235,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		this.current_fps = 0;
 		// call update function in main thread, need to safe time here!
-		Timeout.add_seconds(0, () => {
+		Idle.add(() => {
 			this.update();
 			return Source.REMOVE;
 		});
