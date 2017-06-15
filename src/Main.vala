@@ -114,7 +114,9 @@ public class WordClock.Main : GLib.Object {
 			BootSequenceRenderer boot = new BootSequenceRenderer();
 			ColorRenderer black = new ColorRenderer();
 			black.color.set_hsv(0,0,0);
-			renderer.set_overwrite( { black, boot }, { black, boot }, { black, boot } );
+			renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
+				debug("Boot sequence finished");
+			});
 		}
 		
 		debug("Init LRADCs");

@@ -53,7 +53,7 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 			break;
 		}
 		
-		yield this.renderer.async_overwrite( { background, str_renderer }, { background }, { background }, cancellable );
+		yield this.renderer.overwrite( { background, str_renderer }, { background }, { background }, cancellable );
 		
 		debug("Display message finished"); 
 	}
