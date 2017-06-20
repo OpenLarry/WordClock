@@ -9,6 +9,7 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 	public Color right_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public uint8 speed { get; set; default = 15; }
 	public uint8 add_spacing { get; set; default = 1; }
+	public int position { get; set; default = 0; }
 	
 	public string font_name {
 		owned get {
@@ -56,13 +57,21 @@ public class WordClock.StringRenderer : GLib.Object, Jsonable, ClockRenderable, 
 			this.rendered_str = this.font.render_str(str, add_spacing);
 		}
 		
-		
-		var pos = ((get_monotonic_time() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
-		if(pos >= this.rendered_str.length) {
-			if(count >= 0 && count-- == 0) return false;
-			
-			this.start_time = get_monotonic_time();
-			pos = -leds_matrix.length[0] + 1;
+		int pos = 0;
+		if(this.speed > 0) {
+			pos = (int) ((get_monotonic_time() - this.start_time)/(1000000/this.speed)) - leds_matrix.length[0] + 1;
+			if(pos >= this.rendered_str.length) {
+				if(count >= 0 && count-- == 0) return false;
+				
+				this.start_time = get_monotonic_time();
+				pos = -leds_matrix.length[0] + 1;
+			}
+		}else{
+			if(this.position >= 0) {
+				pos = this.position - leds_matrix.length[0] + 1;
+			}else{
+				pos = this.position + this.rendered_str.length;
+			}
 		}
 		
 		for(int i=0; i<leds_matrix.length[0]; i++) {
