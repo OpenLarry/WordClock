@@ -19,19 +19,24 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	private SourceFunc? overwrite_callback = null;
 	private Cancellable? overwrite_cancellable = null;
 	
+	public enum ReturnReason {
+		CANCELLED,
+		TERMINATED,
+		REPLACED
+	}
+	
 	public ClockRenderer( ClockWiring wiring, LedDriver driver ) {
 		this.wiring = wiring;
 		this.driver = driver;
 	}
 	
-	public async void overwrite(MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight, Cancellable? cancellable = null ) {
+	public async ReturnReason overwrite(MatrixRenderer[]? matrix, DotsRenderer[]? dots, BacklightRenderer[]? backlight, Cancellable? cancellable = null ) {
+		debug("Set overwrite renderer");
+		
+		SourceFunc? callback = null;
 		lock(this.overwrite_matrix) {
 			if(this.overwrite_callback != null) {
-				SourceFunc callback = (owned) this.overwrite_callback;
-				Idle.add(() => {
-					callback();
-					return Source.REMOVE;
-				});
+				callback = (owned) this.overwrite_callback;
 			}
 			
 			this.overwrite_matrix = matrix;
@@ -41,19 +46,31 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 			this.overwrite_cancellable = cancellable;
 		}
 		
+		if(callback != null) {
+			callback();
+		}
+		
 		yield;
+		
+		if(cancellable.is_cancelled()) {
+			debug("Unset overwrite renderer: CANCELLED");
+			return ReturnReason.CANCELLED;
+		}else if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) {
+			debug("Unset overwrite renderer: TERMINATED");
+			return ReturnReason.TERMINATED;
+		}else{
+			debug("Unset overwrite renderer: REPLACED");
+			return ReturnReason.REPLACED;
+		}
 	}
 	
 	private bool reset_overwrite() {
 		lock(this.overwrite_matrix) {
 			if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) return false;
 			
+			SourceFunc? callback = null;
 			if(this.overwrite_callback != null) {
-				SourceFunc callback = (owned) this.overwrite_callback;
-				Idle.add(() => {
-					callback();
-					return Source.REMOVE;
-				});
+				callback = (owned) this.overwrite_callback;
 			}else{
 				critical("Reset overwrite without callback");
 			}
@@ -63,6 +80,14 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 			this.overwrite_backlight = null;
 			this.overwrite_callback = null;
 			this.overwrite_cancellable = null;
+			
+			if(callback != null) {
+				Idle.add(() => {
+					callback();
+					return Source.REMOVE;
+				});
+			}
+			
 			return true;
 		}
 	}
