@@ -137,6 +137,7 @@ set(VALA_SRC
 	System/OWMWeatherSink.vala
 	System/WirelessNetworks.vala
 	System/FirmwareUpdate.vala
+	System/StringChooser.vala
 	Statistic.vala
 	Version.vala
 )
