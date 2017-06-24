@@ -52,22 +52,22 @@ public class WordClock.WirelessNetworks : GLib.Object {
 			}
 			return id;
 		}else{
-			throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli add_network failed!");
+			throw new WirelessNetworkError.ADD_NETWORK_FAILED("Add network failed!");
 		}
 	}
 	
 	public void edit_network(uint id, WirelessNetwork network) throws SpawnError, WirelessNetworkError {
 		string output = "";
 		Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, "set_network", id.to_string(), "ssid", "\""+network.ssid+"\""}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-		if(output != "OK\n") throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli set_network ssid failed!");;
+		if(output != "OK\n") throw new WirelessNetworkError.SET_NETWORK_SSID_FAILED("Set network ssid failed!");;
 		
 		if(network.psk != "*") {
 			Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, "set_network", id.to_string(), "psk", "\""+network.psk+"\""}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-			if(output != "OK\n") throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli set_network psk failed! (Key too short?)");
+			if(output != "OK\n") throw new WirelessNetworkError.SET_NETWORK_PSK_FAILED("Set network psk failed! (Key too short?)");
 		}
 		
 		Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, network.enabled ? "enable_network" : "disable_network", id.to_string()}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-		if(output != "OK\n") throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli enable_network/disable_network failed!");
+		if(output != "OK\n") throw new WirelessNetworkError.ENABLEDISABLE_NETWORK_FAILED("Enable/disable network failed!");
 		
 		this.save_config();
 	}
@@ -76,7 +76,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		string output = "";
 		Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, "remove_network", id.to_string()}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 		
-		if(output != "OK\n") throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli remove_network failed!");
+		if(output != "OK\n") throw new WirelessNetworkError.REMOVE_NETWORK_FAILED("Remove network failed!");
 		
 		this.save_config();
 	}
@@ -112,7 +112,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		string output = "";
 		Process.spawn_sync("/usr/sbin", {"wpa_cli", "-i"+INTERFACE, "save_config"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
 		
-		if(output != "OK\n") throw new WirelessNetworkError.COMMAND_FAILED("wpa_cli save_config failed!");
+		if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Save config failed!");
 	}
 }
 
@@ -138,5 +138,10 @@ public class WordClock.WirelessNetwork : GLib.Object, Jsonable {
 }
 
 public errordomain WordClock.WirelessNetworkError {
-	COMMAND_FAILED
+	ADD_NETWORK_FAILED,
+	SET_NETWORK_SSID_FAILED,
+	SET_NETWORK_PSK_FAILED,
+	REMOVE_NETWORK_FAILED,
+	ENABLEDISABLE_NETWORK_FAILED,
+	SAVE_CONFIG_FAILED
 }
