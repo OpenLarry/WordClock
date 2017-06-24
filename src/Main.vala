@@ -91,6 +91,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(MessageSink);
 		type = typeof(SignalDelayerSink);
 		type = typeof(OWMWeatherSink);
+		type = typeof(WirelessNetworkInputSink);
 		
 		type = typeof(GoogleLocationProvider);
 		type = typeof(StaticLocationProvider);

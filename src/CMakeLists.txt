@@ -139,6 +139,7 @@ set(VALA_SRC
 	System/FirmwareUpdate.vala
 	System/StringChooser.vala
 	System/StringInput.vala
+	System/WirelessNetworkInputSink.vala
 	Statistic.vala
 	Version.vala
 )
