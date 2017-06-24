@@ -1177,6 +1177,11 @@
             "-type" : "WordClockInfoSink"
           }
         ],
+        "remote,R3-10" : [
+          {
+            "-type" : "WordClockWirelessNetworkInputSink"
+          }
+        ],
         "remote,R4" : [
           {
             "delay" : 3,
