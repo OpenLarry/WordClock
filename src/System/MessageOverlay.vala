@@ -20,7 +20,7 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 		this.renderer = renderer;
 	}
 	
-	public async void message( string str, MessageType type = MessageType.INFO, int count = 1, Cancellable? cancellable = null ) {
+	public async ClockRenderer.ReturnReason message( string str, MessageType type = MessageType.INFO, int count = 1, Cancellable? cancellable = null ) {
 		debug("Display message: %s (%s)", str, type.to_string());
 		
 		StringRenderer str_renderer = new StringRenderer();
@@ -53,9 +53,10 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 			break;
 		}
 		
-		yield this.renderer.overwrite( { background, str_renderer }, { background }, { background }, cancellable );
+		ClockRenderer.ReturnReason reason = yield this.renderer.overwrite( { background, str_renderer }, { background }, { background }, cancellable );
 		
 		debug("Display message finished"); 
+		return reason;
 	}
 	
 	public Cancellable error( string str, int count = 1, Cancellable cancellable = new Cancellable() ) {
