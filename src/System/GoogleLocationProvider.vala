@@ -7,7 +7,7 @@ using Gee;
  * @version 1.0
  */
 public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
-	const string GOOGLE_LOCATION_API = "https://maps.googleapis.com/maps/api/browserlocation/json";
+	const string GOOGLE_LOCATION_API = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAY8X2PHxod0tWS5BC-HGFl_t6BQLrIVEc";
 	
 	const uint RETRY_COUNT = 10;
 	const uint RETRY_INTERVAL = 60;
@@ -90,33 +90,37 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		ses.proxy_resolver = null;
 		ses.ssl_strict = false;
 		ses.tls_database = null;
-		Soup.URI uri = new Soup.URI(GOOGLE_LOCATION_API);
-		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
 		
-		query.insert("browser","firefox");
-		query.insert("sensor","true");
-		
+		// generate request body
+		Json.Array arr = new Json.Array();
 		
 		WirelessNetworks wireless = new WirelessNetworks();
 		ArrayList<WirelessNetwork> networks = wireless.scan_networks(3);
 		foreach(WirelessNetwork network in networks) {
-			query.insert("wifi","mac:"+network.mac+"|ssid:"+network.ssid);
+			Json.Object obj = new Json.Object();
+			obj.set_string_member("macAddress",network.mac);
+			arr.add_object_element(obj);
 		}
 		
-		uri.set_query_from_form( query );
+		Json.Object obj = new Json.Object();
+		obj.set_array_member("wifiAccessPoints",arr);
 		
-		debug("Request URL %s", uri.to_string(false));
-		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
+		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
+		node.take_object(obj);
+		
+		// send request
+		Soup.Message msg = new Soup.Message("POST", GOOGLE_LOCATION_API);
+		msg.set_request("application/json", Soup.MemoryUse.COPY, JsonHelper.to_string(node).data);
+		
+		debug("Send request to Google Location API");
 		ses.send_message(msg);
 		
 		if(msg.status_code != 200) throw new IOError.FAILED("Got status code: %u: %s\n", msg.status_code, msg.reason_phrase);
 		
-		Json.Node node = JsonHelper.from_string( (string) msg.response_body.data );
+		// parse reponse body
+		node = JsonHelper.from_string( (string) msg.response_body.data );
 		
-		Json.Object obj;
 		if(node.get_node_type() == Json.NodeType.OBJECT &&
-		   node.get_object().has_member("status") &&
-		   node.get_object().get_string_member("status") == "OK" &&
 		   node.get_object().has_member("accuracy") &&
 		   node.get_object().has_member("location")) {
 			obj = node.get_object().get_object_member("location");

@@ -96,7 +96,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 			MatchInfo match;
 			if( regex.match( output, 0, out match ) ) {
 				do {
-					networks.add(new WirelessNetwork.with_mac(match.fetch(2),match.fetch(1).replace(":","-")));
+					networks.add(new WirelessNetwork.with_mac(match.fetch(2),match.fetch(1)));
 				} while ( match.next() );
 			}
 			
