@@ -179,7 +179,7 @@ public class WordClock.Main : GLib.Object {
 		Lua lua = new Lua();
 		
 		debug("Init Settings");
-		settings = new Settings("/etc/wordclock/settings.json");
+		settings = new Settings();
 		settings.objects["clockrenderer"] = renderer;
 		settings.objects["signalrouter"] = signalrouter;
 		settings.objects["sensorsobserver"] = sensorsobserver;
@@ -211,8 +211,7 @@ public class WordClock.Main : GLib.Object {
 				Buzzer.beep(200,2000,255);
 				
 				message.info("Loading default settings...");
-				debug("Loading default settings");
-				settings.load("/etc/wordclock/defaults.json");
+				settings.load("defaults");
 			}else{
 				try {
 					settings.load();
@@ -223,10 +222,10 @@ public class WordClock.Main : GLib.Object {
 						warning("Lua error: %s", e.message);
 					}
 				} catch ( Error e ) {
-					if( !(e is FileError.NOENT) ) {
-						warning("Loading settings failed: %s", e.message);
-						message.error("Loading settings failed! Resetting to defaults...");
-						
+					critical("Loading settings failed: %s", e.message);
+					message.error("Loading settings failed! Resetting to defaults...");
+					
+					if(args.length <= 1 || args[1] != "-s") {
 						Buzzer.beep(200,2000,255);
 						Thread.usleep(200000);
 						Buzzer.beep(200,2000,255);
@@ -234,9 +233,7 @@ public class WordClock.Main : GLib.Object {
 						Buzzer.beep(200,2000,255);
 					}
 					
-
-					debug("Loading default settings");
-					settings.load("/etc/wordclock/defaults.json");
+					settings.load("defaults");
 				}
 			}
 			

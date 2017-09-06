@@ -55,6 +55,7 @@ set(VALA_SRC
 	Main.vala
 	RestServer.vala
 	Settings.vala
+	SettingsMigrator.vala
 	Lua/Lua.vala
 	Lua/LuaSignals.vala
 	Lua/LuaSettings.vala

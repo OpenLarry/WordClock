@@ -1,3 +1,38 @@
 class WordClock.Version : GLib.Object {
 	public const string GIT_DESCRIBE = "@GIT_DESCRIBE@";
+	
+	public static bool is_official(string version = GIT_DESCRIBE) {
+		if(version == "") return true; // legacy
+		return /^v(\d+\.?)+$/.match(version);
+	}
+	
+	public static int compare( string a, string b ) {
+		if(a == b) return 0;
+		Regex regex = /\d+/;
+		
+		int a_val = 0;
+		int b_val = 0;
+		
+		MatchInfo a_info;
+		if(regex.match(a, 0, out a_info)) {
+			string? str = a_info.fetch(0);
+			if(str != null) a_val = int.parse(str);
+		}
+		MatchInfo b_info;
+		if(regex.match(b, 0, out b_info)) {
+			string? str = b_info.fetch(0);
+			if(str != null) b_val = int.parse(str);
+		}
+		
+		if(a_val == b_val) {
+			int end;
+			string a_new="", b_new="";
+			if(a_info.fetch_pos(0, null, out end) && end < a.length-1) a_new = a.substring(end+1);
+			if(b_info.fetch_pos(0, null, out end) && end < b.length-1) b_new = b.substring(end+1);
+			
+			return compare(a_new, b_new);
+		}else{
+			return a_val - b_val;
+		}
+	}
 }
