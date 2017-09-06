@@ -5,6 +5,8 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.OWMWeatherSink : GLib.Object, Jsonable, SignalSink {
+	public string template = "{TEMP} {DESCRIPTION} - {CITY}";
+	
 	private Cancellable? message = null;
 	
 	public void action() {
@@ -22,7 +24,13 @@ public class WordClock.OWMWeatherSink : GLib.Object, Jsonable, SignalSink {
 		if(weather==null) return;
 		
 		this.message = new Cancellable();
-		yield (Main.settings.objects["message"] as MessageOverlay).message( "%s: %.1f°C %s".printf( weather.name, weather.main.temp, weather.weather.size > 0 ? weather.weather[0].description : ""), MessageType.INFO, 1, this.message);
+		
+		string str = template;
+		str = str.replace("{TEMP}", "%.1f°C".printf(weather.main.temp));
+		str = str.replace("{DESCRIPTION}",weather.weather.size > 0 ? weather.weather[0].description : "");
+		str = str.replace("{CITY}", weather.name);
+		
+		yield (Main.settings.objects["message"] as MessageOverlay).message(str, MessageType.INFO, 1, this.message);
 		this.message = null;
 	}
 	
