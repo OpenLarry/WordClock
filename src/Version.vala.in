@@ -1,4 +1,4 @@
-class WordClock.Version : GLib.Object {
+public class WordClock.Version : GLib.Object {
 	public const string GIT_DESCRIBE = "@GIT_DESCRIBE@";
 	
 	public static bool is_official(string version = GIT_DESCRIBE) {
