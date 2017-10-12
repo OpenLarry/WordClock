@@ -5,8 +5,6 @@ pkg_check_modules(GIO_UNIX REQUIRED gio-unix-2.0)
 pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(GEE REQUIRED gee-0.8)
 pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
-pkg_check_modules(SDL REQUIRED sdl)
-pkg_check_modules(SDL_IMAGE REQUIRED SDL_image)
 pkg_check_modules(LUAJIT REQUIRED luajit)
 pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(PANGO REQUIRED pango)
@@ -19,8 +17,6 @@ set(CFLAGS
 	${GIO_CFLAGS} ${GIO_CFLAGS_OTHER}
 	${GEE_CFLAGS} ${GEE_OTHER}
 	${JSON_GLIB_CFLAGS} ${JSON_GLIB_OTHER}
-	${SDL_CFLAGS} ${SDL_OTHER}
-	${SDL_IMAGE_CFLAGS} ${SDL_IMAGE_OTHER}
 	${LUAJIT_CFLAGS} ${LUAJIT_OTHER}
 	${CAIRO_CFLAGS} ${CAIRO_OTHER}
 	${PANGO_CFLAGS} ${PANGO_OTHER}
@@ -35,8 +31,6 @@ set(LIBS
 	${GIO_LIBRARIES}
 	${GEE_LIBRARIES}
 	${JSON_GLIB_LIBRARIES}
-	${SDL_LIBRARIES}
-	${SDL_IMAGE_LIBRARIES}
 	${LUAJIT_LIBRARIES}
 	${CAIRO_LIBRARIES}
 	${PANGO_LIBRARIES}
@@ -51,8 +45,6 @@ set(LIB_PATHS
 	${GIO_LIBRARY_DIRS}
 	${GEE_LIBRARY_DIRS}
 	${JSON_GLIB_LIBRARY_DIRS}
-	${SDL_LIBRARY_DIRS}
-	${SDL_IMAGE_LIBRARY_DIRS}
 	${LUAJIT_LIBRARY_DIRS}
 	${CAIRO_LIBRARY_DIRS}
 	${PANGO_LIBRARY_DIRS}
@@ -168,14 +160,10 @@ PACKAGES
 	gio-2.0
 	gee-0.8
 	json-glib-1.0
-	sdl
-	sdl-image
 	lua
 	cairo
 	pango
 	pangocairo
-	# poppler-glib
-	# gtk+-2.0
 	posix
 	linux
 OPTIONS 
@@ -193,7 +181,8 @@ add_executable(wordclock
 )
 
 # null coalescing operator does not work as expected in Color class if -ftree-dse is enabled
-add_definitions(-w -fno-tree-dse -DG_LOG_DOMAIN=\"WordClock\")
+# _GNU_SOURCE needed for SCHED_IDLE
+add_definitions(-w -fno-tree-dse -DG_LOG_DOMAIN=\"WordClock\" -D_GNU_SOURCE=1)
 
 # explicitly add libraries (needed e.g. for Fedora 13+)
 target_link_libraries(wordclock -lm)

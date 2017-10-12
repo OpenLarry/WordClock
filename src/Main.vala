@@ -1,5 +1,4 @@
 using WordClock;
-using SDLImage;
 
 /**
  * @author Aaron Larisch
