@@ -89,6 +89,61 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			}
 		};
 		
+		migration_funcs["v0.8"] = (ref node) => {
+			debug("Update $.objects.clockrenderer.renderers: Replace StringRenderer with TextRenderer");
+			Json.Node renderers = get_first_node("$.objects.clockrenderer.renderers", ref node);
+			
+			if(renderers.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+			
+			foreach(unowned Json.Node renderer in renderers.get_object().get_values()) {
+				if(renderer.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+				
+				if(!renderer.get_object().has_member("-type")) continue;
+				if(renderer.get_object().get_member("-type").get_node_type() != Json.NodeType.VALUE) continue;
+				if(renderer.get_object().get_string_member("-type") != "WordClockStringRenderer") continue;
+				
+				if(renderer.get_object().has_member("left-color")) {
+					Json.Node member = renderer.get_object().get_member("left-color");
+					renderer.get_object().remove_member("left-color");
+					renderer.get_object().set_member("color", member);
+				}
+				if(renderer.get_object().has_member("right-color")) {
+					renderer.get_object().remove_member("right-color");
+				}
+				if(renderer.get_object().has_member("speed")) {
+					Json.Node member = renderer.get_object().get_member("speed");
+					renderer.get_object().remove_member("speed");
+					renderer.get_object().set_member("x-speed", member);
+				}
+				if(renderer.get_object().has_member("position")) {
+					Json.Node member = renderer.get_object().get_member("position");
+					renderer.get_object().remove_member("position");
+					renderer.get_object().set_member("x-offset", member);
+				}
+				if(renderer.get_object().has_member("add-spacing")) {
+					Json.Node member = renderer.get_object().get_member("add-spacing");
+					renderer.get_object().remove_member("add-spacing");
+					renderer.get_object().set_member("letter-spacing", member);
+				}
+				if(renderer.get_object().has_member("font-name")) {
+					Json.Node member = renderer.get_object().get_member("font-name");
+					if(member.get_node_type() == Json.NodeType.VALUE && member.get_string() == "WordClockHugeMicrosoftSansSerifFont") {
+						renderer.get_object().set_string_member("font", "DejaVuSans 10.5");
+						renderer.get_object().set_int_member("y-offset", 9);
+						renderer.get_object().set_int_member("hint-style", 3);
+					}
+					renderer.get_object().remove_member("font-name");
+				}
+				if(renderer.get_object().has_member("string")) {
+					Json.Node member = renderer.get_object().get_member("string");
+					renderer.get_object().remove_member("string");
+					renderer.get_object().set_member("text", member);
+				}
+				
+				renderer.get_object().set_string_member("-type","WordClockTextRenderer");
+			}
+		};
+		
 		return migration_funcs;
 	}
 	

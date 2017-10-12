@@ -8,6 +8,9 @@ pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
 pkg_check_modules(SDL REQUIRED sdl)
 pkg_check_modules(SDL_IMAGE REQUIRED SDL_image)
 pkg_check_modules(LUAJIT REQUIRED luajit)
+pkg_check_modules(CAIRO REQUIRED cairo)
+pkg_check_modules(PANGO REQUIRED pango)
+pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
 
 set(CFLAGS
 	${GOBJECT_CFLAGS} ${GOBJECT_CFLAGS_OTHER}
@@ -19,6 +22,9 @@ set(CFLAGS
 	${SDL_CFLAGS} ${SDL_OTHER}
 	${SDL_IMAGE_CFLAGS} ${SDL_IMAGE_OTHER}
 	${LUAJIT_CFLAGS} ${LUAJIT_OTHER}
+	${CAIRO_CFLAGS} ${CAIRO_OTHER}
+	${PANGO_CFLAGS} ${PANGO_OTHER}
+	${PANGOCAIRO_CFLAGS} ${PANGOCAIRO_OTHER}
 )
 add_definitions(${CFLAGS})
 
@@ -32,6 +38,9 @@ set(LIBS
 	${SDL_LIBRARIES}
 	${SDL_IMAGE_LIBRARIES}
 	${LUAJIT_LIBRARIES}
+	${CAIRO_LIBRARIES}
+	${PANGO_LIBRARIES}
+	${PANGOCAIRO_LIBRARIES}
 )
 link_libraries(${LIBS})
 
@@ -45,6 +54,9 @@ set(LIB_PATHS
 	${SDL_LIBRARY_DIRS}
 	${SDL_IMAGE_LIBRARY_DIRS}
 	${LUAJIT_LIBRARY_DIRS}
+	${CAIRO_LIBRARY_DIRS}
+	${PANGO_LIBRARY_DIRS}
+	${PANGOCAIRO_LIBRARY_DIRS}
 )
 link_directories(${LIB_PATHS})
 
@@ -106,6 +118,8 @@ set(VALA_SRC
 	Renderer/OWMWeatherRenderer.vala
 	Renderer/Tpm2NetRenderer.vala
 	Renderer/LuaRenderer.vala
+	Renderer/CairoRenderer.vala
+	Renderer/TextRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
@@ -157,6 +171,9 @@ PACKAGES
 	sdl
 	sdl-image
 	lua
+	cairo
+	pango
+	pangocairo
 	# poppler-glib
 	# gtk+-2.0
 	posix

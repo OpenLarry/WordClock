@@ -79,6 +79,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(OWMWeatherRenderer);
 		type = typeof(Tpm2NetRenderer);
 		type = typeof(LuaRenderer);
+		type = typeof(TextRenderer);
 		
 		type = typeof(JsonableTreeMap);
 		type = typeof(JsonableArrayList);

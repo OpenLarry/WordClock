@@ -283,7 +283,7 @@
           "-type" : "WordClockWatchHandRenderer"
         },
         "String" : {
-          "left-color" : {
+          "color" : {
             "min-brightness" : 0,
             "max-brightness" : 1850,
             "min-color" : {
@@ -298,45 +298,27 @@
             },
             "-type" : "WordClockBrightnessSensorColor"
           },
-          "right-color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
-            "min-color" : {
-              "h" : 120,
-              "s" : 255,
-              "v" : 25
-            },
-            "max-color" : {
-              "h" : 120,
-              "s" : 255,
-              "v" : 200
-            },
-            "-type" : "WordClockBrightnessSensorColor"
-          },
-          "speed" : 10,
-          "add-spacing" : 0,
-          "font-name" : "WordClockHugeMicrosoftSansSerifFont",
+          "x-speed" : 10,
+          "y-offset" : 9,
+          "letter-spacing" : 0,
+          "font" : "DejaVuSans 10.5",
+          "hint-style" : 3,
           "time-format" : true,
-          "string" : "%k:%M",
-          "-type" : "WordClockStringRenderer"
+          "text" : "%k:%M",
+          "-type" : "WordClockTextRenderer"
         },
         "StringBright" : {
-          "left-color" : {
+          "color" : {
             "h" : 0,
             "s" : 0,
             "v" : 150
           },
-          "right-color" : {
-            "h" : 0,
-            "s" : 0,
-            "v" : 150
-          },
-          "speed" : 10,
-          "add-spacing" : 1,
-          "font-name" : "WordClockMicrosoftSansSerifFont",
+          "x-speed" : 10,
+          "letter-spacing" : 1,
+          "font" : "DejaVuSans 8",
           "time-format" : true,
-          "string" : " %A %d.%m.%Y %k:%M-%S ",
-          "-type" : "WordClockStringRenderer"
+          "text" : " %A %d.%m.%Y %k:%M-%S ",
+          "-type" : "WordClockTextRenderer"
         },
         "Time" : {
           "words-color" : {
