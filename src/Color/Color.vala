@@ -171,7 +171,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	public Color mix_with( Color color, uint8 percent = 127, bool gamma_fade = true ) {
 		if(percent == 0) {
 			this.check_update();
-			return this;
 		}else if(percent == 255) {
 			color.check_update();
 			this.r = color.r;
@@ -202,6 +201,30 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		return this;
 	}
 	
+	/**
+	 * Mixes this color with rgb values, allows daisy chaining
+	 * @param r red
+	 * @param g green
+	 * @param b blue
+	 * @param percent Mixing factor between 0 (this color) and 255 (param color)
+	 * @return this color
+	 */
+	public Color mix_with_rgb( uint8 r, uint8 g, uint8 b, uint8 percent = 127 ) {
+		if(percent == 0) {
+			this.check_update();
+		}else if(percent == 255) {
+			this.set_rgb(r,g,b);
+		}else{
+			this.check_update();
+			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) r)*percent) / 255 );
+			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) g)*percent) / 255 );
+			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) b)*percent) / 255 );
+			this.do_gamma_correction();
+		}
+		
+		return this;
+	}
+	
 	public Color clone() {
 		this.check_update();
 		
@@ -220,6 +243,12 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		ret.last_update_frame = this.last_update_frame;
 		
 		return ret;
+	}
+	
+	public bool equal( Color other ) {
+		this.check_update();
+		other.check_update();
+		return this.h == other.h && this.s == other.s && this.v == other.v;
 	}
 	
 	protected void do_gamma_correction() {
