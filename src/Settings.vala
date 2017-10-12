@@ -42,6 +42,8 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 						debug("Settings loaded");
 						this.save();
 					}
+				}else{
+					throw e;
 				}
 			}
 		}else{
