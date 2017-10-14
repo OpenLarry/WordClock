@@ -71,7 +71,7 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 			}
 			
 			// set letter spacing
-			Pango.AttrList attrlist = new Pango.AttrList();
+			unowned Pango.AttrList attrlist = layout.get_attributes();
 			attrlist.insert( Pango.attr_letter_spacing_new( (int) (this.letter_spacing * Pango.SCALE) ) );
 			layout.set_attributes( attrlist );
 			
