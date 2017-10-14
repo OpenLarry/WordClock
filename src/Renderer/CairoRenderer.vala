@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable {
+public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer {
 	public int x_speed { get; set; default = 0; }
 	public int y_speed { get; set; default = 0; }
 	public int x_offset { get; set; default = 10; }
@@ -18,7 +18,10 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable {
 	
 	private Cairo.ImageSurface? surface;
 	
-	protected bool render_surface_to_matrix( Color[,] leds_matrix, Cairo.ImageSurface? surface ) {
+	protected abstract Cairo.ImageSurface? render_surface();
+	
+	public bool render_matrix( Color[,] leds_matrix ) {
+		Cairo.ImageSurface? surface = this.render_surface();
 		if(surface != null) this.surface = surface;
 		
 		if(this.surface == null) {

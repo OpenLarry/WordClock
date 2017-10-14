@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.TextRenderer : CairoRenderer, Jsonable, ClockRenderable, MatrixRenderer {
+public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 	public string font { get; set; default = "DejaVuSans 8"; }
 	public Color color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public bool markup { get; set; default = false; }
@@ -34,7 +34,7 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable, ClockRenderable, 
 		this.y_offset = 10;
 	}
 	
-	public bool render_matrix( Color[,] leds_matrix ) {
+	protected override Cairo.ImageSurface? render_surface() {
 		var time = new DateTime.now(Main.timezone);
 		
 		string str;
@@ -92,9 +92,9 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable, ClockRenderable, 
 			// Save the image:
 			// surface.write_to_png ("img.png");
 			
-			return this.render_surface_to_matrix(leds_matrix, surface);
+			return surface;
 		}else{
-			return this.render_surface_to_matrix(leds_matrix, null);
+			return null;
 		}
 	}
 	

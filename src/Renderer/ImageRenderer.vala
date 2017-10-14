@@ -4,7 +4,7 @@ using WordClock;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.ImageRenderer : CairoRenderer, Jsonable, ClockRenderable, MatrixRenderer {
+public class WordClock.ImageRenderer : CairoRenderer, Jsonable {
 	public string path {
 		owned get {
 			return this.real_path;
@@ -30,11 +30,11 @@ public class WordClock.ImageRenderer : CairoRenderer, Jsonable, ClockRenderable,
 	private string real_path;
 	private Cairo.ImageSurface? surface = null;
 	
-	public bool render_matrix( Color[,] matrix ) {
+	protected override Cairo.ImageSurface? render_surface( ) {
 		lock(this.surface) {
-			if(this.surface != null) this.render_surface_to_matrix( matrix, this.surface );
+			if(this.surface != null) return this.surface;
 		}
 		
-		return true;
+		return null;
 	}
 }
