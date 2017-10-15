@@ -84,10 +84,17 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 			Cairo.Context context = new Cairo.Context(surface);
 			
 			// copy
-			uint8[] rgb = this.color.get_rgb();
+			uint8[] rgb = this.color.clone().set_hsv(null, null, 255).get_rgb(); // set max brightness
 			context.set_source_rgba(rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0, 1);
 			context.move_to(-text_extends.x,-text_extends.y);
 			Pango.cairo_show_layout(context, layout);
+			
+			// apply brightness
+			context.set_operator(Cairo.Operator.ATOP);
+			context.rectangle(0, 0, text_extends.width, text_extends.height);
+			double brightness = this.color.get_hsv()[2] / 255.0;
+			context.set_source_rgba(0,0,0,1-brightness);
+			context.fill();
 			
 			// Save the image:
 			// surface.write_to_png ("img.png");
