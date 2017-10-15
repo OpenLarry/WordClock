@@ -9,12 +9,50 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	public Color warning_color { get; set; default = new Color.from_hsv( 60, 255, 200 ); }
 	public Color info_color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public Color success_color { get; set; default = new Color.from_hsv( 120, 255, 200 ); }
-	public Color background_color { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
-	public uint8 speed { get; set; default = 15; }
-	public uint8 add_spacing { get; set; default = 1; }
-	public string font_name { get; set; default = "WordClockMicrosoftSansSerifFont"; }
+	
+	public Color background_color {
+		get { return this.background_renderer.color; }
+		set { this.background_renderer.color = value; }
+	}
+	
+	public int x_speed {
+		get { return this.text_renderer.x_speed; }
+		set { this.text_renderer.x_speed = value; }
+	}
+	public int y_offset {
+		get { return this.text_renderer.y_offset; }
+		set { this.text_renderer.y_offset = value; }
+	}
+	public string font {
+		get { return this.text_renderer.font; }
+		set { this.text_renderer.font = value; }
+	}
+	public bool antialias {
+		get { return this.text_renderer.antialias; }
+		set { this.text_renderer.antialias = value; }
+	}
+	public bool hint_metrics {
+		get { return this.text_renderer.hint_metrics; }
+		set { this.text_renderer.hint_metrics = value; }
+	}
+	public uint8 hint_style {
+		get { return this.text_renderer.hint_style; }
+		set { this.text_renderer.hint_style = value; }
+	}
+	public float letter_spacing {
+		get { return this.text_renderer.letter_spacing; }
+		set { this.text_renderer.letter_spacing = value; }
+	}
+	
 	
 	protected ClockRenderer renderer;
+	protected TextRenderer text_renderer = new TextRenderer();
+	protected ColorRenderer background_renderer = new ColorRenderer();
+	
+	construct {
+		this.text_renderer.markup = true;
+		this.text_renderer.time_format = false;
+	}
 	
 	public MessageOverlay( ClockRenderer renderer ) {
 		this.renderer = renderer;
@@ -23,37 +61,26 @@ public class WordClock.MessageOverlay : GLib.Object, Jsonable {
 	public async ClockRenderer.ReturnReason message( string str, MessageType type = MessageType.INFO, int count = 1, Cancellable? cancellable = null ) {
 		debug("Display message: %s (%s)", str, type.to_string());
 		
-		StringRenderer str_renderer = new StringRenderer();
-		str_renderer.string = str;
-		str_renderer.time_format = false;
-		str_renderer.count = count;
-		str_renderer.speed = this.speed;
-		str_renderer.add_spacing = this.add_spacing;
-		str_renderer.font_name = this.font_name;
-		
-		ColorRenderer background = new ColorRenderer();
-		background.color = this.background_color;
+		this.text_renderer.reset();
+		this.text_renderer.text = str;
+		this.text_renderer.count = count;
 		
 		switch(type) {
 			case MessageType.ERROR:
-				str_renderer.left_color  = this.error_color;
-				str_renderer.right_color = this.error_color;
+				this.text_renderer.color  = this.error_color;
 			break;
 			case MessageType.WARNING:
-				str_renderer.left_color  = this.warning_color;
-				str_renderer.right_color = this.warning_color;
+				this.text_renderer.color  = this.warning_color;
 			break;
 			case MessageType.INFO:
-				str_renderer.left_color  = this.info_color;
-				str_renderer.right_color = this.info_color;
+				this.text_renderer.color  = this.info_color;
 			break;
 			case MessageType.SUCCESS:
-				str_renderer.left_color  = this.success_color;
-				str_renderer.right_color = this.success_color;
+				this.text_renderer.color  = this.success_color;
 			break;
 		}
 		
-		ClockRenderer.ReturnReason reason = yield this.renderer.overwrite( { background, str_renderer }, { background }, { background }, cancellable );
+		ClockRenderer.ReturnReason reason = yield this.renderer.overwrite( { this.background_renderer, this.text_renderer }, { this.background_renderer }, { this.background_renderer }, cancellable );
 		
 		debug("Display message finished"); 
 		return reason;

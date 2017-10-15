@@ -495,9 +495,13 @@
         "s" : 0,
         "v" : 0
       },
-      "speed" : 15,
-      "add-spacing" : 2,
-      "font-name" : "WordClockMicrosoftSansSerifFont",
+      "x-speed" : 15,
+      "y-offset" : 10,
+      "font" : "DejaVuSans 8",
+      "antialias" : false,
+      "hint-metrics" : true,
+      "hint-style" : 0,
+      "letter-spacing" : 2.0,
       "-type" : "WordClockMessageOverlay"
     },
     "sensorsobserver" : {
@@ -1168,6 +1172,7 @@
           {
             "delay" : 3,
             "sink" : {
+              "template" : "{TEMP} {DESCRIPTION} - <span color=\"#ffff00\">{CITY}</span>",
               "-type" : "WordClockOWMWeatherSink"
             },
             "-type" : "WordClockSignalDelayerSink"

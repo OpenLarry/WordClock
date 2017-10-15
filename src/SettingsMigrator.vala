@@ -142,6 +142,25 @@ public class WordClock.SettingsMigrator : GLib.Object {
 				
 				renderer.get_object().set_string_member("-type","WordClockTextRenderer");
 			}
+			
+			debug("Update $.objects.message: Migrate to TextRenderer");
+			Json.Node message = get_first_node("$.objects.message", ref node);
+			
+			if(message.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+			
+			if(message.get_object().has_member("speed")) {
+				Json.Node member = message.get_object().get_member("speed");
+				message.get_object().remove_member("speed");
+				message.get_object().set_member("x-speed", member);
+			}
+			if(message.get_object().has_member("add-spacing")) {
+				Json.Node member = message.get_object().get_member("add-spacing");
+				message.get_object().remove_member("add-spacing");
+				message.get_object().set_member("letter-spacing", member);
+			}
+			if(message.get_object().has_member("font-name")) {
+				message.get_object().remove_member("font-name");
+			}
 		};
 		
 		return migration_funcs;

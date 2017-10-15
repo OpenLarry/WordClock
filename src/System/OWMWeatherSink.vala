@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.OWMWeatherSink : GLib.Object, Jsonable, SignalSink {
-	public string template = "{TEMP} {DESCRIPTION} - {CITY}";
+	public string template { get; set; default = "{TEMP} {DESCRIPTION} - <span color=\"#ffff00\">{CITY}</span>"; }
 	
 	private Cancellable? message = null;
 	

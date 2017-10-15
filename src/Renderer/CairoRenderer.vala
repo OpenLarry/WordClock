@@ -63,6 +63,10 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRend
 		return true;
 	}
 	
+	public void reset() {
+		this.x_start_time = 0;
+		this.y_start_time = 0;
+	}
 	
 	private int? calc_offset( int speed, int offset, int display_length, int surface_length, ref int64 start_time ) {
 		int pos = 0;

@@ -22,7 +22,7 @@ public class WordClock.InfoSink : GLib.Object, Jsonable, SignalSink {
 		
 		SystemInfo systeminfo = new SystemInfo();
 		this.message = new Cancellable();
-		yield (Main.settings.objects["message"] as MessageOverlay).message(@"WordClock $(Version.GIT_DESCRIBE)  IP: $(systeminfo.ip)  Host: $(systeminfo.hostname)  WLAN: $(systeminfo.wlan)  Kernel: $(systeminfo.kernel)", MessageType.INFO, 1, this.message);
+		yield (Main.settings.objects["message"] as MessageOverlay).message(@"WordClock $(Version.GIT_DESCRIBE)  IP: <span color=\"#ffff00\">$(systeminfo.ip)</span>  Host: <span color=\"#ffff00\">$(systeminfo.hostname)</span>  WLAN: <span color=\"#ffff00\">$(systeminfo.wlan)</span>  Kernel: <span color=\"#ffff00\">$(systeminfo.kernel)</span>", MessageType.INFO, 1, this.message);
 		this.message = null;
 	}
 }
