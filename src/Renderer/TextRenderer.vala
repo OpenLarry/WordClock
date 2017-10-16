@@ -34,6 +34,10 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 		this.y_offset = 10;
 	}
 	
+	public static string escape( string str ) {
+		return str.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;");
+	}
+	
 	protected override Cairo.ImageSurface? render_surface() {
 		var time = new DateTime.now(Main.timezone);
 		

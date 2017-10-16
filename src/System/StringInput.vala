@@ -9,9 +9,21 @@ public class WordClock.StringInput : GLib.Object {
 	private Cancellable? cancellable = null;
 	
 	private string? string = null;
+	private bool blink = false;
 	
 	private static bool running = false;
 	private const string SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?$%&#@/\\\"'*+-=_.,:;()[]{}<>|^`~ ";
+	
+	private TextRenderer text_renderer = new TextRenderer();
+	private ColorRenderer background = new ColorRenderer();
+	
+	construct {
+		text_renderer.time_format = false;
+		text_renderer.x_speed = 0;
+		text_renderer.x_offset = -11;
+		text_renderer.letter_spacing = 0;
+		text_renderer.markup = true;
+	}
 	
 	public StringInput( string? message = null ) {
 		this.message = message;
@@ -30,22 +42,25 @@ public class WordClock.StringInput : GLib.Object {
 			
 			this.string = "A";
 			
-			StringRenderer str_renderer = new StringRenderer();
-			str_renderer.time_format = false;
-			str_renderer.speed = 0;
-			str_renderer.position = -11;
-			str_renderer.left_color = (Main.settings.objects["message"] as MessageOverlay).info_color;
-			str_renderer.right_color = (Main.settings.objects["message"] as MessageOverlay).info_color;
+			this.update_text();
+			text_renderer.color = (Main.settings.objects["message"] as MessageOverlay).info_color;
+			text_renderer.font = (Main.settings.objects["message"] as MessageOverlay).font;
 			
-			ColorRenderer background = new ColorRenderer();
 			background.color = (Main.settings.objects["message"] as MessageOverlay).background_color;
 			
-			while(running) {
-				str_renderer.string = this.string;
-				this.cancellable = new Cancellable();
-				ClockRenderer.ReturnReason ret = yield (Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite( { background, str_renderer }, { background }, { background }, this.cancellable);
-				if(ret == ClockRenderer.ReturnReason.REPLACED) this.action(StringInputAction.ABORT);
-			}
+			// letter blink timer
+			Timeout.add(500, () => {
+				if(!running) return Source.REMOVE;
+				
+				this.blink = !this.blink;
+				this.update_text();
+				
+				return Source.CONTINUE;
+			});
+			
+			this.cancellable = new Cancellable();
+			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite( { background, text_renderer }, { background }, { background }, this.cancellable);
+			if(ret == ClockRenderer.ReturnReason.REPLACED) this.action(StringInputAction.ABORT);
 			
 			return this.string;
 		} finally {
@@ -53,6 +68,12 @@ public class WordClock.StringInput : GLib.Object {
 			running = false;
 			debug("End StringInput");
 		}
+	}
+	
+	private void update_text() {
+		if(this.string == null) return;
+		
+		this.text_renderer.text = TextRenderer.escape(this.string[0:-1]) + "<span color=\"#" + (this.blink ? "888888" : "ffffff") + "\">" + TextRenderer.escape(this.string[this.string.length-1].to_string()) + "</span>";
 	}
 	
 	public void action( StringInputAction action ) {
@@ -82,8 +103,8 @@ public class WordClock.StringInput : GLib.Object {
 				this.string = this.string.slice(0,-1) + "!";
 				break;
 			case StringInputAction.SELECT:
-				running = false;
-				break;
+				this.cancellable.cancel();
+				return;
 			case StringInputAction.NEXT:
 				this.string += this.string.substring(-1);
 				break;
@@ -96,12 +117,12 @@ public class WordClock.StringInput : GLib.Object {
 				}
 				break;
 			case StringInputAction.ABORT:
-				running = false;
 				this.string = null;
-				break;
+				this.cancellable.cancel();
+				return;
 		}
 		
-		this.cancellable.cancel();
+		this.update_text();
 	}
 }
 
