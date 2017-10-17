@@ -73,14 +73,18 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		return this;
 	}
 	
-	public uint16[] get_hsv( ) {
-		this.check_update();
-		return { this.h, this.s, this.v };
+	public void get_hsv( out uint16 h, out uint8 s, out uint8 v, bool check_update = true ) {
+		if(check_update) this.check_update();
+		h = this.h;
+		s = this.s;
+		v = this.v;
 	}
 	
-	public uint8[] get_rgb( ) {
-		this.check_update();
-		return { this.r_no_gamma, this.g_no_gamma, this.b_no_gamma };
+	public void get_rgb( out uint8 r, out uint8 g, out uint8 b, bool check_update = true ) {
+		if(check_update) this.check_update();
+		r = this.r_no_gamma;
+		g = this.g_no_gamma;
+		b = this.b_no_gamma;
 	}
 	
 	/**

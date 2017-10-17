@@ -148,25 +148,28 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 		}else{
 			switch(model) {
 				case ColorModel.RGB:
-					uint8[] rgb = color.get_rgb();
+					uint8 r,g,b;
+					color.get_rgb(out r, out g, out b);
 					
 					Value val = Value(typeof(uint));
-					val.set_uint(rgb[0]);
+					val.set_uint(r);
 					lua.push_value(val);
-					val.set_uint(rgb[1]);
+					val.set_uint(g);
 					lua.push_value(val);
-					val.set_uint(rgb[2]);
+					val.set_uint(b);
 					lua.push_value(val);
 				break;
 				case ColorModel.HSV:
-					uint16[] hsv = color.get_hsv();
+					uint16 h;
+					uint8 s,v;
+					color.get_hsv(out h, out s, out v);
 					
 					Value val = Value(typeof(uint));
-					val.set_uint(hsv[0]);
+					val.set_uint(h);
 					lua.push_value(val);
-					val.set_uint(hsv[1]);
+					val.set_uint(s);
 					lua.push_value(val);
-					val.set_uint(hsv[2]);
+					val.set_uint(v);
 					lua.push_value(val);
 				break;
 			}
