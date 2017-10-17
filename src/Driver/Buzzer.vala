@@ -14,6 +14,7 @@ public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 	const string PWM_PATH_ENABLE = "/sys/class/pwm/pwmchip%u/pwm%u/enable";
 	
 	private static int buzzer;
+	private static bool silent_mode = false;
 	
 	public uint msec { get; set; default = 250; }
 	public uint freq { get; set; default = 2000; }
@@ -31,6 +32,11 @@ public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 	 */
 	public static void beep( uint16 msec = 250, uint16 freq = 2000, uint8 volume = 255 ) {
 		lock(buzzer) {
+			if(silent_mode) {
+				Thread.usleep(msec*1000);
+				return;
+			}
+			
 			try {
 				GLib.File file;
 				GLib.FileOutputStream ostream;
@@ -94,6 +100,10 @@ public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 				warning(e.message);
 			}
 		}
+	}
+	
+	public static void silent(bool silent = true) {
+		silent_mode = silent;
 	}
 	
 	public static void play_happy_birthday() {

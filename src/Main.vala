@@ -14,7 +14,29 @@ public class WordClock.Main : GLib.Object {
 	private static Cancellable cancellable;
 	private static MainLoop loop;
 	
+	private static bool version = false;
+	private static bool debug_mode = false;
+	private static bool silent = false;
+	
+	private const OptionEntry[] options = {
+		{ "version", 'v', 0, OptionArg.NONE, ref version, "Display version number", null },
+		{ "debug", 'd', 0, OptionArg.NONE, ref debug_mode, "Enable debug mode (no syslog, no intro, no sound)", null },
+		{ "silent", 's', 0, OptionArg.NONE, ref silent, "Disable sound output", null },
+		{ null }
+	};
+	
     public static int main(string[] args) {
+		try {
+			OptionContext opt_context = new OptionContext();
+			opt_context.set_help_enabled(true);
+			opt_context.add_main_entries(options, null);
+			opt_context.parse(ref args);
+		} catch (OptionError e) {
+			stdout.printf ("error: %s\n", e.message);
+			stdout.printf ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
+			return 1;
+		}
+		
 		Posix.openlog("wordclock", Posix.LOG_PID, Posix.LOG_LOCAL1);
 		Log.set_default_handler((log_domain, log_levels, message) => {
 			if(log_domain == "WordClock" || ((log_levels & LogLevelFlags.LEVEL_MASK) & (LogLevelFlags.LEVEL_ERROR | LogLevelFlags.LEVEL_CRITICAL | LogLevelFlags.LEVEL_WARNING | LogLevelFlags.LEVEL_MESSAGE)) > 0) {
@@ -28,7 +50,7 @@ public class WordClock.Main : GLib.Object {
 					case LogLevelFlags.LEVEL_DEBUG: default: level = Posix.LOG_DEBUG; break;
 				}
 				
-				Posix.syslog(level, "%s\n", message);
+				if(!debug_mode) Posix.syslog(level, "%s\n", message);
 			}
 			
 			Log.default_handler(log_domain, log_levels, message);
@@ -99,7 +121,7 @@ public class WordClock.Main : GLib.Object {
 		print("WordClock %s\n\n", Version.GIT_DESCRIBE);
 		
 		// display version only
-		if(args.length == 2 && args[1] == "-v") {
+		if(version) {
 			return 0;
 		}
 		
@@ -110,8 +132,8 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
-		// Parameter -s skips boot sequence
-		if(args.length <= 1 || args[1] != "-s") {
+		// Debug parameter skips boot sequence
+		if(!debug_mode) {
 			BootSequenceRenderer boot = new BootSequenceRenderer();
 			ColorRenderer black = new ColorRenderer();
 			black.color.set_hsv(0,0,0);
@@ -199,6 +221,11 @@ public class WordClock.Main : GLib.Object {
 		LuaBuzzer.init(lua);
 		LuaRenderer.init(lua);
 		
+		if(silent) {
+			debug("Enable silent mode");
+			Buzzer.silent();
+		}
+		
 		try{
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
@@ -225,7 +252,7 @@ public class WordClock.Main : GLib.Object {
 					critical("Loading settings failed: %s", e.message);
 					message.error("Loading settings failed! Resetting to defaults...");
 					
-					if(args.length <= 1 || args[1] != "-s") {
+					if(!debug_mode) {
 						Buzzer.beep(200,2000,255);
 						Thread.usleep(200000);
 						Buzzer.beep(200,2000,255);
@@ -271,8 +298,7 @@ public class WordClock.Main : GLib.Object {
 			return driver.start(renderer);
 		});
 		
-		// Parameter -s skips beep sound
-		if(args.length <= 1 || args[1] != "-s") {
+		if(!debug_mode) {
 			debug("Make beep sound");
 			Buzzer.beep(100,2000,10);
 			Buzzer.beep(400,4000,10);
@@ -282,8 +308,7 @@ public class WordClock.Main : GLib.Object {
 		loop.run();
 		debug("Terminating");
 		
-		// Parameter -s skips beep sound
-		if(args.length <= 1 || args[1] != "-s") {
+		if(!debug_mode) {
 			debug("Make beep sound");
 			Buzzer.beep(100,4000,10);
 			Buzzer.beep(100,2000,10);
