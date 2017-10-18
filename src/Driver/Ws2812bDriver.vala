@@ -199,8 +199,9 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	 * @return Result code
 	 */
 	public override int start( FrameRenderer renderer ) {
-		int arg = 0;
+		renderer.set_leds( this.leds );
 		
+		int arg = 0;
 		
 		var timer = new Timer();
 		uint last_print = 0;
@@ -208,7 +209,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		timer.start();
 		
 		while(this.cancellable == null || !this.cancellable.is_cancelled()) {
-			renderer.render( this.leds );
+			renderer.render();
 			
 			this.frame++;
 			

@@ -19,6 +19,10 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	private SourceFunc? overwrite_callback = null;
 	private Cancellable? overwrite_cancellable = null;
 	
+	private Color[,]? matrix = null;
+	private Color[]? dots = null;
+	private Color[]? backlight = null;
+	
 	public enum ReturnReason {
 		CANCELLED,
 		TERMINATED,
@@ -92,6 +96,35 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		}
 	}
 	
+	public uint8[] dump_colors() {
+		uint8[] ret = new uint8[(this.matrix.length[0] * this.matrix.length[1] + this.dots.length + this.backlight.length) * 3];
+		
+		uint8 r,g,b;
+		int i=0;
+		for(int y=0;y<this.matrix.length[1];y++) {
+			for(int x=0;x<this.matrix.length[0];x++) {
+				this.matrix[x,y].get_rgb(out r, out g, out b, false);
+				ret[i++] = r;
+				ret[i++] = g;
+				ret[i++] = b;
+			}
+		}
+		for(int x=0;x<this.dots.length;x++) {
+			this.dots[x].get_rgb(out r, out g, out b, false);
+			ret[i++] = r;
+			ret[i++] = g;
+			ret[i++] = b;
+		}
+		for(int x=0;x<this.backlight.length;x++) {
+			this.backlight[x].get_rgb(out r, out g, out b, false);
+			ret[i++] = r;
+			ret[i++] = g;
+			ret[i++] = b;
+		}
+		
+		return ret;
+	}
+	
 	/*
 	public void update_fps() {
 		ClockConfiguration config = this.configurations[this.active];
@@ -136,15 +169,17 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		}
 	}
 	
-	public static void clear_leds( Color[] leds ) {
-		for(int i=0;i<leds.length;i++) {
-			leds[i].set_hsv(0,0,0);
-		}
+	public void set_leds( Color[,] leds ) {
+		this.matrix = wiring.get_matrix( leds );
+		this.dots = wiring.get_dots( leds );
+		this.backlight = wiring.get_backlight( leds );
 	}
 	
-	public void render( Color[,] leds ) {
+	public void render( ) {
 		ClockConfiguration config = this.configurations[this.active];
 		if(config == null) return;
+		
+		if(this.matrix == null || this.dots == null || this.backlight == null) return;
 		
 		MatrixRenderer[]? overwrite_matrix;
 		DotsRenderer[]? overwrite_dots;
@@ -162,34 +197,34 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		
 		if(overwrite_matrix != null) {
 			foreach( MatrixRenderer matrix in overwrite_matrix ) {
-				if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
+				if(matrix != null) ret = matrix.render_matrix( this.matrix ) && ret;
 			}
 		}else if(config != null) {
 			foreach( JsonableString name in config.matrix ) {
 				MatrixRenderer matrix = this.renderers[name.to_string()] as MatrixRenderer;
-				if(matrix != null) ret = matrix.render_matrix( wiring.get_matrix( leds ) ) && ret;
+				if(matrix != null) ret = matrix.render_matrix( this.matrix ) && ret;
 			}
 		}
 		
 		if(overwrite_dots != null) {
 			foreach( DotsRenderer dots in overwrite_dots ) {
-				if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
+				if(dots != null) ret = dots.render_dots( this.dots ) && ret;
 			}
 		}else if(config != null) {
 			foreach( JsonableString name in config.dots ) {
 				DotsRenderer dots = this.renderers[name.to_string()] as DotsRenderer;
-				if(dots != null) ret = dots.render_dots( wiring.get_dots( leds ) ) && ret;
+				if(dots != null) ret = dots.render_dots( this.dots ) && ret;
 			}
 		}
 		
 		if(overwrite_backlight != null) {
 			foreach( BacklightRenderer backlight in overwrite_backlight ) {
-				if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
+				if(backlight != null) ret = backlight.render_backlight( this.backlight ) && ret;
 			}
 		}else if(config != null) {
 			foreach( JsonableString name in config.backlight ) {
 				BacklightRenderer backlight = this.renderers[name.to_string()] as BacklightRenderer;
-				if(backlight != null) ret = backlight.render_backlight( wiring.get_backlight( leds ) ) && ret;
+				if(backlight != null) ret = backlight.render_backlight( this.backlight ) && ret;
 			}
 		}
 		

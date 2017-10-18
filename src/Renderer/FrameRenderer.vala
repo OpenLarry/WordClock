@@ -5,5 +5,6 @@ using WordClock;
  * @version 1.0
  */
 public interface WordClock.FrameRenderer : GLib.Object {
-	public abstract void render( Color[,] leds );
+	public abstract void set_leds( Color[,] leds );
+	public abstract void render( );
 }

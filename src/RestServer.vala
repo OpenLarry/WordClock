@@ -10,6 +10,7 @@ public class WordClock.RestServer : Soup.Server {
 	
 	private ArrayList<Soup.WebsocketConnection> hwinfo_connections = new ArrayList<Soup.WebsocketConnection>();
 	private ArrayList<Soup.WebsocketConnection> lua_log_connections = new ArrayList<Soup.WebsocketConnection>();
+	private ArrayList<Soup.WebsocketConnection> livestream_connections = new ArrayList<Soup.WebsocketConnection>();
 	
 	private WirelessNetworks wirelessnetworks = new WirelessNetworks();
 	
@@ -27,6 +28,7 @@ public class WordClock.RestServer : Soup.Server {
 		
 		this.add_websocket_handler("/hwinfo", null, null, this.request_hwinfo);
 		this.add_websocket_handler("/lua-log", null, null, this.request_lua_log);
+		this.add_websocket_handler("/livestream", null, null, this.request_livestream);
 		this.connect_signals();
 		
 		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
@@ -205,6 +207,35 @@ public class WordClock.RestServer : Soup.Server {
 				}
 			}
 		}
+	}
+	
+	private void request_livestream( Soup.Server server, Soup.WebsocketConnection connection, string path, Soup.ClientContext client) {
+		debug("WebSocket request: %s", path);
+		
+		if(this.livestream_connections.size == 0) {
+			Timeout.add(100, this.update_livestream);
+		}
+		this.livestream_connections.add(connection);
+		
+		connection.send_binary((Main.settings.objects["clockrenderer"] as ClockRenderer).dump_colors());		
+	}
+	
+	private bool update_livestream() {
+		if(this.livestream_connections.size > 0) {
+			uint8[] data = (Main.settings.objects["clockrenderer"] as ClockRenderer).dump_colors();
+			for(int i=0;i<this.livestream_connections.size;i++) {
+				var con = this.livestream_connections[i];
+				if(con.get_state() == Soup.WebsocketState.OPEN) {
+					con.send_binary(data);
+				}else{
+					this.livestream_connections.remove(con);
+					i--;
+					debug("WebSocket connection closed");
+				}
+			}
+		}
+		
+		return this.livestream_connections.size == 0 ? Source.REMOVE : Source.CONTINUE;
 	}
 	
 	
