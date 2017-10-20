@@ -183,8 +183,8 @@
           "width" : 1,
           "rotate-time" : 43200,
           "color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 120,
               "s" : 255,
@@ -200,13 +200,18 @@
           "-type" : "WordClockWatchHandRenderer"
         },
         "Image" : {
+          "x-speed" : 0,
+          "y-speed" : 0,
+          "x-offset" : 10,
+          "y-offset" : 9,
+          "mosaic" : false,
           "path" : "/usr/share/wordclock/weather_markus/09d.png",
           "-type" : "WordClockImageRenderer"
         },
         "NoBlack" : {
           "color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 0,
               "s" : 0,
@@ -237,8 +242,8 @@
           "width" : 1,
           "rotate-time" : 60,
           "color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "timespan" : 3600,
               "basic-color" : {
@@ -266,8 +271,8 @@
           "width" : 1,
           "rotate-time" : 60,
           "color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 40,
               "s" : 255,
@@ -283,9 +288,15 @@
           "-type" : "WordClockWatchHandRenderer"
         },
         "String" : {
+          "x-speed" : 10,
+          "y-speed" : 0,
+          "x-offset" : 10,
+          "y-offset" : 9,
+          "mosaic" : false,
+          "font" : "DejaVuSans 10.5",
           "color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 120,
               "s" : 255,
@@ -298,32 +309,40 @@
             },
             "-type" : "WordClockBrightnessSensorColor"
           },
-          "x-speed" : 10,
-          "y-offset" : 9,
-          "letter-spacing" : 0,
-          "font" : "DejaVuSans 10.5",
+          "markup" : false,
+          "antialias" : false,
+          "hint-metrics" : true,
           "hint-style" : 3,
-          "time-format" : true,
+          "letter-spacing" : 0.0,
           "text" : "%k:%M",
+          "time-format" : true,
           "-type" : "WordClockTextRenderer"
         },
         "StringBright" : {
+          "x-speed" : 10,
+          "y-speed" : 0,
+          "x-offset" : 10,
+          "y-offset" : 10,
+          "mosaic" : false,
+          "font" : "DejaVuSans 8",
           "color" : {
             "h" : 0,
             "s" : 0,
             "v" : 150
           },
-          "x-speed" : 10,
-          "letter-spacing" : 1,
-          "font" : "DejaVuSans 8",
-          "time-format" : true,
+          "markup" : false,
+          "antialias" : false,
+          "hint-metrics" : true,
+          "hint-style" : 0,
+          "letter-spacing" : 1.0,
           "text" : " %A %d.%m.%Y %k:%M-%S ",
+          "time-format" : true,
           "-type" : "WordClockTextRenderer"
         },
         "Time" : {
           "words-color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "timespan" : 3600,
               "basic-color" : {
@@ -345,8 +364,8 @@
             "-type" : "WordClockBrightnessSensorColor"
           },
           "dots-color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "timespan" : 3600,
               "basic-color" : {
@@ -367,15 +386,15 @@
             },
             "-type" : "WordClockBrightnessSensorColor"
           },
-          "fade-secs" : 1,
+          "fade-secs" : 1.0,
           "display-it-is" : true,
           "frontpanel-name" : "WordClockRhineRuhrGermanFrontPanel",
           "-type" : "WordClockTimeRenderer"
         },
         "Time-MonoColor" : {
           "words-color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 40,
               "s" : 255,
@@ -389,8 +408,8 @@
             "-type" : "WordClockBrightnessSensorColor"
           },
           "dots-color" : {
-            "min-brightness" : 0,
-            "max-brightness" : 1850,
+            "min-brightness" : 0.0,
+            "max-brightness" : 1850.0,
             "min-color" : {
               "h" : 40,
               "s" : 255,
@@ -403,7 +422,7 @@
             },
             "-type" : "WordClockBrightnessSensorColor"
           },
-          "fade-secs" : 1,
+          "fade-secs" : 1.0,
           "display-it-is" : true,
           "frontpanel-name" : "WordClockRhineRuhrGermanFrontPanel",
           "-type" : "WordClockTimeRenderer"
@@ -461,7 +480,7 @@
     },
     "filteredmotion" : {
       "min-high-time" : 0.05,
-      "min-low-time" : -1,
+      "min-low-time" : -1.0,
       "-type" : "WordClockFilteredGpio"
     },
     "lua" : {
