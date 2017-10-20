@@ -77,7 +77,7 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRend
 			if(pos >= surface_length) {
 				if(this.count >= 0 && this.count-- == 0) return null;
 				
-				start_time = get_monotonic_time();
+				start_time = get_monotonic_time() - 500000/speed;
 				pos = 0;
 				if(!this.mosaic) pos -= display_length - 1;
 			}
