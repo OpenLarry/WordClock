@@ -201,6 +201,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) color.r_no_gamma)*percent) / 255 );
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
 			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) color.b_no_gamma)*percent) / 255 );
+			this.to_hsv();
 			this.do_gamma_correction();
 		}else{
 			color.check_update();
@@ -209,6 +210,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.g = (uint8) ( (((uint16) this.g)*(255-percent) + ((uint16) color.g)*percent) / 255 );
 			this.b = (uint8) ( (((uint16) this.b)*(255-percent) + ((uint16) color.b)*percent) / 255 );
 			this.do_gamma_correction_inv();
+			this.to_hsv();
 		}
 		
 		return this;
