@@ -15,6 +15,8 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRend
 	
 	private int64 x_start_time = 0;
 	private int64 y_start_time = 0;
+	protected uint8 x_stepsize = 1;
+	protected uint8 y_stepsize = 1;
 	
 	private Cairo.ImageSurface? surface;
 	
@@ -39,9 +41,9 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRend
 		}
 		
 		// calc position
-		int? x_pos = this.calc_offset(this.x_speed, this.x_offset, leds_matrix.length[0], this.surface.get_width(), ref this.x_start_time);
+		int? x_pos = this.calc_offset(this.x_speed, this.x_offset, this.x_stepsize, leds_matrix.length[0], this.surface.get_width(), ref this.x_start_time);
 		if(x_pos == null) return false;
-		int? y_pos = this.calc_offset(this.y_speed, this.y_offset, leds_matrix.length[1], this.surface.get_height(), ref this.y_start_time);
+		int? y_pos = this.calc_offset(this.y_speed, this.y_offset, this.y_stepsize, leds_matrix.length[1], this.surface.get_height(), ref this.y_start_time);
 		if(y_pos == null) return false;
 		
 		
@@ -68,10 +70,12 @@ public abstract class WordClock.CairoRenderer : GLib.Object, Jsonable, ClockRend
 		this.y_start_time = 0;
 	}
 	
-	private int? calc_offset( int speed, int offset, int display_length, int surface_length, ref int64 start_time ) {
+	private int? calc_offset( int speed, int offset, uint8 stepsize, int display_length, int surface_length, ref int64 start_time ) {
+		if(stepsize == 0) stepsize = 1;
+		
 		int pos = 0;
 		if(speed > 0) {
-			pos = (int) ((get_monotonic_time() - start_time)/(1000000/speed));
+			pos = (int) ((get_monotonic_time() - start_time)/(1000000/speed)) * stepsize;
 			if(!this.mosaic) pos -= display_length - 1;
 			
 			if(pos >= surface_length) {

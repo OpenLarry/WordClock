@@ -27,6 +27,11 @@ public class WordClock.ImageRenderer : CairoRenderer, Jsonable {
 		}
 		default = "";
 	}
+	public bool animation {
+		get { return this.x_stepsize == 11 && this.y_stepsize == 10; }
+		set { this.x_stepsize = value ? 11 : 1; this.y_stepsize = value ? 10 : 1; }
+	}
+	
 	private string real_path;
 	private Cairo.ImageSurface? surface = null;
 	
