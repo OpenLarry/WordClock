@@ -103,6 +103,7 @@ function(git_describe _var)
 		"${GIT_EXECUTABLE}"
 		describe
 		--dirty
+		--always
 		WORKING_DIRECTORY
 		"${CMAKE_CURRENT_SOURCE_DIR}"
 		RESULT_VARIABLE
