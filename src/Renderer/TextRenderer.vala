@@ -5,12 +5,12 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.TextRenderer : CairoRenderer, Jsonable {
-	public string font { get; set; default = "DejaVuSans 8"; }
+	public string font { get; set; default = "DejaVuSans 7.5"; }
 	public Color color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public bool markup { get; set; default = false; }
 	public bool antialias { get; set; default = false; }
 	public bool hint_metrics { get; set; default = true; }
-	public uint8 hint_style { get; set; default = 0; }
+	public uint8 hint_style { get; set; default = 3; }
 	public float letter_spacing { get; set; default = 1; }
 	
 	public string text { get; set; default = "%k:%M "; }
@@ -81,7 +81,7 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 			
 			// get dimensions
 			Pango.Rectangle text_extends;
-			layout.get_pixel_extents( out text_extends, null );
+			layout.get_pixel_extents( null, out text_extends );
 			
 			// create real image with correct size
 			Cairo.ImageSurface surface = new Cairo.ImageSurface(Cairo.Format.ARGB32, text_extends.width, text_extends.height);

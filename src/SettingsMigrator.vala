@@ -129,8 +129,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 					Json.Node member = renderer.get_object().get_member("font-name");
 					if(member.get_node_type() == Json.NodeType.VALUE && member.get_string() == "WordClockHugeMicrosoftSansSerifFont") {
 						renderer.get_object().set_string_member("font", "DejaVuSans 10.5");
-						renderer.get_object().set_int_member("y-offset", 9);
-						renderer.get_object().set_int_member("hint-style", 3);
+						renderer.get_object().set_int_member("y-offset", 12);
 					}
 					renderer.get_object().remove_member("font-name");
 				}
