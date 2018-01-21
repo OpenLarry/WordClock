@@ -114,6 +114,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(SignalDelayerSink);
 		type = typeof(OWMWeatherSink);
 		type = typeof(WirelessNetworkInputSink);
+		type = typeof(LuaSink);
 		
 		type = typeof(GoogleLocationProvider);
 		type = typeof(StaticLocationProvider);
