@@ -148,33 +148,34 @@ namespace WordClock.JsonHelper {
 			if( node.get_object().get_size() > 0 ) throw new JsonError.INVALID_CLASS_NAME("Class does not implement interface Jsonable!");
 		}else{
 			if(path!="") throw new JsonError.INVALID_PATH("Invalid path '%s'!".printf(path));
+			if(node.get_node_type() != Json.NodeType.VALUE) throw new JsonError.INVALID_NODE_TYPE("Expected JSON_NODE_VALUE, got: %s\n".printf(node.get_node_type().to_string()));
 			
-			if(val.holds(typeof(bool))) {
+			if(val.holds(typeof(bool)) && node.get_value_type().is_a(typeof(bool))) {
 				val.set_boolean( node.get_boolean() );
-			}else if(val.holds(typeof(char))) {
+			}else if(val.holds(typeof(char)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_schar( (int8) node.get_int() );
-			}else if(val.holds(typeof(uchar))) {
+			}else if(val.holds(typeof(uchar)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_uchar( (uchar) node.get_int() );
-			}else if(val.holds(typeof(int))) {
+			}else if(val.holds(typeof(int)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_int( (int) node.get_int() );
-			}else if(val.holds(typeof(uint))) {
+			}else if(val.holds(typeof(uint)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_uint( (uint) node.get_int() );
-			}else if(val.holds(typeof(long))) {
+			}else if(val.holds(typeof(long)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_long( (long) node.get_int() );
-			}else if(val.holds(typeof(ulong))) {
+			}else if(val.holds(typeof(ulong)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_ulong( (ulong) node.get_int() );
-			}else if(val.holds(typeof(int64))) {
+			}else if(val.holds(typeof(int64)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_int64( node.get_int() );
-			}else if(val.holds(typeof(uint64))) {
+			}else if(val.holds(typeof(uint64)) && node.get_value_type().is_a(typeof(int64))) {
 				val.set_uint64( node.get_int() );
-			}else if(val.holds(typeof(float))) {
+			}else if(val.holds(typeof(float)) && (node.get_value_type().is_a(typeof(double)) || node.get_value_type().is_a(typeof(int64)))) {
 				val.set_float( (float) node.get_double() );
-			}else if(val.holds(typeof(double))) {
+			}else if(val.holds(typeof(double)) && (node.get_value_type().is_a(typeof(double)) || node.get_value_type().is_a(typeof(int64)))) {
 				val.set_double( node.get_double() );
-			}else if(val.holds(typeof(string))) {
+			}else if(val.holds(typeof(string)) && node.get_value_type().is_a(typeof(string))) {
 				val.set_string( node.get_string() );
 			}else{
-				throw new JsonError.INVALID_VALUE_TYPE("Invalid type: %s\n".printf(val.type().name()));
+				throw new JsonError.INVALID_VALUE_TYPE("Expected %s, got: %s\n".printf(val.type().name(), node.get_value_type().name()));
 			}
 		}
 	}
