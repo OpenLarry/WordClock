@@ -7,9 +7,9 @@ using WordClock;
  * Container class
  */
 public class WordClock.JsonableNode : GLib.Object, Jsonable {
-	public Json.Node node { get; set; }
+	public Json.Node node { get; set; default = new Json.Node( Json.NodeType.NULL ); }
 	
-	public JsonableNode( Json.Node node ) {
+	public JsonableNode( Json.Node node = new Json.Node( Json.NodeType.NULL ) ) {
 		this.node = node;
 	}
 	

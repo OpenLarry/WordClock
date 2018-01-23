@@ -6,7 +6,7 @@ using WordClock, Lua, Gee;
  */
 public class WordClock.LuaSink : GLib.Object, Jsonable, SignalSink {
 	public string function { get; set; default = ""; }
-	public JsonableArrayList<JsonableNode> parameter { get; set; default = new JsonableArrayList<JsonableNode>(); }
+	public JsonableNode parameter { get; set; default = new JsonableNode(); }
 	
 	private static Lua lua;
 	
