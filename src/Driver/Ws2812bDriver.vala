@@ -204,7 +204,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		int arg = 0;
 		
 		var timer = new Timer();
-		uint last_print = 0;
+		double last_time = 0;
 		uint last_frame = 0;
 		timer.start();
 		
@@ -213,10 +213,11 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			
 			this.frame++;
 			
-			if((uint) timer.elapsed() > last_print) {
-				last_print = (uint) timer.elapsed();
+			double time_diff = timer.elapsed() - last_time;
+			if(time_diff >= 1) {
+				this.current_fps = (this.frame - last_frame) / time_diff;
 				
-				this.current_fps = this.frame - last_frame;
+				last_time += time_diff;
 				
 				// call update function in main thread, need to safe time here!
 				Idle.add(() => {
