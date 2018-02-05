@@ -20,6 +20,15 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 	protected string? last_str = null;
 	protected int64 start_time = 0;
 	
+	static construct {
+		// takes ~10 seconds on first run after system boot
+		debug("Preload Pango and Cairo");
+		TextRenderer tr = new TextRenderer();
+		tr.text = "";
+		tr.time_format = false;
+		tr.render_surface();
+	}
+	
 	construct {
 		// update surface if some properties have changed
 		this.notify["font"].connect(() => { this.last_str = null; });
