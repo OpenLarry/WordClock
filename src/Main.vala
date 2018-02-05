@@ -133,16 +133,6 @@ public class WordClock.Main : GLib.Object {
 		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
 		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 		
-		// Debug parameter skips boot sequence
-		if(!debug_mode) {
-			BootSequenceRenderer boot = new BootSequenceRenderer();
-			ColorRenderer black = new ColorRenderer();
-			black.color.set_hsv(0,0,0);
-			renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
-				debug("Boot sequence finished");
-			});
-		}
-		
 		debug("Init LRADCs");
 		hwinfo = new HardwareInfo();
 		hwinfo.lradcs["brightness"] = Lradc.get_channel(1);
@@ -288,6 +278,17 @@ public class WordClock.Main : GLib.Object {
 		signalsource = new Unix.SignalSource( Posix.SIGINT );
 		signalsource.set_callback(Main.shutdown);
 		signalsource.attach( loop.get_context() );
+		
+		// Debug parameter skips boot sequence
+		if(!debug_mode) {
+			debug("Setup boot sequence");
+			BootSequenceRenderer boot = new BootSequenceRenderer();
+			ColorRenderer black = new ColorRenderer();
+			black.color.set_hsv(0,0,0);
+			renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
+				debug("Boot sequence finished");
+			});
+		}
 		
 		debug("Run renderer thread");
 		var thread = new Thread<int>("Ws2812bDriver", () => {
