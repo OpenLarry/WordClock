@@ -8,30 +8,35 @@
 * gio-2.0
 * gee-0.8
 * json-glib-1.0
-* sdl, sdl-image
+* luajit
+* cairo
+* pango, pangocairo
 
 ## Compilation
 
 1. Clone repository:
-  
-  `git clone https://github.com/OpenLarry/WordClock.git `
+   
+   `git clone git@github.com:OpenLarry/WordClock.git`
+   
 2. Change directory:
-  
-  `cd WordClock`
+   
+   `cd WordClock`
 3. Create build directory and change into (for out-of-source build, which is CMake default):
-  
-  `mkdir build`
-  
-  `cd build`
+   
+   `mkdir build`
+   
+   `cd build`
 4. Initialize CMake:
-  
-  `cmake ..`
+   
+   `cmake ..`
+   
 5. Compile source code:
   
-  `make`
-  
-  (append e.g. `-j8` to use 8 jobs in parallel)
+   `make`
+   
+   (append e.g. `-j8` to use 8 jobs in parallel)
 6. Change into generated folder
-  
-  `cd src`
+   
+   `cd src`
+   
 7. Executable `wordclock` can be found here
