@@ -65,10 +65,10 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 			
 			// run script
 			if(this.vm.do_file(this.script)) {
-				Value error = Value(typeof(string));
+				Value? error = Value(typeof(string));
 				this.pop_value(ref error);
-				this.log_message((string) error);
-				throw new LuaError.SCRIPT_ERROR((string) error);
+				this.log_message(error != null ? (string) error : "null");
+				throw new LuaError.SCRIPT_ERROR(error != null ? (string) error : "null");
 			}else{
 				this.log_message("Lua script %s loaded!".printf(this.script));
 				debug("Lua script %s loaded",this.script);
@@ -80,16 +80,16 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		this.vm.register(name, func);
 	}
 	
-	public void call_function( string func, Value[] params = {}, Value[] ret = {} ) throws LuaError {
+	public void call_function( string func, Value[] params = {}, Value?[] ret = {} ) throws LuaError {
 		lock(this.vm) {
 			this.vm.get_global(func);
 			foreach(Value param in params) this.push_value(param);
 			
 			if(this.vm.pcall(params.length, ret.length) != 0) {
-				Value error = Value(typeof(string));
+				Value? error = Value(typeof(string));
 				this.pop_value(ref error);
-				this.log_message((string) error);
-				throw new LuaError.CALL_ERROR((string) error);
+				this.log_message(error != null ? (string) error : "null");
+				throw new LuaError.CALL_ERROR(error != null ? (string) error : "null");
 			}else{
 				for(uint i=0;i<ret.length;i++) {
 					this.pop_value(ref ret[i]);
@@ -98,16 +98,16 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		}
 	}
 	
-	public void call_reffunction( int reffunc, Value[] params = {}, Value[] ret = {} ) throws LuaError {
+	public void call_reffunction( int reffunc, Value[] params = {}, Value?[] ret = {} ) throws LuaError {
 		lock(this.vm) {
 			this.vm.raw_geti(PseudoIndex.REGISTRY, reffunc);
 			foreach(Value param in params) this.push_value(param);
 			
 			if(this.vm.pcall(params.length, ret.length) != 0) {
-				Value error = Value(typeof(string));
+				Value? error = Value(typeof(string));
 				this.pop_value(ref error);
-				this.log_message((string) error);
-				throw new LuaError.CALL_ERROR((string) error);
+				this.log_message(error != null ? (string) error : "null");
+				throw new LuaError.CALL_ERROR(error != null ? (string) error : "null");
 			}else{
 				for(uint i=0;i<ret.length;i++) {
 					this.pop_value(ref ret[i]);
@@ -158,7 +158,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		return true;
 	}
 	
-	public bool pop_value( ref Value val ) {
+	public bool pop_value( ref Value? val ) {
 		if(this.vm.is_number(-1) && val.holds(typeof(double))) {
 			val.set_double(this.vm.to_number(-1));
 		}else if(this.vm.is_number(-1) && val.holds(typeof(int))) {
@@ -168,8 +168,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 		}else if(this.vm.is_string(-1) && val.holds(typeof(string))) {
 			val.set_string(this.vm.to_string(-1));
 		}else{
-			warning("Can't pop return value from lua stack into %s variable!", val.type().name());
-			return false;
+			val = null;
 		}
 		
 		this.vm.pop(-1);

@@ -101,7 +101,7 @@ public class WordClock.LuaSignals : GLib.Object {
 	}
 	
 	private static bool handle_signal(uint id, string signal_name) {
-		Value[] ret = {Value(typeof(bool))};
+		Value?[] ret = {Value(typeof(bool))};
 		try {
 			if(lua_funcs.has_key(id)) {
 				lua.call_function( lua_funcs[id], { signal_name }, ret );
@@ -115,6 +115,7 @@ public class WordClock.LuaSignals : GLib.Object {
 			lua.log_message("Error: "+e.message);
 		}
 		
+		if(ret[0] == null) return true;
 		return (bool) ret[0];
 	}
 }
