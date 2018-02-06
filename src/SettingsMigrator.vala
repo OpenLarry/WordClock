@@ -160,6 +160,24 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			if(message.get_object().has_member("font-name")) {
 				message.get_object().remove_member("font-name");
 			}
+			
+			debug("Update $.objects.signalrouter.sinks: Replace 'remote,' with 'remote,rgb_remote-'");
+			Json.Node sinks = get_first_node("$.objects.signalrouter.sinks", ref node);
+			
+			if(sinks.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+			
+			foreach(unowned string sink in sinks.get_object().get_members()) {
+				MatchInfo info;
+				if(/^remote,((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?)$/.match(sink, 0, out info)) {
+					Json.Node member = sinks.get_object().get_member(sink);
+					sinks.get_object().remove_member(sink);
+					sinks.get_object().set_member("remote,rgb_remote-"+info.fetch(1), member);
+				}else if(/^remote,((?:PLAYPAUSE|POWER|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?)$/.match(sink, 0, out info)) {
+					Json.Node member = sinks.get_object().get_member(sink);
+					sinks.get_object().remove_member(sink);
+					sinks.get_object().set_member("remote,rgb_remote_big-"+info.fetch(1), member);
+				}
+			}
 		};
 		
 		return migration_funcs;
