@@ -12,6 +12,7 @@ public class WordClock.LuaBuzzer: GLib.Object {
 		
 		lua.init.connect(() => {
 			lua.register_func("beep", beep);
+			lua.register_func("pause", pause);
 		});
 	}
 	
@@ -25,6 +26,16 @@ public class WordClock.LuaBuzzer: GLib.Object {
 		if(volume <= 0) volume = 255;
 		
 		Buzzer.beep((uint16) msec, (uint16) freq, (uint8) volume);
+		
+		return 0;
+	}
+	
+	private static int pause(LuaVM vm) {
+		int msec = vm.to_integer(1);
+		
+		if(msec <= 0) msec = 250;
+		
+		Buzzer.pause((uint16) msec);
 		
 		return 0;
 	}
