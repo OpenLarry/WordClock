@@ -158,6 +158,11 @@ public class WordClock.Main : GLib.Object {
 		debug("Init SensorsObserver");
 		var sensorsobserver = new SensorsObserver(hwinfo);
 		
+		if(!silent) {
+			debug("Init Buzzer");
+			Buzzer.init();
+		}
+		
 		debug("Init MainLoop");
 		loop = new MainLoop();
 		
@@ -212,20 +217,15 @@ public class WordClock.Main : GLib.Object {
 		LuaBuzzer.init(lua);
 		LuaRenderer.init(lua);
 		
-		if(silent) {
-			debug("Enable silent mode");
-			Buzzer.silent();
-		}
-		
 		try{
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
 			
 			if(hwinfo.gpios["button0"].value) {
 				Buzzer.beep(200,2000,255);
-				Thread.usleep(200000);
+				Buzzer.pause(200);
 				Buzzer.beep(200,2000,255);
-				Thread.usleep(200000);
+				Buzzer.pause(200);
 				Buzzer.beep(200,2000,255);
 				
 				message.info("Loading default settings...");
@@ -245,9 +245,9 @@ public class WordClock.Main : GLib.Object {
 					
 					if(!debug_mode) {
 						Buzzer.beep(200,2000,255);
-						Thread.usleep(200000);
+						Buzzer.pause(200);
 						Buzzer.beep(200,2000,255);
-						Thread.usleep(200000);
+						Buzzer.pause(200);
 						Buzzer.beep(200,2000,255);
 					}
 					
@@ -326,8 +326,9 @@ public class WordClock.Main : GLib.Object {
 			critical(e.message);
 		}
 		
-		debug("Wait for renderer thread");
+		debug("Wait for threads");
 		thread.join();
+		Buzzer.deinit();
 		
 		debug("Program end");
 		Posix.closelog();
