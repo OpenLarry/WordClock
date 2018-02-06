@@ -171,7 +171,7 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 			val = null;
 		}
 		
-		this.vm.pop(-1);
+		this.vm.pop(1);
 		
 		return true;
 	}
