@@ -22,8 +22,12 @@ public class WordClock.IrRemote : GLib.Object, SignalSource {
 		}
 		
 		this.listener.button.connect((device_conf, interpreted_key_code, repetition_number) => {
-			if(repetition_number==0) this.action(device_conf+"-"+interpreted_key_code);
-			else if(repetition_number%10==0) this.action(device_conf+"-"+interpreted_key_code+"-"+repetition_number.to_string());
+			bool handled = false;
+			
+			if(repetition_number==0) handled = this.action(device_conf+"-"+interpreted_key_code);
+			else if(repetition_number%10==0) handled = this.action(device_conf+"-"+interpreted_key_code+"-"+repetition_number.to_string());
+			
+			if(handled) Buzzer.beep(50,2500,255);
 		});
 	}
 }

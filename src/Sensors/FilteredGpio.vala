@@ -18,13 +18,20 @@ public class WordClock.FilteredGpio : GLib.Object , SignalSource, Jsonable {
 		this.gpio.action.connect(this.check_time);
 	}
 	
-	private void check_time(string action) {
+	private bool check_time(string action) {
 		if(action == "0") timer_0.start();
 		if(action == "1") timer_1.start();
 		
-		if(action == "0" && last == true && this.min_high_time > 0 && timer_1.elapsed() >= this.min_high_time) this.action("1");
-		if(action == "1" && last == false && this.min_low_time > 0 && timer_0.elapsed() >= this.min_low_time) this.action("0");
+		if(action == "0" && last == true && this.min_high_time > 0 && timer_1.elapsed() >= this.min_high_time) {
+			this.last = (action == "1");
+			return this.action("1");
+		}
+		if(action == "1" && last == false && this.min_low_time > 0 && timer_0.elapsed() >= this.min_low_time) {
+			this.last = (action == "1");
+			return this.action("0");
+		}
 		
 		this.last = (action == "1");
+		return false;
 	}
 }

@@ -5,5 +5,5 @@ using WordClock, Gee;
  * @version 1.0
  */
 public interface WordClock.SignalSource : GLib.Object {
-	public signal void action( string name );
+	public signal bool action( string name );
 }

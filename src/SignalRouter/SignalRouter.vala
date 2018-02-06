@@ -25,7 +25,7 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 		}
 	}
 	
-	public delegate bool SignalFunc( uint id, string signal_name );
+	public delegate bool SignalFunc( uint id, string signal_name, out bool proceed = null );
 	protected TreeMap<uint,SignalFuncWrapper> signal_funcs = new TreeMap<uint,SignalFuncWrapper>();
 	protected uint signal_funcs_count = 0;
 	
@@ -34,11 +34,13 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 	public void add_source( string source_name, SignalSource source ) {
 		sources[source_name] = source;
 		source.action.connect( (name) => {
-			this.trigger_signal( source_name+","+name );
+			return this.trigger_signal( source_name+","+name );
 		});
 	}
 	
-	public void trigger_signal( string signal_name ) {
+	public bool trigger_signal( string signal_name ) {
+		bool handled = false;
+		
 		if(signal_name != "signalrouter,userevent") {
 			string[] parts = signal_name.split(",",2);
 			if(parts.length > 0 && userevent_sources.contains(new JsonableString(parts[0]))) {
@@ -50,22 +52,29 @@ public class WordClock.SignalRouter : GLib.Object, Jsonable {
 		
 		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
 			if(entry.value.before && entry.value.regex.match(signal_name)) {
-				if(!entry.value.f(entry.key, signal_name)) return;
+				bool proceed;
+				if(entry.value.f(entry.key, signal_name, out proceed)) handled = true;
+				if(!proceed) return handled;
 			}
 		}
 		
 		var sinks = this.sinks[signal_name];
 		if(sinks != null) {
 			foreach(var sink in sinks) {
+				handled = true;
 				sink.action();
 			}
 		}
 		
 		foreach(Map.Entry<uint,SignalFuncWrapper> entry in this.signal_funcs.entries) {
 			if(!entry.value.before && entry.value.regex.match(signal_name)) {
-				if(!entry.value.f(entry.key, signal_name)) return;
+				bool proceed;
+				if(entry.value.f(entry.key, signal_name, out proceed)) handled = true;
+				if(!proceed) return handled;
 			}
 		}
+		
+		return handled;
 	}
 	
 	public uint add_signal_func( Regex regex, SignalFunc func, bool before = false ) {

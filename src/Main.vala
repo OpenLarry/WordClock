@@ -169,10 +169,6 @@ public class WordClock.Main : GLib.Object {
 		debug("Init IR remote");
 		var remote = new IrRemote( loop.get_context() );
 		
-		remote.action.connect((value) => {
-			if(!(/-\d+$/.match(value))) Buzzer.beep(50,2500,255);
-		});
-		
 		debug("Init TimeObserver");
 		var timeobserver = new TimeObserver();
 		

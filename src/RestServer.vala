@@ -40,6 +40,7 @@ public class WordClock.RestServer : Soup.Server {
 		Main.hwinfo.gpios.foreach( (e) => {
 			e.value.action.connect( () => {
 				this.update_hwinfo("gpios",e.key,e.value);
+				return false;
 			});
 			
 			return true;

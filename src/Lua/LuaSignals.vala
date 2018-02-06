@@ -95,13 +95,18 @@ public class WordClock.LuaSignals : GLib.Object {
 	private static int trigger_signal(LuaVM vm) {
 		string signal_name = vm.to_string(1);
 		
-		signal_router.trigger_signal(signal_name);
+		Value val = Value(typeof(bool));
+		val.set_boolean(signal_router.trigger_signal(signal_name));
 		
-		return 0;
+		lua.push_value(val);
+		
+		return 1;
 	}
 	
-	private static bool handle_signal(uint id, string signal_name) {
-		Value?[] ret = {Value(typeof(bool))};
+	private static bool handle_signal(uint id, string signal_name, out bool proceed = null ) {
+		proceed = true;
+		
+		Value?[] ret = {Value(typeof(bool)),Value(typeof(bool))};
 		try {
 			if(lua_funcs.has_key(id)) {
 				lua.call_function( lua_funcs[id], { signal_name }, ret );
@@ -115,7 +120,9 @@ public class WordClock.LuaSignals : GLib.Object {
 			lua.log_message("Error: "+e.message);
 		}
 		
-		if(ret[0] == null) return true;
-		return (bool) ret[0];
+		if(ret[0] != null && !(bool) ret[0]) proceed = false;
+		
+		if(ret[1] == null) return true;
+		return (bool) ret[1];
 	}
 }
