@@ -89,7 +89,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			}
 		};
 		
-		migration_funcs["v0.8"] = (ref node) => {
+		migration_funcs["v0.8.2"] = (ref node) => {
 			debug("Update $.objects.clockrenderer.renderers: Replace StringRenderer with TextRenderer");
 			Json.Node renderers = get_first_node("$.objects.clockrenderer.renderers", ref node);
 			
