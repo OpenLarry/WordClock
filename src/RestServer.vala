@@ -23,6 +23,7 @@ public class WordClock.RestServer : Soup.Server {
 		debug("Starting REST server");
 		
 		this.add_handler("/", this.request);
+		this.add_handler("/hwinfo", this.request); // try non-websocket request first
 		
 		this.add_early_handler("/update", this.update);
 		
@@ -249,6 +250,8 @@ public class WordClock.RestServer : Soup.Server {
 	 * @param client Client instance
 	 */
 	private void request( Soup.Server server, Soup.Message msg, string path, HashTable<string,string>? query, Soup.ClientContext client) {
+		if( msg.request_headers.header_contains("Upgrade","websocket") ) return;
+		
 		debug("Request: %s %s (%s, %lli)", msg.method, path, msg.request_headers.get_content_type(null) ?? "none", msg.request_headers.get_content_length());
 		
 		msg.response_headers.append("Access-Control-Allow-Origin", "*");
@@ -262,6 +265,23 @@ public class WordClock.RestServer : Soup.Server {
 				case "GET":
 					msg.set_response("text/html", Soup.MemoryUse.COPY, @"<h1>WordClock $(Version.GIT_DESCRIBE)</h1>".data);
 					msg.set_status(200);
+				break;
+				default:
+					msg.set_status(405);
+				break;
+			}
+		}else if( path.index_of("/hwinfo") == 0 ) {
+			switch(msg.method) {
+				case "GET":
+					try{
+						string data = JsonHelper.to_string(Main.hwinfo.to_json( path.substring(7) ));
+						
+						msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
+						msg.set_status(200);
+					} catch( Error e ) {
+						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
+						msg.set_status(400);
+					}
 				break;
 				default:
 					msg.set_status(405);
