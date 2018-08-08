@@ -126,97 +126,104 @@ public class WordClock.Main : GLib.Object {
 			return 0;
 		}
 		
-		debug("Starting WordClock %s", Version.GIT_DESCRIBE);
-		
-		debug("Init Ws2812bDriver");
-		cancellable = new Cancellable();
-		var driver = new Ws2812bDriver( {4,5,6}, 60, cancellable );
-		renderer = new ClockRenderer(new MarkusClockWiring(),driver);
-		
-		debug("Init LRADCs");
-		hwinfo = new HardwareInfo();
-		hwinfo.lradcs["brightness"] = Lradc.get_channel(1);
-		hwinfo.lradcs["brightness"].set_scale("0.90332031"); 
-		hwinfo.lradcs["vddio"] = Lradc.get_channel(6);
-		hwinfo.lradcs["battery"] = Lradc.get_channel(7);
-		hwinfo.lradcs["temp"] = Lradc.get_channel(8);
-		hwinfo.lradcs["vdd5v"] = Lradc.get_channel(15);
-		Lradc.start();
-		
-		debug("Init GPIOs");
-		hwinfo.gpios["button0"] = new Gpio(92);
-		hwinfo.gpios["button1"] = new Gpio(91);
-		hwinfo.gpios["button2"] = new Gpio(23);
-		hwinfo.gpios["motion"] = new Gpio(7);
-		var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
-		
-		debug("Init CPU and memory monitors");
-		hwinfo.system["cpuload"] = new CpuLoad();
-		hwinfo.system["memoryusage"] = new MemoryUsage();
-		hwinfo.system["leddriver"] = driver;
-		
-		debug("Init SensorsObserver");
-		var sensorsobserver = new SensorsObserver(hwinfo);
-		
-		if(!silent) {
-			debug("Init Buzzer");
-			Buzzer.init();
-		}
-		
-		debug("Init MainLoop");
-		loop = new MainLoop();
-		
-		debug("Init IR remote");
-		var remote = new IrRemote( loop.get_context() );
-		
-		debug("Init TimeObserver");
-		var timeobserver = new TimeObserver();
-		
-		debug("Init SignalRouter");
-		var signalrouter = new SignalRouter();
-		signalrouter.add_source("button0", hwinfo.gpios["button0"]);
-		signalrouter.add_source("button1", hwinfo.gpios["button1"]);
-		signalrouter.add_source("button2", hwinfo.gpios["button2"]);
-		signalrouter.add_source("filteredmotion", filteredmotion);
-		signalrouter.add_source("motion", hwinfo.gpios["motion"]);
-		signalrouter.add_source("remote", remote);
-		signalrouter.add_source("sensorsobserver", sensorsobserver);
-		signalrouter.add_source("timeobserver", timeobserver);
-		
-		debug("Init MessageOverlay");
-		MessageOverlay message = new MessageOverlay( renderer );
-		
-		debug("Init OWMWeatherProvider");
-		OWMWeatherProvider weather = new OWMWeatherProvider();
-		
-		debug("Init Lua");
-		Lua lua = new Lua();
-		
-		debug("Init Settings");
-		settings = new Settings();
-		settings.objects["clockrenderer"] = renderer;
-		settings.objects["signalrouter"] = signalrouter;
-		settings.objects["sensorsobserver"] = sensorsobserver;
-		settings.objects["message"] = message;
-		settings.objects["timeobserver"] = timeobserver;
-		settings.objects["weather"] = weather;
-		settings.objects["lua"] = lua;
-		settings.objects["filteredmotion"] = filteredmotion;
-		settings.objects.set_keys_immutable();
-		
-		debug("Init Lua modules");
-		LuaSignals.init(lua, signalrouter);
-		LuaSettings.init(lua, settings);
-		LuaHwinfo.init(lua, hwinfo);
-		LuaMessage.init(lua, message);
-		LuaSink.init(lua);
-		LuaBuzzer.init(lua);
-		LuaRenderer.init(lua);
-		
-		try{
+		try {
+			debug("Starting WordClock %s", Version.GIT_DESCRIBE);
+			
+			debug("Load port config");
+			JsonWrapper.Node port_config = new JsonWrapper.Node.from_json_file("/etc/wordclock/ports.json");
+			
+			debug("Init Ws2812bDriver");
+			cancellable = new Cancellable();
+			uint8[] ports = port_config["ws2812b"]["ports"].get_uint8_array();
+			uint8 leds = (uint8) port_config["ws2812b"]["leds"].get_typed_value<uint8>();
+			var driver = new Ws2812bDriver( ports, leds, cancellable );
+			renderer = new ClockRenderer(new MarkusClockWiring(),driver);
+			
+			debug("Init LRADCs");
+			hwinfo = new HardwareInfo();
+			
+			foreach( JsonWrapper.Entry entry in port_config["lradc"] ) {
+				hwinfo.lradcs[entry.get_member_name()] = Lradc.get_channel((uint8) entry.value.get_typed_value<uint8>());
+			}
+			foreach( JsonWrapper.Entry entry in port_config["lradc-scale"] ) {
+				hwinfo.lradcs[entry.get_member_name()].set_scale(entry.value.to_string());
+			}
+			Lradc.start();
+			
+			debug("Init GPIOs");
+			foreach( JsonWrapper.Entry entry in port_config["gpio"] ) {
+				hwinfo.gpios[entry.get_member_name()] = new Gpio((uint8) entry.value.get_typed_value<uint8>());
+			}
+			
+			var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
+			
+			debug("Init CPU and memory monitors");
+			hwinfo.system["cpuload"] = new CpuLoad();
+			hwinfo.system["memoryusage"] = new MemoryUsage();
+			hwinfo.system["leddriver"] = driver;
+			
+			debug("Init SensorsObserver");
+			var sensorsobserver = new SensorsObserver(hwinfo);
+			
+			if(!silent) {
+				debug("Init Buzzer");
+				Buzzer.init((uint8) port_config["buzzer"]["pwm-port"].get_typed_value<uint8>());
+			}
+			
+			debug("Init MainLoop");
+			loop = new MainLoop();
+			
+			debug("Init IR remote");
+			var remote = new IrRemote( loop.get_context() );
+			
+			debug("Init TimeObserver");
+			var timeobserver = new TimeObserver();
+			
+			debug("Init SignalRouter");
+			var signalrouter = new SignalRouter();
+			signalrouter.add_source("button0", hwinfo.gpios["button0"]);
+			signalrouter.add_source("button1", hwinfo.gpios["button1"]);
+			signalrouter.add_source("button2", hwinfo.gpios["button2"]);
+			signalrouter.add_source("filteredmotion", filteredmotion);
+			signalrouter.add_source("motion", hwinfo.gpios["motion"]);
+			signalrouter.add_source("remote", remote);
+			signalrouter.add_source("sensorsobserver", sensorsobserver);
+			signalrouter.add_source("timeobserver", timeobserver);
+			
+			debug("Init MessageOverlay");
+			MessageOverlay message = new MessageOverlay( renderer );
+			
+			debug("Init OWMWeatherProvider");
+			OWMWeatherProvider weather = new OWMWeatherProvider();
+			
+			debug("Init Lua");
+			Lua lua = new Lua();
+			
+			debug("Init Settings");
+			settings = new Settings();
+			settings.objects["clockrenderer"] = renderer;
+			settings.objects["signalrouter"] = signalrouter;
+			settings.objects["sensorsobserver"] = sensorsobserver;
+			settings.objects["message"] = message;
+			settings.objects["timeobserver"] = timeobserver;
+			settings.objects["weather"] = weather;
+			settings.objects["lua"] = lua;
+			settings.objects["filteredmotion"] = filteredmotion;
+			settings.objects.set_keys_immutable();
+			
+			debug("Init Lua modules");
+			LuaSignals.init(lua, signalrouter);
+			LuaSettings.init(lua, settings);
+			LuaHwinfo.init(lua, hwinfo);
+			LuaMessage.init(lua, message);
+			LuaSink.init(lua);
+			LuaBuzzer.init(lua);
+			LuaRenderer.init(lua);
+			
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
 			
+			// reset requested (left button)
 			if(hwinfo.gpios["button0"].value) {
 				Buzzer.beep(200,2000,255);
 				Buzzer.pause(200);
@@ -251,85 +258,79 @@ public class WordClock.Main : GLib.Object {
 				}
 			}
 			
-		} catch( Error e ) {
-			error(e.message);
-		}
-		
-		
-		try{
 			new RestServer();
+			
+			debug("Register Posix signal callbacks");
+			var signalsource = new Unix.SignalSource( Posix.SIGTERM );
+			signalsource.set_callback(Main.shutdown);
+			signalsource.attach( loop.get_context() );
+			
+			signalsource = new Unix.SignalSource( Posix.SIGHUP );
+			signalsource.set_callback(Main.shutdown);
+			signalsource.attach( loop.get_context() );
+			
+			signalsource = new Unix.SignalSource( Posix.SIGINT );
+			signalsource.set_callback(Main.shutdown);
+			signalsource.attach( loop.get_context() );
+			
+			// Debug parameter skips boot sequence
+			if(!debug_mode) {
+				debug("Setup boot sequence");
+				BootSequenceRenderer boot = new BootSequenceRenderer();
+				ColorRenderer black = new ColorRenderer();
+				black.color.set_hsv(0,0,0);
+				renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
+					debug("Boot sequence finished");
+				});
+			}
+			
+			debug("Run renderer thread");
+			var thread = new Thread<int>("Ws2812bDriver", () => {
+				// set real-time scheduling policy
+				Posix.Sched.Param param = { 1 };
+				int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
+				assert(ret==0);
+				
+				return driver.start(renderer);
+			});
+			
+			if(!debug_mode) {
+				debug("Make beep sound");
+				Buzzer.beep(100,2000,10);
+				Buzzer.beep(400,4000,10);
+			}
+			
+			debug("Run main loop");
+			loop.run();
+			debug("Terminating");
+			
+			if(!debug_mode) {
+				debug("Make beep sound");
+				Buzzer.beep(100,4000,10);
+				Buzzer.beep(100,2000,10);
+			}
+			
+			debug("Stop LRADCs");
+			Lradc.stop();
+			
+			debug("Save pending changes");
+			try{
+				settings.check_save();
+			}catch( Error e ) {
+				critical(e.message);
+			}
+			
+			debug("Wait for threads");
+			thread.join();
+			Buzzer.deinit();
+			
+			debug("Program end");
+			Posix.closelog();
+			
+			print("Bye!\n");		
 		} catch( Error e ) {
 			error(e.message);
 		}
-		
-		debug("Register Posix signal callbacks");
-		var signalsource = new Unix.SignalSource( Posix.SIGTERM );
-		signalsource.set_callback(Main.shutdown);
-		signalsource.attach( loop.get_context() );
-		
-		signalsource = new Unix.SignalSource( Posix.SIGHUP );
-		signalsource.set_callback(Main.shutdown);
-		signalsource.attach( loop.get_context() );
-		
-		signalsource = new Unix.SignalSource( Posix.SIGINT );
-		signalsource.set_callback(Main.shutdown);
-		signalsource.attach( loop.get_context() );
-		
-		// Debug parameter skips boot sequence
-		if(!debug_mode) {
-			debug("Setup boot sequence");
-			BootSequenceRenderer boot = new BootSequenceRenderer();
-			ColorRenderer black = new ColorRenderer();
-			black.color.set_hsv(0,0,0);
-			renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
-				debug("Boot sequence finished");
-			});
-		}
-		
-		debug("Run renderer thread");
-		var thread = new Thread<int>("Ws2812bDriver", () => {
-			// set real-time scheduling policy
-			Posix.Sched.Param param = { 1 };
-			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.FIFO, ref param);
-			assert(ret==0);
-			
-			return driver.start(renderer);
-		});
-		
-		if(!debug_mode) {
-			debug("Make beep sound");
-			Buzzer.beep(100,2000,10);
-			Buzzer.beep(400,4000,10);
-		}
-		
-		debug("Run main loop");
-		loop.run();
-		debug("Terminating");
-		
-		if(!debug_mode) {
-			debug("Make beep sound");
-			Buzzer.beep(100,4000,10);
-			Buzzer.beep(100,2000,10);
-		}
-		
-		debug("Stop LRADCs");
-		Lradc.stop();
-		
-		debug("Save pending changes");
-		try{
-			settings.check_save();
-		}catch( Error e ) {
-			critical(e.message);
-		}
-		
-		debug("Wait for threads");
-		thread.join();
-		Buzzer.deinit();
-		
-		debug("Program end");
-		Posix.closelog();
-		
-		print("Bye!\n");
 		
 		return 0;
     }

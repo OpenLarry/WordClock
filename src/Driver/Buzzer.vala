@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
-	const uint8 PWM_PORT = 2;
+	private static uint8 PWM_PORT = 2;
 	const uint8 PWM_CHIP = 0;
 	
 	const string PWM_PATH_EXPORT = "/sys/class/pwm/pwmchip%u/export";
@@ -47,9 +47,10 @@ public class WordClock.Buzzer : GLib.Object, Jsonable, SignalSink {
 	/**
 	 * Start Buzzer thread
 	 */
-	public static void init() {
+	public static void init(uint8 pwm_port) {
 		if(thread != null) return;
 		
+		PWM_PORT = pwm_port;
 		queue = new AsyncQueue<BuzzerCommand>();
 		thread = new Thread<bool>("Buzzer", worker_thread);
 	}
