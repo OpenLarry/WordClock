@@ -80,6 +80,11 @@ set(VALA_SRC
 	Json/Jsonable.vala
 	Json/JsonHelper.vala
 	Json/JsonModifierSink.vala
+	Json/JsonWrapper/Node.vala
+	Json/JsonWrapper/Entry.vala
+	Json/JsonWrapper/Iterator.vala
+	Json/JsonWrapper/ArrayIterator.vala
+	Json/JsonWrapper/ObjectIterator.vala
 	Driver/LedDriver.vala
 	Driver/Ws2812bDriver.vala
 	Driver/Buzzer.vala
