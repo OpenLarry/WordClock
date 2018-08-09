@@ -36,9 +36,21 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 						Json.Parser parser = new Json.Parser();
 						parser.load_from_file(old_settings);
 						Json.Node node = parser.get_root();
-						
-						SettingsMigrator.migrate(new JsonWrapper.Node(node), old_version);
-						this.from_json(node);
+						try {
+							SettingsMigrator.migrate(new JsonWrapper.Node(node), old_version);
+							this.from_json(node);
+						} catch ( Error e ) {
+							Buzzer.beep(200,2000,255);
+							Buzzer.pause(200);
+							Buzzer.beep(200,2000,255);
+							Buzzer.pause(200);
+							Buzzer.beep(200,2000,255);
+							
+							// wait for buzzer
+							Thread.usleep(1500000);
+							
+							error("Migration failed: %s", e.message);
+						}
 						debug("Settings loaded");
 						this.save();
 					}
