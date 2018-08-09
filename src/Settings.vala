@@ -37,7 +37,7 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 						parser.load_from_file(old_settings);
 						Json.Node node = parser.get_root();
 						
-						SettingsMigrator.migrate(ref node, old_version);
+						SettingsMigrator.migrate(new JsonWrapper.Node(node), old_version);
 						this.from_json(node);
 						debug("Settings loaded");
 						this.save();

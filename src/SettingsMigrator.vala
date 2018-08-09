@@ -1,4 +1,4 @@
-using WordClock, Gee;
+using WordClock, Gee, JsonWrapper;
 
 /**
  * @author Aaron Larisch
@@ -8,9 +8,9 @@ public class WordClock.SettingsMigrator : GLib.Object {
 	const string SETTINGS_PATH = "/etc/wordclock/";
 	
 	[CCode (has_target=false)]
-	private delegate void MigrationFunc( ref Json.Node node ) throws Error;
+	private delegate void MigrationFunc( JsonWrapper.Node node ) throws JsonWrapper.Error;
 	
-	public static void migrate( ref Json.Node node, string from = get_old_settings_version(), string to = Version.GIT_DESCRIBE) throws Error {
+	public static void migrate( JsonWrapper.Node node, string from = get_old_settings_version(), string to = Version.GIT_DESCRIBE) throws GLib.Error {
 		if(!Version.is_official(from)) throw new SettingsMigratorError.INVALID_VERSION("Invalid version: %s".printf(from ?? "null"));
 		if(Version.is_official(to) && Version.compare(from,to) >= 0) throw new SettingsMigratorError.INVALID_VERSION("Invalid version: %s".printf(to));
 		
@@ -20,7 +20,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 		foreach(Map.Entry<string,MigrationFunc> e in migration_funcs.entries) {
 			if(Version.compare(from,e.key) <= 0 && (!Version.is_official(to) || Version.compare(e.key,to) < 0)) {
 				debug("Migration from version %s", (e.key=="") ? "none" : e.key);
-				e.value(ref node);
+				e.value(node);
 			}
 		}
 		
@@ -30,165 +30,153 @@ public class WordClock.SettingsMigrator : GLib.Object {
 	private static TreeMap<string,MigrationFunc> get_migration_funcs() {
 		TreeMap<string,MigrationFunc> migration_funcs = new TreeMap<string,MigrationFunc>(Version.compare);
 		
-		migration_funcs[""] = (ref node) => {
+		migration_funcs[""] = (node) => {
 			debug("Update $.objects.signalrouter.sinks: Replace motion with filteredmotion");
-			Json.Node sinks = get_first_node("$.objects.signalrouter.sinks", ref node);
+			JsonWrapper.Node sinks = node["objects"]["signalrouter"]["sinks"];
 			
-			if(sinks.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
-			
-			if(sinks.get_object().has_member("motion,1")) {
-				Json.Node member = sinks.get_object().get_member("motion,1");
-				sinks.get_object().remove_member("motion,1");
-				sinks.get_object().set_member("filteredmotion,1", member);
+			try {
+				sinks["filteredmotion,1"] = sinks["motion,1"];
+				sinks["motion,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 			}
 			
 			debug("Update $.objects.signalrouter.sinks: Bind WirelessNetworkInputSink with delay to same key as InfoSink");
-			foreach(string name in sinks.get_object().get_members()) {
+			foreach(Entry entry in sinks) {
 				MatchInfo info;
-				if(/^remote,\w+(?!-\d+)$/.match(name, 0, out info)) {
-					if(sinks.get_object().has_member( info.fetch(0)+"-10" )) continue;
-					if(sinks.get_object().get_member(name).get_node_type() != Json.NodeType.ARRAY) continue;
-					Json.Array member = sinks.get_object().get_array_member(name);
-					
-					// check if current signal has WordClockInfoSink
-					bool found = false;
-					foreach(unowned Json.Node val in member.get_elements()) {
-						if(val.get_node_type() != Json.NodeType.OBJECT) continue;
-						if(!val.get_object().has_member("-type")) continue;
-						if(val.get_object().get_member("-type").get_node_type() != Json.NodeType.VALUE) continue;
-						if(val.get_object().get_string_member("-type") != "WordClockInfoSink") continue;
-						
-						found = true;
-						break;
-					}
-					
-					// add WordClockWirelessNetworkInputSink
-					if(found) {
-						Json.Object obj = new Json.Object();
-						obj.set_string_member("-type","WordClockWirelessNetworkInputSink");
-						
-						Json.Array arr = new Json.Array();
-						arr.add_object_element(obj);
-						
-						sinks.get_object().set_array_member(info.fetch(0)+"-10", arr);
+				// check if there is already a delayed sink
+				if(! (/^remote,\w+(?!-\d+)$/.match(entry.get_member_name(), 0, out info))) continue;
+				string new_key = info.fetch(0)+"-10";
+				if(sinks.has(new_key)) continue;
+				
+				// check if current signal has WordClockInfoSink
+				foreach(Entry elem in entry.value) {
+					try {
+						if(elem.value["-type"].to_string() == "WordClockInfoSink") {
+							// add WordClockWirelessNetworkInputSink
+							sinks[new_key] = new JsonWrapper.Node.empty( Json.NodeType.ARRAY );
+							sinks[new_key][0] = new JsonWrapper.Node.empty( Json.NodeType.OBJECT );
+							sinks[new_key][0]["-type"] = "WordClockWirelessNetworkInputSink";
+							break;
+						}
+					} catch ( JsonWrapper.Error e ) {
+						// ignore
 					}
 				}
 			}
 			
 			debug("Update $.objects.signalrouter.userevent-sources: Replace motion with filteredmotion");
-			sinks = get_first_node("$.objects.signalrouter.userevent-sources", ref node);
+			JsonWrapper.Node sources = node["objects"]["signalrouter"]["userevent-sources"];
 			
-			if(sinks.get_node_type() != Json.NodeType.ARRAY) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.ARRAY");
-				
-			for(int i=0;i<sinks.get_array().get_length();i++) {
-				Json.Node elem = sinks.get_array().get_element(i);
-				if(elem.get_node_type() == Json.NodeType.VALUE && elem.get_string() == "motion") {
-					sinks.get_array().remove_element(i--);
-					sinks.get_array().add_string_element("filteredmotion");
-				}
+			foreach(Entry source in sources) {
+				if(source.value.to_string() == "motion") source.value.set_value("filteredmotion");
 			}
 		};
 		
-		migration_funcs["v0.8.2"] = (ref node) => {
+		migration_funcs["v0.8.2"] = (node) => {
 			debug("Update $.objects.clockrenderer.renderers: Replace StringRenderer with TextRenderer");
-			Json.Node renderers = get_first_node("$.objects.clockrenderer.renderers", ref node);
+			JsonWrapper.Node renderers = node["objects"]["clockrenderer"]["renderers"];
 			
-			if(renderers.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
-			
-			foreach(unowned Json.Node renderer in renderers.get_object().get_values()) {
-				if(renderer.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+			foreach(Entry renderer in renderers) {
+				try {
+					if(renderer.value["-type"].to_string() != "WordClockStringRenderer") continue;
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
 				
-				if(!renderer.get_object().has_member("-type")) continue;
-				if(renderer.get_object().get_member("-type").get_node_type() != Json.NodeType.VALUE) continue;
-				if(renderer.get_object().get_string_member("-type") != "WordClockStringRenderer") continue;
+				try {
+					renderer.value["color"] = renderer.value["left-color"];
+					renderer.value["left-color"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}					
+					
+				try {
+					renderer.value["right-color"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
 				
-				if(renderer.get_object().has_member("left-color")) {
-					Json.Node member = renderer.get_object().get_member("left-color");
-					renderer.get_object().remove_member("left-color");
-					renderer.get_object().set_member("color", member);
+				try {
+					renderer.value["x-speed"] = renderer.value["speed"];
+					renderer.value["speed"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 				}
-				if(renderer.get_object().has_member("right-color")) {
-					renderer.get_object().remove_member("right-color");
+
+				try {
+					renderer.value["x-offset"] = renderer.value["position"];
+					renderer.value["position"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 				}
-				if(renderer.get_object().has_member("speed")) {
-					Json.Node member = renderer.get_object().get_member("speed");
-					renderer.get_object().remove_member("speed");
-					renderer.get_object().set_member("x-speed", member);
+
+				try {
+					renderer.value["letter-spacing"] = renderer.value["add-spacing"];
+					renderer.value["add-spacing"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 				}
-				if(renderer.get_object().has_member("position")) {
-					Json.Node member = renderer.get_object().get_member("position");
-					renderer.get_object().remove_member("position");
-					renderer.get_object().set_member("x-offset", member);
-				}
-				if(renderer.get_object().has_member("add-spacing")) {
-					Json.Node member = renderer.get_object().get_member("add-spacing");
-					renderer.get_object().remove_member("add-spacing");
-					renderer.get_object().set_member("letter-spacing", member);
-				}
-				if(renderer.get_object().has_member("font-name")) {
-					Json.Node member = renderer.get_object().get_member("font-name");
-					if(member.get_node_type() == Json.NodeType.VALUE && member.get_string() == "WordClockHugeMicrosoftSansSerifFont") {
-						renderer.get_object().set_string_member("font", "DejaVuSans 10.5");
-						renderer.get_object().set_int_member("y-offset", 12);
+
+				try {
+					if(renderer.value["font-name"].to_string() == "WordClockHugeMicrosoftSansSerifFont") {
+						renderer.value["font"] = "DejaVuSans 10.5";
+						renderer.value["y-offset"] = 12;
 					}
-					renderer.get_object().remove_member("font-name");
+					renderer.value["font-name"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 				}
-				if(renderer.get_object().has_member("string")) {
-					Json.Node member = renderer.get_object().get_member("string");
-					renderer.get_object().remove_member("string");
-					renderer.get_object().set_member("text", member);
+
+				try {
+					renderer.value["text"] = renderer.value["string"];
+					renderer.value["string"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 				}
 				
-				renderer.get_object().set_string_member("-type","WordClockTextRenderer");
+				renderer.value["-type"] = "WordClockTextRenderer";
 			}
 			
 			debug("Update $.objects.message: Migrate to TextRenderer");
-			Json.Node message = get_first_node("$.objects.message", ref node);
+			JsonWrapper.Node message = node["objects"]["message"];
 			
-			if(message.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
+			try {
+				message["x-speed"] = message["speed"];
+				message["speed"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
 			
-			if(message.get_object().has_member("speed")) {
-				Json.Node member = message.get_object().get_member("speed");
-				message.get_object().remove_member("speed");
-				message.get_object().set_member("x-speed", member);
+			try {
+				message["letter-spacing"] = message["add-spacing"];
+				message["add-spacing"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 			}
-			if(message.get_object().has_member("add-spacing")) {
-				Json.Node member = message.get_object().get_member("add-spacing");
-				message.get_object().remove_member("add-spacing");
-				message.get_object().set_member("letter-spacing", member);
-			}
-			if(message.get_object().has_member("font-name")) {
-				message.get_object().remove_member("font-name");
+			
+			try {
+				message["font-name"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 			}
 			
 			debug("Update $.objects.signalrouter.sinks: Replace 'remote,' with 'remote,rgb_remote-'");
-			Json.Node sinks = get_first_node("$.objects.signalrouter.sinks", ref node);
+			JsonWrapper.Node sinks = node["objects"]["signalrouter"]["sinks"];
 			
-			if(sinks.get_node_type() != Json.NodeType.OBJECT) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.OBJECT");
-			
-			foreach(unowned string sink in sinks.get_object().get_members()) {
+			foreach(Entry sink in sinks) {
 				MatchInfo info;
-				if(/^remote,((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?)$/.match(sink, 0, out info)) {
-					Json.Node member = sinks.get_object().get_member(sink);
-					sinks.get_object().remove_member(sink);
-					sinks.get_object().set_member("remote,rgb_remote-"+info.fetch(1), member);
-				}else if(/^remote,((?:PLAYPAUSE|POWER|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?)$/.match(sink, 0, out info)) {
-					Json.Node member = sinks.get_object().get_member(sink);
-					sinks.get_object().remove_member(sink);
-					sinks.get_object().set_member("remote,rgb_remote_big-"+info.fetch(1), member);
+				if(/^remote,((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?)$/.match(sink.get_member_name(), 0, out info)) {
+					sinks["remote,rgb_remote-"+info.fetch(1)] = sink.value;
+					sink.value.remove();
+				}else if(/^remote,((?:PLAYPAUSE|POWER|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?)$/.match(sink.get_member_name(), 0, out info)) {
+					sinks["remote,rgb_remote_big-"+info.fetch(1)] = sink.value;
+					sink.value.remove();
 				}
 			}
 		};
 		
 		return migration_funcs;
-	}
-	
-	private static Json.Node? get_first_node(string path, ref Json.Node node) throws Error {
-		Json.Node path_node = Json.Path.query(path, node);
-		if(path_node.get_node_type() != Json.NodeType.ARRAY) throw new SettingsMigratorError.MIGRATION_FAILED("get_node_type != Json.NodeType.ARRAY");
-		if(path_node.get_array().get_length() == 0) throw new SettingsMigratorError.MIGRATION_FAILED("get_length == 0");
-		
-		return path_node.get_array().get_element(0);
 	}
 	
 	public static string get_current_settings_version() {
@@ -211,7 +199,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			list.sort(Version.compare);
 			
 			return (list.size > 0) ? list.last() : null;
-		} catch ( Error e ) {
+		} catch ( GLib.Error e ) {
 			error("Cannot get old settings version: %s", e.message);
 		}
 	}
