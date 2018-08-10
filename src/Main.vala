@@ -17,11 +17,13 @@ public class WordClock.Main : GLib.Object {
 	private static bool version = false;
 	private static bool debug_mode = false;
 	private static bool silent = false;
+	private static int port = 8080;
 	
 	private const OptionEntry[] options = {
 		{ "version", 'v', 0, OptionArg.NONE, ref version, "Display version number", null },
 		{ "debug", 'd', 0, OptionArg.NONE, ref debug_mode, "Enable debug mode (no syslog, no intro, no sound)", null },
 		{ "silent", 's', 0, OptionArg.NONE, ref silent, "Disable sound output", null },
+		{ "port", 'p', 0, OptionArg.INT, ref port, "HTTP port number", "PORT" },
 		{ null }
 	};
 	
@@ -258,7 +260,7 @@ public class WordClock.Main : GLib.Object {
 				}
 			}
 			
-			new RestServer();
+			new RestServer((uint16) port);
 			
 			debug("Register Posix signal callbacks");
 			var signalsource = new Unix.SignalSource( Posix.SIGTERM );

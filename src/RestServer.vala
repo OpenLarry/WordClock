@@ -6,7 +6,7 @@ using Gee;
  * @version 1.0
  */
 public class WordClock.RestServer : Soup.Server {
-	const uint16 PORT = 8080;
+	private new uint16 port = 8080;
 	
 	private ArrayList<Soup.WebsocketConnection> hwinfo_connections = new ArrayList<Soup.WebsocketConnection>();
 	private ArrayList<Soup.WebsocketConnection> lua_log_connections = new ArrayList<Soup.WebsocketConnection>();
@@ -17,10 +17,11 @@ public class WordClock.RestServer : Soup.Server {
 	/**
 	 * Creates a new HTTP REST server instance with JSON interface
 	 * @param port Port number
-	 * @param control LEDControl object which parses the request
 	 */
-	public RestServer( ) throws GLib.Error {
+	public RestServer( uint16 port = 8080 ) throws GLib.Error {
 		debug("Starting REST server");
+		
+		this.port = port;
 		
 		this.add_handler("/", this.request);
 		this.add_handler("/hwinfo", this.request); // try non-websocket request first
@@ -32,7 +33,7 @@ public class WordClock.RestServer : Soup.Server {
 		this.add_websocket_handler("/livestream", null, null, this.request_livestream);
 		this.connect_signals();
 		
-		this.listen_all(PORT, Soup.ServerListenOptions.IPV4_ONLY);
+		this.listen_all(this.port, Soup.ServerListenOptions.IPV4_ONLY);
 		
 		debug("Server running");
 	}
