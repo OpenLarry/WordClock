@@ -214,18 +214,16 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			this.frame++;
 			
 			double time_diff = timer.elapsed() - last_time;
-			if(time_diff >= 1) {
+			if(time_diff >= 1 || (this.frame - last_frame) >= this.fps) {
 				this.current_fps = (this.frame - last_frame) / time_diff;
-				
 				last_time += time_diff;
+				last_frame = this.frame;
 				
-				// call update function in main thread, need to safe time here!
+				// call update function in main thread, need to save time here!
 				Idle.add(() => {
 					this.update();
 					return Source.REMOVE;
 				});
-				
-				last_frame = this.frame;
 			}
 			
 			// wait for vsync
