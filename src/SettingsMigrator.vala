@@ -9,6 +9,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 	
 	[CCode (has_target=false)]
 	private delegate void MigrationFunc( JsonWrapper.Node node ) throws JsonWrapper.Error;
+	private delegate void RecursiveMigrationFunc( JsonWrapper.Node node ) throws JsonWrapper.Error;
 	
 	public static void migrate( JsonWrapper.Node node, string from = get_old_settings_version(), string to = Version.GIT_DESCRIBE) throws GLib.Error {
 		if(!Version.is_official(from)) throw new SettingsMigratorError.INVALID_VERSION("Invalid version: %s".printf(from ?? "null"));
@@ -161,7 +162,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
 			}
 			
-			debug("Update $.objects.signalrouter.sinks: Replace 'remote,' with 'remote,rgb_remote-'");
+			debug("Update $.objects.signalrouter.sinks: Replace signals 'remote,' with 'remote,rgb_remote-'");
 			JsonWrapper.Node sinks = node["objects"]["signalrouter"]["sinks"];
 			
 			foreach(Entry sink in sinks) {
@@ -174,6 +175,36 @@ public class WordClock.SettingsMigrator : GLib.Object {
 					sink.value.remove();
 				}
 			}
+			
+			debug("Update $.objects.signalrouter.sinks: Replace JsonModifierSink paths 'remote,' with 'remote,rgb_remote-'");
+			
+			RecursiveMigrationFunc updateJsonModifierSink = null;
+			updateJsonModifierSink = (sinks) => {
+				// modify path if JsonModifierSink is found
+				try {
+					if(sinks["-type"].to_string() == "WordClockJsonModifierSink") {
+						foreach(Entry path in sinks["paths"]) {
+							MatchInfo info;
+							if(/^\/objects\/signalrouter\/sinks\/remote,((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?(?:\/.+)?)$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/signalrouter/sinks/remote,rgb_remote-"+info.fetch(1));
+							}else if(/^\/objects\/signalrouter\/sinks\/remote,((?:PLAYPAUSE|POWER|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?(?:\/.+)?)$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/signalrouter/sinks/remote,rgb_remote_big-"+info.fetch(1));
+							}
+						}
+					}
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+				
+				// go through sink nodes recursively
+				try {
+					foreach(Entry sink in sinks) {
+						updateJsonModifierSink(sink.value);
+					}
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.INVALID_NODE_TYPE) ) throw e; // skip node if not iterable
+				}
+			};
+			
+			updateJsonModifierSink(sinks);
 		};
 		
 		return migration_funcs;
