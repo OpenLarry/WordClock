@@ -206,6 +206,7 @@
           "y-offset" : 9,
           "mosaic" : false,
           "path" : "/usr/share/wordclock/weather_markus/09d.png",
+          "animation" : false,
           "-type" : "WordClockImageRenderer"
         },
         "NoBlack" : {
@@ -291,7 +292,7 @@
           "x-speed" : 10,
           "y-speed" : 0,
           "x-offset" : 10,
-          "y-offset" : 9,
+          "y-offset" : 12,
           "mosaic" : false,
           "font" : "DejaVuSans 10.5",
           "color" : {
@@ -324,7 +325,7 @@
           "x-offset" : 10,
           "y-offset" : 10,
           "mosaic" : false,
-          "font" : "DejaVuSans 8",
+          "font" : "DejaVuSans 7.5",
           "color" : {
             "h" : 0,
             "s" : 0,
@@ -333,7 +334,7 @@
           "markup" : false,
           "antialias" : false,
           "hint-metrics" : true,
-          "hint-style" : 0,
+          "hint-style" : 3,
           "letter-spacing" : 1.0,
           "text" : " %A %d.%m.%Y %k:%M-%S ",
           "time-format" : true,
@@ -516,10 +517,10 @@
       },
       "x-speed" : 15,
       "y-offset" : 10,
-      "font" : "DejaVuSans 8",
+      "font" : "DejaVuSans 7.5",
       "antialias" : false,
       "hint-metrics" : true,
-      "hint-style" : 0,
+      "hint-style" : 3,
       "letter-spacing" : 2.0,
       "-type" : "WordClockMessageOverlay"
     },
