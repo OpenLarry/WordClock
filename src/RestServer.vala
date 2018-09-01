@@ -33,7 +33,7 @@ public class WordClock.RestServer : Soup.Server {
 		this.add_websocket_handler("/livestream", null, null, this.request_livestream);
 		this.connect_signals();
 		
-		this.listen_all(this.port, Soup.ServerListenOptions.IPV4_ONLY);
+		this.listen_all(this.port, 0);
 		
 		debug("Server running");
 	}
