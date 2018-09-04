@@ -121,7 +121,7 @@ public class WordClock.SettingsMigrator : GLib.Object {
 
 				try {
 					if(renderer.value["font-name"].to_string() == "WordClockHugeMicrosoftSansSerifFont") {
-						renderer.value["font"] = "DejaVuSans 10.5";
+						renderer.value["font"] = "DejaVuSans 14px";
 						renderer.value["y-offset"] = 12;
 					}
 					renderer.value["font-name"].remove();

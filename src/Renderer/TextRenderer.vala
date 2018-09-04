@@ -5,7 +5,7 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.TextRenderer : CairoRenderer, Jsonable {
-	public string font { get; set; default = "DejaVuSans 7.5"; }
+	public string font { get; set; default = "DejaVuSans 10px"; }
 	public Color color { get; set; default = new Color.from_hsv( 0, 0, 200 ); }
 	public bool markup { get; set; default = false; }
 	public bool antialias { get; set; default = false; }
@@ -62,8 +62,9 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 			this.last_color = this.color.clone();
 			
 			// create a context, size doesn't matter yet
-			Cairo.ImageSurface mini_surface = new Cairo.ImageSurface(Cairo.Format.ARGB32, 1, 1);
-			Pango.Context mini_context = Pango.cairo_create_context(new Cairo.Context(mini_surface));
+			Pango.FontMap fontmap = Pango.CairoFontMap.new_for_font_type(Cairo.FontType.FT);
+			assert(fontmap != null);
+			Pango.Context mini_context = fontmap.create_context();
 			
 			// set font options
 			Cairo.FontOptions options = new Cairo.FontOptions();
