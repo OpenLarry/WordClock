@@ -14,7 +14,7 @@ public class WordClock.Lradc : GLib.Object, Jsonable {
 	const string LRADC_PATH = "/sys/bus/iio/devices/iio:device%u/in_%s_%s";
 	const string LRADC_SCAN_ELEMENTS = "/sys/bus/iio/devices/iio:device%u/scan_elements/in_%s_en";
 	const string LRADC_CURRENT_TRIGGER = "/sys/bus/iio/devices/iio:device%u/trigger/current_trigger";
-	const string LRADC_TRIGGER = "80050000.lradc-dev0";
+	const string LRADC_TRIGGER = "mxs-lradc-adc-dev0";
 	const string LRADC_BUFFER_WATERMARK = "/sys/bus/iio/devices/iio:device%u/buffer/watermark";
 	const string LRADC_BUFFER_LENGTH = "/sys/bus/iio/devices/iio:device%u/buffer/length";
 	const string LRADC_BUFFER_ENABLE = "/sys/bus/iio/devices/iio:device%u/buffer/enable";
