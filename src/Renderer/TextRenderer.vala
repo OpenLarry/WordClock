@@ -40,7 +40,7 @@ public class WordClock.TextRenderer : CairoRenderer, Jsonable {
 		
 		// change default values
 		this.x_speed = 15;
-		this.y_offset = 10;
+		this.y_offset = 11;
 	}
 	
 	public static string escape( string str ) {

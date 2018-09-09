@@ -323,7 +323,7 @@
           "x-speed" : 10,
           "y-speed" : 0,
           "x-offset" : 10,
-          "y-offset" : 10,
+          "y-offset" : 11,
           "mosaic" : false,
           "font" : "DejaVuSans 10px",
           "color" : {
@@ -516,7 +516,7 @@
         "v" : 0
       },
       "x-speed" : 15,
-      "y-offset" : 10,
+      "y-offset" : 11,
       "font" : "DejaVuSans 10px",
       "antialias" : false,
       "hint-metrics" : true,
