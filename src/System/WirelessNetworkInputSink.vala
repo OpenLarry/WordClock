@@ -36,10 +36,10 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			StringChooser stringchooser = new StringChooser(networks_array, "Choose network:");
 			uint signalfunc = signalrouter.add_signal_func(/^remote,[RGB]\d?$/, (id,sig) => {
 				switch(sig) {
-					case "remote,G1": stringchooser.action(StringChooserAction.UP); break;
-					case "remote,G3": stringchooser.action(StringChooserAction.DOWN); break;
-					case "remote,G2": stringchooser.action(StringChooserAction.SELECT); break;
-					case "remote,R2": stringchooser.action(StringChooserAction.ABORT); break;
+					case "remote,rgb_remote-G1": case "remote,rgb_remote_big-G1": stringchooser.action(StringChooserAction.UP); break;
+					case "remote,rgb_remote-G3": case "remote,rgb_remote_big-G3": stringchooser.action(StringChooserAction.DOWN); break;
+					case "remote,rgb_remote-G2": case "remote,rgb_remote_big-G2": stringchooser.action(StringChooserAction.SELECT); break;
+					case "remote,rgb_remote-R2": case "remote,rgb_remote_big-R2": stringchooser.action(StringChooserAction.ABORT); break;
 				}
 				return false; 
 			}, true);
@@ -53,15 +53,15 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			StringInput stringinput = new StringInput("Enter password:");
 			signalfunc = signalrouter.add_signal_func(/^remote,[RGB]\d?$/, (id,sig) => {
 				switch(sig) {
-					case "remote,G1": stringinput.action(StringInputAction.UP); break;
-					case "remote,G3": stringinput.action(StringInputAction.DOWN); break;
-					case "remote,G2": stringinput.action(StringInputAction.SELECT); break;
-					case "remote,R2": stringinput.action(StringInputAction.PREV); break;
-					case "remote,B2": stringinput.action(StringInputAction.NEXT); break;
-					case "remote,R1": stringinput.action(StringInputAction.UPPERCASE); break;
-					case "remote,R3": stringinput.action(StringInputAction.LOWERCASE); break;
-					case "remote,B1": stringinput.action(StringInputAction.NUMBERS); break;
-					case "remote,B3": stringinput.action(StringInputAction.SPECIAL); break;
+					case "remote,rgb_remote-G1": case "remote,rgb_remote_big-G1": stringinput.action(StringInputAction.UP); break;
+					case "remote,rgb_remote-G3": case "remote,rgb_remote_big-G3": stringinput.action(StringInputAction.DOWN); break;
+					case "remote,rgb_remote-G2": case "remote,rgb_remote_big-G2": stringinput.action(StringInputAction.SELECT); break;
+					case "remote,rgb_remote-R2": case "remote,rgb_remote_big-R2": stringinput.action(StringInputAction.PREV); break;
+					case "remote,rgb_remote-B2": case "remote,rgb_remote_big-B2": stringinput.action(StringInputAction.NEXT); break;
+					case "remote,rgb_remote-R1": case "remote,rgb_remote_big-R1": stringinput.action(StringInputAction.UPPERCASE); break;
+					case "remote,rgb_remote-R3": case "remote,rgb_remote_big-R3": stringinput.action(StringInputAction.LOWERCASE); break;
+					case "remote,rgb_remote-B1": case "remote,rgb_remote_big-B1": stringinput.action(StringInputAction.NUMBERS); break;
+					case "remote,rgb_remote-B3": case "remote,rgb_remote_big-B3": stringinput.action(StringInputAction.SPECIAL); break;
 				}
 				return false; 
 			}, true);
