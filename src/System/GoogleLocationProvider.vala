@@ -108,14 +108,10 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		// parse response body
 		node = new JsonWrapper.Node.from_json_string( (string) data[0:data_length] );
 		
-		Value lat = Value(typeof(double));
-		Value lng = Value(typeof(double));
-		node["location"]["lat"].to_value(ref lat);
-		node["location"]["lng"].to_value(ref lng);
 		this.location = new LocationInfo(
-			(double) lat,
-			(double) lng,
-			(int) node["accuracy"].get_typed_value<int>()
+			(double) node["location"]["lat"].get_typed_value(typeof(double)),
+			(double) node["location"]["lng"].get_typed_value(typeof(double)),
+			(int) node["accuracy"].get_typed_value(typeof(int))
 		);
 		
 		debug("Finished refresh");

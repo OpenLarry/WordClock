@@ -210,8 +210,8 @@ public class JsonWrapper.Node : GLib.Object {
 		return this.node.get_value();
 	}
 	
-	public Value get_typed_value<T>() throws JsonWrapper.Error {
-		Value val = Value(typeof(T));
+	public Value get_typed_value( Type t ) throws JsonWrapper.Error {
+		Value val = Value(t);
 		this.to_value(ref val);
 		
 		return val;

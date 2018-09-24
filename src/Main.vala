@@ -138,7 +138,7 @@ public class WordClock.Main : GLib.Object {
 			debug("Init Ws2812bDriver");
 			cancellable = new Cancellable();
 			uint8[] ports = port_config["ws2812b"]["ports"].get_uint8_array();
-			uint8 leds = (uint8) port_config["ws2812b"]["leds"].get_typed_value<uint8>();
+			uint8 leds = (uint8) port_config["ws2812b"]["leds"].get_typed_value(typeof(uint8));
 			var driver = new Ws2812bDriver( ports, leds, cancellable );
 			renderer = new ClockRenderer(new MarkusClockWiring(),driver);
 			
@@ -146,7 +146,7 @@ public class WordClock.Main : GLib.Object {
 			hwinfo = new HardwareInfo();
 			
 			foreach( JsonWrapper.Entry entry in port_config["lradc"] ) {
-				hwinfo.lradcs[entry.get_member_name()] = Lradc.get_channel((uint8) entry.value.get_typed_value<uint8>());
+				hwinfo.lradcs[entry.get_member_name()] = Lradc.get_channel((uint8) entry.value.get_typed_value(typeof(uint8)));
 			}
 			foreach( JsonWrapper.Entry entry in port_config["lradc-scale"] ) {
 				hwinfo.lradcs[entry.get_member_name()].set_scale(entry.value.to_string());
@@ -155,7 +155,7 @@ public class WordClock.Main : GLib.Object {
 			
 			debug("Init GPIOs");
 			foreach( JsonWrapper.Entry entry in port_config["gpio"] ) {
-				hwinfo.gpios[entry.get_member_name()] = new Gpio((uint8) entry.value.get_typed_value<uint8>());
+				hwinfo.gpios[entry.get_member_name()] = new Gpio((uint8) entry.value.get_typed_value(typeof(uint8)));
 			}
 			
 			var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
@@ -170,7 +170,7 @@ public class WordClock.Main : GLib.Object {
 			
 			if(!silent) {
 				debug("Init Buzzer");
-				Buzzer.init((uint8) port_config["buzzer"]["pwm-port"].get_typed_value<uint8>());
+				Buzzer.init((uint8) port_config["buzzer"]["pwm-port"].get_typed_value(typeof(uint8)));
 			}
 			
 			debug("Init MainLoop");
