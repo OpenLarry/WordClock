@@ -166,6 +166,23 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		
 		if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Save config failed!");
 	}
+	
+	public TreeMap<string,string> get_status() throws WirelessNetworkError, RegexError {
+		string? output = this.wpa_ctrl_cmd.request("STATUS");
+		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+		
+		TreeMap<string,string> status = new TreeMap<string,string>();
+		
+		Regex regex = /^(.+?)=(.+)$/m;
+		MatchInfo match;
+		if( regex.match( output, 0, out match ) ) {
+			do {
+				status[match.fetch(1)] = match.fetch(2);
+			} while ( match.next() );
+		}
+		
+		return status;
+	}
 }
 
 // container class
