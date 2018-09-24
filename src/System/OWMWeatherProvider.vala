@@ -20,7 +20,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		set {
 			if(this.update_handler_id > 0) this._location.disconnect(this.update_handler_id);
 			this._location = value;
-			this.update_handler_id = this.location.update.connect( this.threaded_refresh );
+			this.update_handler_id = this.location.update.connect( () => {this.async_refresh.begin();} );
 		}
 		default = new StaticLocationProvider();
 	}
@@ -58,7 +58,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 				// ignore timeout if no other reference is held anymore
 				if(this.ref_count == 1) return GLib.Source.REMOVE;
 				
-				this.threaded_refresh();
+				this.async_refresh.begin();
 				return GLib.Source.CONTINUE;
 			});
 		}else{
@@ -70,33 +70,24 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		return this.weather;
 	}
 	
-	public void threaded_refresh() {
+	public async void async_refresh() {
 		if(this.refresh_running) return;
-		
 		this.refresh_running = true;
-		new Thread<int>("owmweather", () => {
-			// set idle scheduling policy
-			Posix.Sched.Param param = { 0 };
-			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
-			assert(ret==0);
-			
-			// retry on error
-			for(uint i=0;i<RETRY_COUNT;i++) {
-				try{
-					this.refresh();
-					break;
-				} catch ( Error e ) {
-					warning(e.message);
-					Thread.usleep(RETRY_INTERVAL*1000000);
-				}
+		
+		for(uint8 i=0;i<RETRY_COUNT;i++) {
+			try{
+				yield this.refresh();
+				break;
+			} catch ( Error e ) {
+				warning(e.message);
+				yield async_sleep(RETRY_INTERVAL*1000);
 			}
-			
-			this.refresh_running = false;
-			return 0;
-		});
+		}
+		
+		this.refresh_running = false;
 	}
 	
-	public void refresh() throws Error {
+	public async void refresh() throws Error {
 		debug("Starting refresh");
 		
 		LocationInfo? location = this.location.get_location();
@@ -106,6 +97,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		ses.proxy_resolver = null;
 		ses.ssl_strict = false;
 		ses.tls_database = null;
+		
 		Soup.URI uri = new Soup.URI(OWM_API);
 		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
 		
@@ -119,11 +111,15 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		
 		debug("Request URL %s", uri.to_string(false));
 		Soup.Message msg = new Soup.Message.from_uri("GET", uri);
-		ses.send_message(msg);
+		InputStream input = yield ses.send_async(msg);
 		
 		if(msg.status_code != 200) throw new IOError.FAILED("Got status code: %u: %s\n", msg.status_code, msg.reason_phrase);
 		
-		Json.Node node = JsonHelper.from_string( (string) msg.response_body.data );
+		uint8[] data = new uint8[4096];
+		size_t data_length;
+		yield input.read_all_async(data, Priority.DEFAULT_IDLE, null, out data_length);
+		
+		Json.Node node = JsonHelper.from_string( (string) data[0:data_length] );
 		
 		// properties named "type" are not allowed in the gobject system
 		if(node.get_node_type() != Json.NodeType.OBJECT || !node.get_object().has_member("sys")) return;
@@ -133,9 +129,9 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		
 		weather.from_json( node );
 		this.weather = weather;
-		this.update();
 		
 		debug("Finished refresh");
+		this.update();
 	}
 }
 
