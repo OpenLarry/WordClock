@@ -46,6 +46,13 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		string? resp = this.wpa_ctrl_msg.recv();
 		if(resp == null) return Source.CONTINUE;
 		
+		if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
+			if(resp.contains(WPA_EVENT_CONNECTED))
+				(Main.settings.objects["message"] as MessageOverlay).success("Connected!");
+			else if(resp.contains(WPA_EVENT_DISCONNECTED))
+				(Main.settings.objects["message"] as MessageOverlay).error("Disconnected!");
+		}
+		
 		this.wpa_ctrl_event( resp );
 		
 		return Source.CONTINUE;

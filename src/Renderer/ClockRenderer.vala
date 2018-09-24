@@ -68,9 +68,13 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		}
 	}
 	
+	public bool overwrite_active() {
+		return this.overwrite_matrix != null || this.overwrite_dots != null || this.overwrite_backlight != null;
+	}
+	
 	private bool reset_overwrite() {
 		lock(this.overwrite_matrix) {
-			if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) return false;
+			if(!this.overwrite_active()) return false;
 			
 			SourceFunc? callback = null;
 			if(this.overwrite_callback != null) {
