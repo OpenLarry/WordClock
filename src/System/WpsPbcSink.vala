@@ -1,4 +1,5 @@
 using WordClock;
+using WPAClient;
 
 /**
  * @author Aaron Larisch
@@ -6,50 +7,32 @@ using WordClock;
  */
 public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 	private static Cancellable cancellable = null;
-	private static Thread<int> thread;
-	
-	private static Cancellable message;
 	
 	public void action () {
-		lock(cancellable) {
-			if(cancellable == null || cancellable.is_cancelled()) {
-				cancellable = new Cancellable();
-				
-				try{
-					thread = new Thread<int>.try("WPS PBC", run_wps);
-				}catch(Error e) {
-					warning(e.message);
-				}
-			}else{
-				cancellable.cancel();
-				
-				thread.join();
-			}
-		}
+		this.async_action.begin();
 	}
 	
-	private static int run_wps() {
-		message = (Main.settings.objects["message"] as MessageOverlay).info("WPS",-1);
-		debug("Starting wps");
+	public async void async_action() {
+		if(cancellable != null) {
+			debug("Cancel wps");
+			cancellable.cancel();
+			return;
+		}
+		cancellable = new Cancellable();
+		
 		try{
-			Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_pbc"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
+			debug("Starting wps");
 			
-			string output="";
-			do {
-				Buzzer.beep(100,2000,25);
-				Process.spawn_sync("/usr/sbin", {"wpa_cli","status"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-				debug("Status wpa_cli: %s", output);
-				Thread.usleep(1000000);
-			} while(!cancellable.is_cancelled() && (output.contains("wpa_state=DISCONNECTED") || output.contains("wpa_state=SCANNING") || output.contains("wpa_state=ASSOCIATING") || output.contains("wpa_state=ASSOCIATED") || output.contains("wpa_state=INTERFACE_DISABLED")));
+			(Main.settings.objects["message"] as MessageOverlay).message.begin("WPS", MessageType.INFO, -1, cancellable, (obj,res) => {
+				ClockRenderer.ReturnReason reason = (Main.settings.objects["message"] as MessageOverlay).message.end(res);
+				if(reason == ClockRenderer.ReturnReason.REPLACED && cancellable != null) cancellable.cancel();
+			});
 			
-			message.cancel();
+			bool success = yield Main.wireless_networks.wps_pbc( null, cancellable );
 			
 			if(cancellable.is_cancelled()) {
-				debug("Cancel wps");
-				Process.spawn_sync("/usr/sbin", {"wpa_cli","wps_cancel"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, out output);
-				
-				(Main.settings.objects["message"] as MessageOverlay).info("Cancelled!");
-			}else if(output.contains("wpa_state=COMPLETED")) {
+				// intended
+			}else if(success) {
 				cancellable.cancel();
 				(Main.settings.objects["message"] as MessageOverlay).success("Completed!");
 				
@@ -61,13 +44,15 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				warning("WPS failed");
 				
 				Buzzer.beep(200,1000,25);
-				Thread.usleep(200000);
+				Buzzer.pause(200);
 				Buzzer.beep(200,1000,25);
 			}
+			
 			debug("Finished wps");
-		}catch(Error e) {
+		} catch(Error e) {
 			warning(e.message);
+		} finally {
+			cancellable = null;
 		}
-		return 0;
 	}
 }

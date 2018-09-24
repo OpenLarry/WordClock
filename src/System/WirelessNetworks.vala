@@ -13,6 +13,8 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	private WPACtrl wpa_ctrl_msg;
 	private signal void wpa_ctrl_event( string event );
 	
+	private bool wps_running = false;
+	
 	private uint source;
 	
 	public WirelessNetworks() throws WirelessNetworkError, IOChannelError {
@@ -129,9 +131,11 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		} );
 		
 		for(uint8 i=0; i<scan_count; i++) {
+			if(this.wps_running) throw new WirelessNetworkError.WPS_RUNNING("WPS running!");
+			
 			string? output = this.wpa_ctrl_cmd.request("SCAN");
 			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
-			if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Scan failed!");
+			if(output != "OK\n") throw new WirelessNetworkError.SCAN_FAILED("Scan failed!");
 			
 			// wait for scan results
 			ulong signal_id = this.wpa_ctrl_event.connect( (event) => {
@@ -163,7 +167,6 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	private void save_config() throws WirelessNetworkError {
 		string? output = this.wpa_ctrl_cmd.request("SAVE_CONFIG");
 		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
-		
 		if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Save config failed!");
 	}
 	
@@ -182,6 +185,46 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		}
 		
 		return status;
+	}
+	
+	// First Cancellable? parameter is needed, because otherwise cancellable also cancels task and throws exception
+	// see: https://valadoc.org/gio-2.0/GLib.Task.set_check_cancellable.html
+	// see: https://github.com/GNOME/vala/blob/master/codegen/valagasyncmodule.vala#L279
+	public async bool wps_pbc( Cancellable? cancel_task, Cancellable cancel ) throws WirelessNetworkError {
+		if(this.wps_running) return false;
+		this.wps_running = true;
+		
+		try {
+			string? output = this.wpa_ctrl_cmd.request("WPS_PBC");
+			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+			if(output != "OK\n") throw new WirelessNetworkError.WPS_PBC_FAILED("WPS PBC failed!");
+			
+			bool success = false;
+			ulong signal_id = this.wpa_ctrl_event.connect((event) => {
+				if(event.contains(WPS_EVENT_SUCCESS)) {
+					success = true;
+					this.wps_pbc.callback();
+				} else if(event.contains(WPS_EVENT_TIMEOUT) || event.contains(WPS_EVENT_FAIL)) {
+					this.wps_pbc.callback();
+				}
+			});
+			ulong cancel_id = cancel.connect(() => {
+				this.wps_pbc.callback();
+			});
+			yield;
+			this.disconnect(signal_id);
+			if(!cancel.is_cancelled()) cancel.disconnect(cancel_id);
+			
+			if(cancel.is_cancelled()) {
+				output = this.wpa_ctrl_cmd.request("WPS_CANCEL");
+				if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+				if(output != "OK\n") throw new WirelessNetworkError.WPS_CANCEL_FAILED("WPS CANCEL failed!");
+			}
+			
+			return success;
+		} finally {
+			this.wps_running = false;;
+		}
 	}
 }
 
@@ -215,5 +258,9 @@ public errordomain WordClock.WirelessNetworkError {
 	REMOVE_NETWORK_FAILED,
 	ENABLEDISABLE_NETWORK_FAILED,
 	SAVE_CONFIG_FAILED,
+	SCAN_FAILED,
+	WPS_PBC_FAILED,
+	WPS_CANCEL_FAILED,
+	WPS_RUNNING,
 	WPA_CTRL_ERROR
 }
