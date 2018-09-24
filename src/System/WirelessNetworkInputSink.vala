@@ -6,7 +6,6 @@ using Gee;
  * @version 1.0
  */
 public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalSink {
-	private WirelessNetworks wireless = new WirelessNetworks();
 	private static bool running = false;
 	
 	public void action() {
@@ -27,7 +26,7 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			
 			// scan networks
 			string[] networks_array = {};
-			ArrayList<WirelessNetwork> scan_networks = wireless.scan_networks(3);
+			ArrayList<WirelessNetwork> scan_networks = yield Main.wireless_networks.scan_networks(3);
 			foreach(WirelessNetwork network in scan_networks) {
 				networks_array += network.ssid;
 			}
@@ -72,7 +71,7 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			
 			// save network
 			uint? network_id = null;
-			TreeMap<string,WirelessNetwork> get_networks = wireless.get_networks();
+			TreeMap<string,WirelessNetwork> get_networks = Main.wireless_networks.get_networks();
 			foreach(Map.Entry<string,WirelessNetwork> e in get_networks.entries) {
 				if(e.value.ssid == ssid) {
 					network_id = (uint) uint64.parse(e.key);
@@ -80,10 +79,10 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 				}
 			}
 			if(network_id == null) {
-				wireless.add_network(new WirelessNetwork(ssid,psk,true));
+				Main.wireless_networks.add_network(new WirelessNetwork(ssid,psk,true));
 				yield (Main.settings.objects["message"] as MessageOverlay).message("OK", MessageType.SUCCESS, 1);
 			}else{
-				wireless.edit_network(network_id, new WirelessNetwork(ssid,psk,true));
+				Main.wireless_networks.edit_network(network_id, new WirelessNetwork(ssid,psk,true));
 				yield (Main.settings.objects["message"] as MessageOverlay).message("OK", MessageType.SUCCESS, 1);
 			}
 		} catch( WirelessNetworkError e ) {

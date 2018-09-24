@@ -35,6 +35,7 @@ set(LIBS
 	${CAIRO_LIBRARIES}
 	${PANGO_LIBRARIES}
 	${PANGOCAIRO_LIBRARIES}
+	-lwpa_client
 )
 link_libraries(${LIBS})
 
@@ -171,6 +172,7 @@ PACKAGES
 	pangocairo
 	posix
 	linux
+	wpa_client
 OPTIONS 
 	--thread
 	--target-glib 2.50

@@ -9,6 +9,7 @@ public class WordClock.Main : GLib.Object {
 	
 	public static HardwareInfo hwinfo;
 	public static Settings settings;
+	public static WirelessNetworks wireless_networks;
 	
 	private static ClockRenderer renderer;
 	private static Cancellable cancellable;
@@ -222,6 +223,9 @@ public class WordClock.Main : GLib.Object {
 			LuaBuzzer.init(lua);
 			LuaRenderer.init(lua);
 			
+			debug("Init WirelessNetworks");
+			wireless_networks = new WirelessNetworks();
+			
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );
 			
@@ -346,3 +350,12 @@ public class WordClock.Main : GLib.Object {
 	}
 }
 
+namespace WordClock {
+	public async void async_sleep( uint time ) {
+		GLib.Timeout.add(time, () => {
+			async_sleep.callback();
+			return Source.REMOVE;
+		});
+		yield;
+	}
+}

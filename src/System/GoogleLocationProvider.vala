@@ -85,7 +85,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	
 	public void refresh() throws Error {
 		debug("Starting refresh");
-		
+		/*
 		Soup.Session ses = new Soup.Session();
 		ses.proxy_resolver = null;
 		ses.ssl_strict = false;
@@ -133,7 +133,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				this.update();
 			}
 		}
-		
+		*/
 		debug("Finished refresh");
 	}
 }
