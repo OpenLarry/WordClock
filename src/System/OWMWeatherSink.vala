@@ -19,19 +19,22 @@ public class WordClock.OWMWeatherSink : GLib.Object, Jsonable, SignalSink {
 			this.message.cancel();
 			return;
 		}
-		
-		OWMWeatherInfo? weather = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
+		JsonWrapper.Node? weather = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
 		if(weather==null) return;
 		
 		this.message = new Cancellable();
 		
-		string str = template;
-		str = str.replace("{TEMP}", "%.1f°C".printf(weather.main.temp));
-		str = str.replace("{DESCRIPTION}",weather.weather.size > 0 ? weather.weather[0].description : "");
-		str = str.replace("{CITY}", weather.name);
-		
-		yield (Main.settings.objects["message"] as MessageOverlay).message(str, MessageType.INFO, 1, this.message);
-		this.message = null;
+		try {
+			string str = template;
+			str = str.replace("{TEMP}", "%.1f°C".printf((double)weather["main"]["temp"].get_typed_value(typeof(double))));
+			str = str.replace("{DESCRIPTION}",weather["weather"][0]["description"].to_string());
+			str = str.replace("{CITY}", weather["name"].to_string());
+			
+			yield (Main.settings.objects["message"] as MessageOverlay).message(str, MessageType.INFO, 1, this.message);
+			this.message = null;
+		} catch ( Error e ) {
+			warning(e.message);
+		}
 	}
 	
 }

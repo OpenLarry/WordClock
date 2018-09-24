@@ -10,12 +10,16 @@ public class WordClock.OWMWeatherRenderer : GLib.Object, Jsonable, ClockRenderab
 	private ImageRenderer renderer = new ImageRenderer();
 	
 	public bool render_matrix( Color[,] matrix ) {
-		OWMWeatherInfo? info = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
+		JsonWrapper.Node? info = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
 		
-		if(info==null || info.weather.size == 0) return true;
+		if(info==null) return true;
 		
-		renderer.path = icon_path.printf(info.weather[0].icon);
+		try {
+			renderer.path = icon_path.printf(info["weather"][0]["icon"].to_string());
 		
-		return renderer.render_matrix(matrix);
+			return renderer.render_matrix(matrix);
+		} catch ( Error e ) {
+			return true;
+		}
 	}
 }

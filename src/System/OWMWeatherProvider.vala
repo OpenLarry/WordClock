@@ -43,7 +43,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	private ulong update_handler_id = 0;
 	private bool refresh_running = false;
 	
-	private OWMWeatherInfo? weather = null;
+	private JsonWrapper.Node? weather = null;
 	
 	public signal void update();
 	
@@ -66,7 +66,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		}
 	}
 	
-	public OWMWeatherInfo? get_weather() {
+	public JsonWrapper.Node? get_weather() {
 		return this.weather;
 	}
 	
@@ -119,72 +119,9 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 		size_t data_length;
 		yield input.read_all_async(data, Priority.DEFAULT_IDLE, null, out data_length);
 		
-		Json.Node node = JsonHelper.from_string( (string) data[0:data_length] );
-		
-		// properties named "type" are not allowed in the gobject system
-		if(node.get_node_type() != Json.NodeType.OBJECT || !node.get_object().has_member("sys")) return;
-		node.get_object().get_object_member("sys").remove_member("type");
-		
-		OWMWeatherInfo weather = new OWMWeatherInfo();
-		
-		weather.from_json( node );
-		this.weather = weather;
+		this.weather = new JsonWrapper.Node.from_json_string( (string) data[0:data_length] );
 		
 		debug("Finished refresh");
 		this.update();
 	}
-}
-
-// container classes
-public class WordClock.OWMWeatherInfo : GLib.Object, Jsonable {
-	public OWMWeatherCoord coord { get; set; default = new OWMWeatherCoord(); }
-	public JsonableArrayList<OWMWeatherDetail> weather { get; set; default = new JsonableArrayList<OWMWeatherDetail>(); }
-	public string base { get; set; default = ""; }
-	public OWMWeatherMain main { get; set; default = new OWMWeatherMain(); }
-	public OWMWeatherWind wind { get; set; default = new OWMWeatherWind(); }
-	public OWMWeatherClouds clouds { get; set; default = new OWMWeatherClouds(); }
-	// workaround because vala does not support properties with beginning numbers
-	public JsonableTreeMap<JsonableNode> rain { get; set; default = new JsonableTreeMap<JsonableNode>(); }
-	// workaround because vala does not support properties with beginning numbers
-	public JsonableTreeMap<JsonableNode> snow { get; set; default = new JsonableTreeMap<JsonableNode>(); }
-	public int visibility { get; set; default = 0; }
-	public int dt { get; set; default = 0; }
-	public OWMWeatherSys sys { get; set; default = new OWMWeatherSys(); }
-	public int id { get; set; default = 0; }
-	public string name { get; set; default = ""; }
-	public int cod { get; set; default = 0; }
-}
-public class WordClock.OWMWeatherCoord : GLib.Object, Jsonable {
-	public double lon { get; set; default = 0; }
-	public double lat { get; set; default = 0; }
-}
-public class WordClock.OWMWeatherDetail : GLib.Object, Jsonable {
-	public int id { get; set; default = 0; }
-	public string main { get; set; default = ""; }
-	public string description { get; set; default = ""; }
-	public string icon { get; set; default = ""; }
-}
-public class WordClock.OWMWeatherMain : GLib.Object, Jsonable {
-	public double temp { get; set; default = 0; }
-	public int pressure { get; set; default = 0; }
-	public int humidity { get; set; default = 0; }
-	public double temp_min { get; set; default = 0; }
-	public double temp_max { get; set; default = 0; }
-	public int sea_level { get; set; default = 0; }
-	public int grnd_level { get; set; default = 0; }
-}
-public class WordClock.OWMWeatherWind : GLib.Object, Jsonable {
-	public double speed { get; set; default = 0; }
-	public int deg { get; set; default = 0; }
-	public double gust { get; set; default = 0; }
-}
-public class WordClock.OWMWeatherClouds : GLib.Object, Jsonable {
-	public int all { get; set; default = 0; }
-}
-public class WordClock.OWMWeatherSys : GLib.Object, Jsonable {
-	public int id { get; set; default = 0; }
-	public double message { get; set; default = 0; }
-	public string country { get; set; default = ""; }
-	public int sunrise { get; set; default = 0; }
-	public int sunset { get; set; default = 0; }
 }
