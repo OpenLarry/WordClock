@@ -9,11 +9,11 @@ using Gee;
 public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
 	const string GOOGLE_LOCATION_API = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAY8X2PHxod0tWS5BC-HGFl_t6BQLrIVEc";
 	
-	const uint RETRY_COUNT = 10;
-	const uint RETRY_INTERVAL = 60;
+	const uint8 RETRY_COUNT = 10;
+	const uint8 RETRY_INTERVAL = 60;
 	
-	const uint SCAN_COUNT = 3;
-	const uint SCAN_INTERVAL = 5;
+	const uint8 SCAN_COUNT = 3;
+	const uint8 SCAN_INTERVAL = 5;
 	
 	public uint refresh_interval {
 		get {
@@ -34,7 +34,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	private LocationInfo? location = null;
 	
 	construct {
-		this.threaded_refresh();
+		this.async_refresh.begin();
 		this.set_timeout();
 	}
 	
@@ -45,7 +45,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 				// ignore timeout if no other reference is held anymore
 				if(this.ref_count == 1) return GLib.Source.REMOVE;
 				
-				this.threaded_refresh();
+				this.async_refresh.begin();
 				return GLib.Source.CONTINUE;
 			});
 		}else{
@@ -57,83 +57,69 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		return this.location;
 	}
 	
-	public void threaded_refresh() {
+	public async void async_refresh() {
 		if(this.refresh_running) return;
-		
 		this.refresh_running = true;
-		new Thread<int>("googlelocation", () => {
-			// set idle scheduling policy
-			Posix.Sched.Param param = { 0 };
-			int ret = Posix.Sched.setscheduler(0, Posix.Sched.Algorithm.IDLE, ref param);
-			assert(ret==0);
-			
-			// retry on error
-			for(uint i=0;i<RETRY_COUNT;i++) {
-				try{
-					this.refresh();
-					break;
-				} catch ( Error e ) {
-					warning(e.message);
-					Thread.usleep(RETRY_INTERVAL*1000000);
-				}
+		
+		for(uint8 i=0;i<RETRY_COUNT;i++) {
+			try{
+				yield this.refresh();
+				break;
+			} catch ( Error e ) {
+				warning(e.message);
+				yield async_sleep(RETRY_INTERVAL*1000);
 			}
-			
-			this.refresh_running = false;
-			return 0;
-		});
+		}
+		
+		this.refresh_running = false;
 	}
 	
-	public void refresh() throws Error {
+	private async void refresh() throws Error {
 		debug("Starting refresh");
-		/*
+		
 		Soup.Session ses = new Soup.Session();
 		ses.proxy_resolver = null;
 		ses.ssl_strict = false;
 		ses.tls_database = null;
 		
-		// generate request body
-		Json.Array arr = new Json.Array();
+		ArrayList<WirelessNetwork> networks = yield Main.wireless_networks.scan_networks(SCAN_COUNT, SCAN_INTERVAL);
 		
-		WirelessNetworks wireless = new WirelessNetworks();
-		ArrayList<WirelessNetwork> networks = wireless.scan_networks(3);
+		JsonWrapper.Node node = new JsonWrapper.Node.empty( Json.NodeType.OBJECT );
+		node["wifiAccessPoints"] = new JsonWrapper.Node.empty( Json.NodeType.ARRAY );
 		foreach(WirelessNetwork network in networks) {
-			Json.Object obj = new Json.Object();
-			obj.set_string_member("macAddress",network.mac);
-			arr.add_object_element(obj);
+			JsonWrapper.Node obj = new JsonWrapper.Node.empty( Json.NodeType.OBJECT );
+			obj["macAddress"] = network.mac;
+			node["wifiAccessPoints"][-1] = obj;
 		}
-		
-		Json.Object obj = new Json.Object();
-		obj.set_array_member("wifiAccessPoints",arr);
-		
-		Json.Node node = new Json.Node( Json.NodeType.OBJECT );
-		node.take_object(obj);
 		
 		// send request
 		Soup.Message msg = new Soup.Message("POST", GOOGLE_LOCATION_API);
-		msg.set_request("application/json", Soup.MemoryUse.COPY, JsonHelper.to_string(node).data);
+		msg.set_request("application/json", Soup.MemoryUse.COPY, node.to_json_string().data);
 		
 		debug("Send request to Google Location API");
-		ses.send_message(msg);
+		InputStream input = yield ses.send_async(msg);
 		
 		if(msg.status_code != 200) throw new IOError.FAILED("Got status code: %u: %s\n", msg.status_code, msg.reason_phrase);
 		
-		// parse reponse body
-		node = JsonHelper.from_string( (string) msg.response_body.data );
+		uint8[] data = new uint8[1024];
+		size_t data_length;
+		yield input.read_all_async(data, Priority.DEFAULT_IDLE, null, out data_length);
 		
-		if(node.get_node_type() == Json.NodeType.OBJECT &&
-		   node.get_object().has_member("accuracy") &&
-		   node.get_object().has_member("location")) {
-			obj = node.get_object().get_object_member("location");
-			if(obj != null &&
-			   obj.has_member("lat") &&
-			   obj.has_member("lng")) {
-				LocationInfo location = new LocationInfo(obj.get_double_member("lat"),obj.get_double_member("lng"),(int) node.get_object().get_int_member("accuracy"));
-				
-				this.location = location;
-				this.update();
-			}
-		}
-		*/
+		// parse response body
+		node = new JsonWrapper.Node.from_json_string( (string) data[0:data_length] );
+		
+		Value lat = Value(typeof(double));
+		Value lng = Value(typeof(double));
+		node["location"]["lat"].to_value(ref lat);
+		node["location"]["lng"].to_value(ref lng);
+		this.location = new LocationInfo(
+			(double) lat,
+			(double) lng,
+			(int) node["accuracy"].get_typed_value<int>()
+		);
+		
 		debug("Finished refresh");
+		
+		this.update();
 	}
 }
