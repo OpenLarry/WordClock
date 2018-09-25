@@ -5,7 +5,18 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, BacklightRenderer {
-	public uint port { get; set; default = 65506; }
+	public uint port {
+		get {
+			return this._port;
+		}
+		set {
+			if(value == this._port) return;
+			this.socket_disconnect();
+			this._port = value;
+			this.socket_connect();
+		}
+	}
+	private uint _port = 65506;
 	
 	private Socket sock;
 	private SocketSource source;
@@ -20,6 +31,7 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 	}
 	
 	private void socket_connect() {
+		debug("Open UDP port %u", this.port);
 		try {
 			this.sock = new Socket(SocketFamily.IPV6, SocketType.DATAGRAM, SocketProtocol.UDP);
 			this.sock.set_option(Posix.IPProto.IPV6, /* IPV6_V6ONLY mssing */ 26, 0);
@@ -54,6 +66,7 @@ public class WordClock.Tpm2NetRenderer : GLib.Object, Jsonable, ClockRenderable,
 	}
 	
 	private void socket_disconnect() {
+		debug("Close UDP port %u", this.port);
 		try {
 			if(this.source != null) this.source.destroy();
 			if(this.sock != null) this.sock.close();
