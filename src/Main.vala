@@ -118,6 +118,7 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(OWMWeatherSink);
 		type = typeof(WirelessNetworkInputSink);
 		type = typeof(LuaSink);
+		type = typeof(ImageSink);
 		
 		type = typeof(GoogleLocationProvider);
 		type = typeof(StaticLocationProvider);
@@ -196,6 +197,9 @@ public class WordClock.Main : GLib.Object {
 			debug("Init MessageOverlay");
 			MessageOverlay message = new MessageOverlay( renderer );
 			
+			debug("Init ImageOverlay");
+			ImageOverlay image = new ImageOverlay( renderer );
+			
 			debug("Init OWMWeatherProvider");
 			OWMWeatherProvider weather = new OWMWeatherProvider();
 			
@@ -208,6 +212,7 @@ public class WordClock.Main : GLib.Object {
 			settings.objects["signalrouter"] = signalrouter;
 			settings.objects["sensorsobserver"] = sensorsobserver;
 			settings.objects["message"] = message;
+			settings.objects["image"] = image;
 			settings.objects["timeobserver"] = timeobserver;
 			settings.objects["weather"] = weather;
 			settings.objects["lua"] = lua;
@@ -219,6 +224,7 @@ public class WordClock.Main : GLib.Object {
 			LuaSettings.init(lua, settings);
 			LuaHwinfo.init(lua, hwinfo);
 			LuaMessage.init(lua, message);
+			LuaImage.init(lua, image);
 			LuaSink.init(lua);
 			LuaBuzzer.init(lua);
 			LuaRenderer.init(lua);

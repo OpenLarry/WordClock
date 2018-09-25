@@ -65,6 +65,7 @@ set(VALA_SRC
 	Lua/LuaSignals.vala
 	Lua/LuaSettings.vala
 	Lua/LuaMessage.vala
+	Lua/LuaImage.vala
 	Lua/LuaBuzzer.vala
 	Lua/LuaSink.vala
 	Lua/LuaHwinfo.vala
@@ -153,6 +154,8 @@ set(VALA_SRC
 	System/StringChooser.vala
 	System/StringInput.vala
 	System/WirelessNetworkInputSink.vala
+	System/ImageOverlay.vala
+	System/ImageSink.vala
 	Statistic.vala
 	Version.vala
 )

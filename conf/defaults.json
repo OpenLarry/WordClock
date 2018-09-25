@@ -484,6 +484,14 @@
       "min-low-time" : -1.0,
       "-type" : "WordClockFilteredGpio"
     },
+    "image" : {
+      "background-color" : {
+        "h" : 0,
+        "s" : 0,
+        "v" : 0
+      },
+      "-type" : "WordClockImageOverlay"
+    },
     "lua" : {
       "script" : "/etc/wordclock/script.lua",
       "log-size" : 50,
