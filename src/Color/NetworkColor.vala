@@ -20,8 +20,9 @@ public class WordClock.NetworkColor : Color, Jsonable {
 	
 	private void socket_connect() {
 		try {
-			this.sock = new Socket(SocketFamily.IPV4, SocketType.DATAGRAM, SocketProtocol.UDP);
-			this.sock.bind(new InetSocketAddress.from_string("0.0.0.0", this.port), true);
+			this.sock = new Socket(SocketFamily.IPV6, SocketType.DATAGRAM, SocketProtocol.UDP);
+			this.sock.set_option(Posix.IPProto.IPV6, /* IPV6_V6ONLY mssing */ 26, 0);
+			this.sock.bind(new InetSocketAddress(new InetAddress.any(SocketFamily.IPV6), (uint16) this.port), true);
 			
 			// segmentation fault without casting! bug in glib?
 			this.source = (SocketSource) sock.create_source(IOCondition.IN);
