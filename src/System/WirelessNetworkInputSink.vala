@@ -33,14 +33,15 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			
 			// choose network
 			StringChooser stringchooser = new StringChooser(networks_array, "Choose network:");
-			uint signalfunc = signalrouter.add_signal_func(/^remote,[RGB]\d?$/, (id,sig) => {
+			uint signalfunc = signalrouter.add_signal_func(/^remote,rgb_remote(_big)?-[RGB]\d?$/, (id,sig) => {
 				switch(sig) {
 					case "remote,rgb_remote-G1": case "remote,rgb_remote_big-G1": stringchooser.action(StringChooserAction.UP); break;
 					case "remote,rgb_remote-G3": case "remote,rgb_remote_big-G3": stringchooser.action(StringChooserAction.DOWN); break;
 					case "remote,rgb_remote-G2": case "remote,rgb_remote_big-G2": stringchooser.action(StringChooserAction.SELECT); break;
 					case "remote,rgb_remote-R2": case "remote,rgb_remote_big-R2": stringchooser.action(StringChooserAction.ABORT); break;
+					default: return false;
 				}
-				return false; 
+				return true; 
 			}, true);
 			
 			int id = yield stringchooser.choose();
@@ -50,7 +51,7 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			
 			// enter password
 			StringInput stringinput = new StringInput("Enter password:");
-			signalfunc = signalrouter.add_signal_func(/^remote,[RGB]\d?$/, (id,sig) => {
+			signalfunc = signalrouter.add_signal_func(/^remote,rgb_remote(_big)?-[RGB]\d?$/, (id,sig) => {
 				switch(sig) {
 					case "remote,rgb_remote-G1": case "remote,rgb_remote_big-G1": stringinput.action(StringInputAction.UP); break;
 					case "remote,rgb_remote-G3": case "remote,rgb_remote_big-G3": stringinput.action(StringInputAction.DOWN); break;
@@ -61,8 +62,9 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 					case "remote,rgb_remote-R3": case "remote,rgb_remote_big-R3": stringinput.action(StringInputAction.LOWERCASE); break;
 					case "remote,rgb_remote-B1": case "remote,rgb_remote_big-B1": stringinput.action(StringInputAction.NUMBERS); break;
 					case "remote,rgb_remote-B3": case "remote,rgb_remote_big-B3": stringinput.action(StringInputAction.SPECIAL); break;
+					default: return false;
 				}
-				return false; 
+				return true;
 			}, true);
 			
 			string? psk = yield stringinput.read();
