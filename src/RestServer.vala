@@ -388,13 +388,20 @@ public class WordClock.RestServer : Soup.Server {
 				break;
 				case "POST":
 					try{
-						WirelessNetwork network = new WirelessNetwork();
-						network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
-						
-						uint id = Main.wireless_networks.add_network(network);
-						
-						msg.set_response("application/json", Soup.MemoryUse.COPY, id.to_string().data);
-						msg.set_status(200);
+						if(path.substring(17) == "/reassociate") {
+							Main.wireless_networks.reassociate();
+							
+							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
+							msg.set_status(200);
+						}else{
+							WirelessNetwork network = new WirelessNetwork();
+							network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
+							
+							uint id = Main.wireless_networks.add_network(network);
+							
+							msg.set_response("application/json", Soup.MemoryUse.COPY, id.to_string().data);
+							msg.set_status(200);
+						}
 					} catch( Error e ) {
 						msg.set_response("text/plain", Soup.MemoryUse.COPY, e.message.data);
 						msg.set_status(400);

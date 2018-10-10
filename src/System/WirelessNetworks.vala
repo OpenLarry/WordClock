@@ -186,6 +186,12 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Save config failed!");
 	}
 	
+	public void reassociate() throws WirelessNetworkError {
+		string? output = this.wpa_ctrl_cmd.request("REASSOCIATE");
+		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+		if(output != "OK\n") throw new WirelessNetworkError.REASSOCIATE_FAILED("Reassociate failed!");
+	}
+	
 	public TreeMap<string,string> get_status() throws WirelessNetworkError, RegexError {
 		string? output = this.wpa_ctrl_cmd.request("STATUS");
 		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
@@ -277,6 +283,7 @@ public errordomain WordClock.WirelessNetworkError {
 	REMOVE_NETWORK_FAILED,
 	ENABLEDISABLE_NETWORK_FAILED,
 	SAVE_CONFIG_FAILED,
+	REASSOCIATE_FAILED,
 	SCAN_FAILED,
 	WPS_PBC_FAILED,
 	WPS_CANCEL_FAILED,
