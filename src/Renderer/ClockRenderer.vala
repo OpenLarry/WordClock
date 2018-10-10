@@ -69,12 +69,12 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	}
 	
 	public bool overwrite_active() {
-		return this.overwrite_matrix != null || this.overwrite_dots != null || this.overwrite_backlight != null;
+		return (this.overwrite_matrix != null || this.overwrite_dots != null || this.overwrite_backlight != null) && (this.overwrite_cancellable == null || !this.overwrite_cancellable.is_cancelled());
 	}
 	
 	private bool reset_overwrite() {
 		lock(this.overwrite_matrix) {
-			if(!this.overwrite_active()) return false;
+			if(this.overwrite_matrix == null && this.overwrite_dots == null && this.overwrite_backlight == null) return false;
 			
 			SourceFunc? callback = null;
 			if(this.overwrite_callback != null) {

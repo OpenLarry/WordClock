@@ -23,26 +23,29 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 		try{
 			debug("Starting wps");
 			
-			(Main.settings.objects["message"] as MessageOverlay).message.begin("WPS", MessageType.INFO, -1, cancellable, (obj,res) => {
-				ClockRenderer.ReturnReason reason = (Main.settings.objects["message"] as MessageOverlay).message.end(res);
+			(Main.settings.objects["image"] as ImageOverlay).image.begin("/usr/share/wordclock/wlan_connecting.png", 0, 4, -1, cancellable, (obj,res) => {
+				ClockRenderer.ReturnReason reason = (Main.settings.objects["image"] as ImageOverlay).image.end(res);
 				if(reason == ClockRenderer.ReturnReason.REPLACED && cancellable != null) cancellable.cancel();
 			});
 			
-			bool success = yield Main.wireless_networks.wps_pbc( null, cancellable );
+			bool? success = yield Main.wireless_networks.wps_pbc( null, cancellable );
 			
 			if(cancellable.is_cancelled()) {
 				// intended
-			}else if(success) {
+			}else if(success == true) {
 				cancellable.cancel();
-				(Main.settings.objects["message"] as MessageOverlay).success("Completed!");
-				
+				warning("WPS success");
 				Buzzer.beep(100,3000,25);
 				Buzzer.beep(400,4000,25);
 			}else{
 				cancellable.cancel();
-				(Main.settings.objects["message"] as MessageOverlay).error("Error!");
-				warning("WPS failed");
-				
+				if(success == false) {
+					(Main.settings.objects["message"] as MessageOverlay).error("Error!");
+					warning("WPS failed");
+				}else{
+					(Main.settings.objects["message"] as MessageOverlay).error("Timeout!");
+					warning("WPS timeout");
+				}
 				Buzzer.beep(200,1000,25);
 				Buzzer.pause(200);
 				Buzzer.beep(200,1000,25);

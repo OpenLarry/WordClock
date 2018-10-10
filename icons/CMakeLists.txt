@@ -1,3 +1,6 @@
 install(DIRECTORY weather_aaron DESTINATION /usr/share/wordclock)
 install(DIRECTORY weather_markus DESTINATION /usr/share/wordclock)
 install(FILES bootlogo.png DESTINATION /usr/share/wordclock)
+install(FILES wlan_connecting.png DESTINATION /usr/share/wordclock)
+install(FILES wlan_connected.png DESTINATION /usr/share/wordclock)
+install(FILES wlan_disconnected.png DESTINATION /usr/share/wordclock)

@@ -15,6 +15,8 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	
 	private bool wps_running = false;
 	
+	private Cancellable? imageoverlay_cancellable = null;
+	
 	private uint source;
 	
 	public WirelessNetworks() throws WirelessNetworkError, IOChannelError {
@@ -46,11 +48,18 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		string? resp = this.wpa_ctrl_msg.recv();
 		if(resp == null) return Source.CONTINUE;
 		
-		if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
-			if(resp.contains(WPA_EVENT_CONNECTED))
-				(Main.settings.objects["message"] as MessageOverlay).success("Connected!");
-			else if(resp.contains(WPA_EVENT_DISCONNECTED))
-				(Main.settings.objects["message"] as MessageOverlay).error("Disconnected!");
+		if(resp.contains(WPA_EVENT_CONNECTED)) {
+			if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
+			
+			if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
+				imageoverlay_cancellable = (Main.settings.objects["image"] as ImageOverlay).display("/usr/share/wordclock/wlan_connected.png", 0, 4, 3);
+			}
+		} else if(resp.contains(WPA_EVENT_DISCONNECTED)) {
+			if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
+			
+			if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
+				imageoverlay_cancellable = (Main.settings.objects["image"] as ImageOverlay).display("/usr/share/wordclock/wlan_disconnected.png", 0, 4, 5);
+			}
 		}
 		
 		this.wpa_ctrl_event( resp );
@@ -197,7 +206,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	// First Cancellable? parameter is needed, because otherwise cancellable also cancels task and throws exception
 	// see: https://valadoc.org/gio-2.0/GLib.Task.set_check_cancellable.html
 	// see: https://github.com/GNOME/vala/blob/master/codegen/valagasyncmodule.vala#L279
-	public async bool wps_pbc( Cancellable? cancel_task, Cancellable cancel ) throws WirelessNetworkError {
+	public async bool? wps_pbc( Cancellable? cancel_task, Cancellable cancel ) throws WirelessNetworkError {
 		if(this.wps_running) return false;
 		this.wps_running = true;
 		
@@ -206,12 +215,15 @@ public class WordClock.WirelessNetworks : GLib.Object {
 			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
 			if(output != "OK\n") throw new WirelessNetworkError.WPS_PBC_FAILED("WPS PBC failed!");
 			
-			bool success = false;
+			bool? success = null;
 			ulong signal_id = this.wpa_ctrl_event.connect((event) => {
 				if(event.contains(WPS_EVENT_SUCCESS)) {
 					success = true;
 					this.wps_pbc.callback();
-				} else if(event.contains(WPS_EVENT_TIMEOUT) || event.contains(WPS_EVENT_FAIL)) {
+				} else if(event.contains(WPS_EVENT_FAIL)) {
+					success = false;
+					this.wps_pbc.callback();
+				} else if(event.contains(WPS_EVENT_TIMEOUT)) {
 					this.wps_pbc.callback();
 				}
 			});
