@@ -48,23 +48,37 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		string? resp = this.wpa_ctrl_msg.recv();
 		if(resp == null) return Source.CONTINUE;
 		
-		if(resp.contains(WPA_EVENT_CONNECTED)) {
-			if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
-			
-			if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
-				imageoverlay_cancellable = (Main.settings.objects["image"] as ImageOverlay).display("/usr/share/wordclock/wlan_connected.png", 0, 4, 3);
-			}
-		} else if(resp.contains(WPA_EVENT_DISCONNECTED)) {
-			if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
-			
-			if(!(Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) {
-				imageoverlay_cancellable = (Main.settings.objects["image"] as ImageOverlay).display("/usr/share/wordclock/wlan_disconnected.png", 0, 4, 5);
-			}
+		if(resp.contains(WPA_EVENT_CONNECTED) || resp.contains(WPA_EVENT_DISCONNECTED)) {
+			this.show_wlan_state.begin(resp);
 		}
 		
 		this.wpa_ctrl_event( resp );
 		
 		return Source.CONTINUE;
+	}
+	
+	private async void show_wlan_state(string resp) {
+		if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
+		
+		if((Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) return;
+		
+		string ssid = "none";
+		try {
+			ssid = Main.wireless_networks.get_status()["ssid"] ?? "none";
+		} catch ( Error e ) {
+			warning(e.message);
+		}
+		
+		imageoverlay_cancellable = new Cancellable();
+		if(resp.contains(WPA_EVENT_CONNECTED)) {
+			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_connected.png", 0, 4, 3, imageoverlay_cancellable);
+				
+			if(ret == ClockRenderer.ReturnReason.TERMINATED) {
+				yield (Main.settings.objects["message"] as MessageOverlay).message(ssid, MessageType.INFO, 1, imageoverlay_cancellable);
+			}
+		} else {
+			yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_disconnected.png", 0, 2, 3, imageoverlay_cancellable);
+		}
 	}
 	
 	public JsonableTreeMap<WirelessNetwork> get_networks() throws WirelessNetworkError {
