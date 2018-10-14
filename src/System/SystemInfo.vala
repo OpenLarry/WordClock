@@ -11,7 +11,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 	public string ip {
 		owned get {
 			try {
-				return Main.wireless_networks.get_status()["ip_address"] ?? "none";
+				return (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_status()["ip_address"] ?? "none";
 			} catch( Error e ) {
 				warning(e.message);
 				return "none";
@@ -23,7 +23,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 	public string wlan {
 		owned get {
 			try{
-				return Main.wireless_networks.get_status()["ssid"] ?? "none";
+				return (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_status()["ssid"] ?? "none";
 			}catch(Error e) {
 				warning(e.message);
 				return "none";
@@ -62,7 +62,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 	public string mac {
 		owned get {
 			try {
-				return Main.wireless_networks.get_status()["address"] ?? "none";
+				return (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_status()["address"] ?? "none";
 			} catch( Error e ) {
 				warning(e.message);
 				return "none";

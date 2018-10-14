@@ -360,9 +360,9 @@ public class WordClock.RestServer : Soup.Server {
 				case "GET":
 					try{
 						if(path.substring(17) == "/scan") {
-							Main.wireless_networks.scan_networks.begin(1,5,(obj, res) => {
+							(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).scan_networks.begin(1,5,(obj, res) => {
 								try{
-									string data = JsonHelper.to_string( Main.wireless_networks.scan_networks.end(res).to_json(path.substring(22)) );
+									string data = JsonHelper.to_string( (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).scan_networks.end(res).to_json(path.substring(22)) );
 									
 									msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 									msg.set_status(200);
@@ -376,7 +376,7 @@ public class WordClock.RestServer : Soup.Server {
 							this.pause_message(msg);
 							return;
 						}else{
-							string data = JsonHelper.to_string( Main.wireless_networks.get_networks().to_json(path.substring(17) ) );
+							string data = JsonHelper.to_string( (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_networks().to_json(path.substring(17) ) );
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, data.data);
 							msg.set_status(200);
@@ -389,7 +389,7 @@ public class WordClock.RestServer : Soup.Server {
 				case "POST":
 					try{
 						if(path.substring(17) == "/reassociate") {
-							Main.wireless_networks.reassociate();
+							(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).reassociate();
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);
@@ -397,7 +397,7 @@ public class WordClock.RestServer : Soup.Server {
 							WirelessNetwork network = new WirelessNetwork();
 							network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
 							
-							uint id = Main.wireless_networks.add_network(network);
+							uint id = (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).add_network(network);
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, id.to_string().data);
 							msg.set_status(200);
@@ -414,7 +414,7 @@ public class WordClock.RestServer : Soup.Server {
 							WirelessNetwork network = new WirelessNetwork();
 							network.from_json( JsonHelper.from_string( (string) msg.request_body.flatten().data ) );
 							
-							Main.wireless_networks.edit_network(id, network);
+							(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).edit_network(id, network);
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);
@@ -431,7 +431,7 @@ public class WordClock.RestServer : Soup.Server {
 					try{
 						uint id = 0;
 						if(path.scanf("/wirelessnetworks/%u", out id) == 1) {
-							Main.wireless_networks.remove_network(id);
+							(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).remove_network(id);
 							
 							msg.set_response("application/json", Soup.MemoryUse.COPY, "true".data);
 							msg.set_status(200);

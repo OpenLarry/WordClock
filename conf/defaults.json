@@ -1511,6 +1511,10 @@
       },
       "refresh-interval" : 1800,
       "-type" : "WordClockOWMWeatherProvider"
+    },
+    "wirelessnetworks" : {
+      "connection-overlays" : false,
+      "-type" : "WordClockWirelessNetworks"
     }
   }
 }

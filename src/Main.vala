@@ -207,6 +207,9 @@ public class WordClock.Main : GLib.Object {
 			debug("Init Lua");
 			Lua lua = new Lua();
 			
+			debug("Init WirelessNetworks");
+			WirelessNetworks wirelessnetworks = new WirelessNetworks();
+			
 			debug("Init Settings");
 			settings = new Settings();
 			settings.objects["clockrenderer"] = renderer;
@@ -218,6 +221,7 @@ public class WordClock.Main : GLib.Object {
 			settings.objects["weather"] = weather;
 			settings.objects["lua"] = lua;
 			settings.objects["filteredmotion"] = filteredmotion;
+			settings.objects["wirelessnetworks"] = wirelessnetworks;
 			settings.objects.set_keys_immutable();
 			
 			debug("Init Lua modules");
@@ -229,9 +233,6 @@ public class WordClock.Main : GLib.Object {
 			LuaSink.init(lua);
 			LuaBuzzer.init(lua);
 			LuaRenderer.init(lua);
-			
-			debug("Init WirelessNetworks");
-			wireless_networks = new WirelessNetworks();
 			
 			// Process button interrupts
 			while( loop.get_context().pending() ) loop.get_context().iteration( false );

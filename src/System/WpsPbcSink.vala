@@ -1,5 +1,4 @@
 using WordClock;
-using WPAClient;
 
 /**
  * @author Aaron Larisch
@@ -28,13 +27,13 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 				if(reason == ClockRenderer.ReturnReason.REPLACED && cancellable != null) cancellable.cancel();
 			});
 			
-			bool? success = yield Main.wireless_networks.wps_pbc( null, cancellable );
+			bool? success = yield (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).wps_pbc( null, cancellable );
 			
 			if(cancellable.is_cancelled()) {
 				// intended
 			}else if(success == true) {
 				cancellable.cancel();
-				warning("WPS success");
+				info("WPS success");
 				Buzzer.beep(100,3000,25);
 				Buzzer.beep(400,4000,25);
 			}else{

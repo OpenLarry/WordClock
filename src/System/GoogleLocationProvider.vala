@@ -82,7 +82,7 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		ses.ssl_strict = false;
 		ses.tls_database = null;
 		
-		ArrayList<WirelessNetwork> networks = yield Main.wireless_networks.scan_networks(SCAN_COUNT, SCAN_INTERVAL);
+		ArrayList<WirelessNetwork> networks = yield (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).scan_networks(SCAN_COUNT, SCAN_INTERVAL);
 		
 		JsonWrapper.Node node = new JsonWrapper.Node.empty( Json.NodeType.OBJECT );
 		node["wifiAccessPoints"] = new JsonWrapper.Node.empty( Json.NodeType.ARRAY );

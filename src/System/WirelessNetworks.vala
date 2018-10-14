@@ -5,7 +5,10 @@ using Gee;
  * @author Aaron Larisch
  * @version 1.0
  */
-public class WordClock.WirelessNetworks : GLib.Object {
+public class WordClock.WirelessNetworks : GLib.Object, Jsonable {
+	public bool connection_overlays { get; set; default = false; }
+	private bool connection_overlays_override = false;
+	
 	private WPACtrl wpa_ctrl = new WPACtrl();
 	
 	private bool wps_running = false;
@@ -16,23 +19,23 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	}
 	
 	private void event( string event ) {
-		if(event.contains(WPAClient.WPA_EVENT_CONNECTED) || event.contains(WPAClient.WPA_EVENT_DISCONNECTED)) {
-			this.show_wlan_state.begin(event);
+		if((this.connection_overlays || this.connection_overlays_override) && (event.contains(WPAClient.WPA_EVENT_CONNECTED) || event.contains(WPAClient.WPA_EVENT_DISCONNECTED))) {
+			this.connection_overlay.begin(event.contains(WPAClient.WPA_EVENT_CONNECTED));
 		}
 	}
 	
-	private async void show_wlan_state(string event) {
+	private async void connection_overlay(bool connected) {
 		if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
 		
 		if((Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) return;
 		
 		imageoverlay_cancellable = new Cancellable();
-		if(event.contains(WPAClient.WPA_EVENT_CONNECTED)) {
+		if(connected) {
 			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_connected.png", 0, 4, 3, imageoverlay_cancellable);
 		
 			string ssid = "none";
 			try {
-				ssid = Main.wireless_networks.get_status()["ssid"] ?? "none";
+				ssid = (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_status()["ssid"] ?? "none";
 			} catch ( Error e ) {
 				warning(e.message);
 			}
@@ -43,6 +46,12 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		} else {
 			yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_disconnected.png", 0, 2, 3, imageoverlay_cancellable);
 		}
+	}
+	
+	public async void connection_overlay_override( uint time ) {
+		this.connection_overlays_override = true;
+		yield async_sleep(time);
+		this.connection_overlays_override = false;
 	}
 	
 	public JsonableTreeMap<WirelessNetwork> get_networks() throws WirelessNetworkError, WPACtrlError {
@@ -154,6 +163,8 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	}
 	
 	public void reassociate() throws WirelessNetworkError, WPACtrlError {
+		this.connection_overlay_override.begin(10000);
+		
 		string output = this.wpa_ctrl.request("REASSOCIATE");
 		if(output != "OK\n") throw new WirelessNetworkError.REASSOCIATE_FAILED("Reassociate failed!");
 	}
@@ -189,6 +200,7 @@ public class WordClock.WirelessNetworks : GLib.Object {
 			ulong signal_id = this.wpa_ctrl.event.connect((event) => {
 				if(event.contains(WPAClient.WPS_EVENT_SUCCESS)) {
 					success = true;
+					this.connection_overlay_override.begin(10000);
 					this.wps_pbc.callback();
 				} else if(event.contains(WPAClient.WPS_EVENT_FAIL)) {
 					success = false;
