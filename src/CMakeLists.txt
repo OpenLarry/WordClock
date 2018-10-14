@@ -73,6 +73,7 @@ set(VALA_SRC
 	Color/HueRotateColor.vala
 	Color/BrightnessSensorColor.vala
 	Color/NetworkColor.vala
+	Color/ModifyColor.vala
 	Json/JsonableTreeMap.vala
 	Json/JsonableTreeMapArrayList.vala
 	Json/JsonableTreeMultiMap.vala
