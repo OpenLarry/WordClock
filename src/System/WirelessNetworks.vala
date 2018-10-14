@@ -1,77 +1,41 @@
 using WordClock;
 using Gee;
-using WPAClient;
 
 /**
  * @author Aaron Larisch
  * @version 1.0
  */
 public class WordClock.WirelessNetworks : GLib.Object {
-	const string WPA_SUPPLICANT_SOCKET = "/var/run/wpa_supplicant/%s";
-	const string INTERFACE = "wlan0";
-	private WPACtrl wpa_ctrl_cmd;
-	private WPACtrl wpa_ctrl_msg;
-	private signal void wpa_ctrl_event( string event );
+	private WPACtrl wpa_ctrl = new WPACtrl();
 	
 	private bool wps_running = false;
-	
 	private Cancellable? imageoverlay_cancellable = null;
 	
-	private uint source;
+	public WirelessNetworks() throws WirelessNetworkError, WPACtrlError, IOChannelError {
+		this.wpa_ctrl.event.connect( this.event );
+	}
 	
-	public WirelessNetworks() throws WirelessNetworkError, IOChannelError {
-		// connect to wpa_supplicant
-		this.wpa_ctrl_cmd = new WPACtrl( WPA_SUPPLICANT_SOCKET.printf( INTERFACE ) );
-		if(this.wpa_ctrl_cmd == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("WPACtrl is null");
-		this.wpa_ctrl_msg = new WPACtrl( WPA_SUPPLICANT_SOCKET.printf( INTERFACE ) );
-		if(this.wpa_ctrl_msg == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("WPACtrl is null");
-		
-		// listen for unsolicited messages
-		if(!this.wpa_ctrl_msg.attach()) throw new WirelessNetworkError.WPA_CTRL_ERROR("WPACtrl attach failed");
-		
-		// add watch
-		var channel = new IOChannel.unix_new(this.wpa_ctrl_msg.get_fd());
-		channel.set_encoding(null);
-		
-		this.source = channel.add_watch(IOCondition.IN, this.receive);
-		if(this.source == 0) {
-			throw new WirelessNetworkError.WPA_CTRL_ERROR("Cannot add watch on IOChannel");
+	private void event( string event ) {
+		if(event.contains(WPAClient.WPA_EVENT_CONNECTED) || event.contains(WPAClient.WPA_EVENT_DISCONNECTED)) {
+			this.show_wlan_state.begin(event);
 		}
 	}
 	
-	~WirelessNetworks() {
-		this.wpa_ctrl_msg.detach();
-		if(this.source > 0) Source.remove(this.source);
-	}
-	
-	private bool receive( IOChannel source, IOCondition condition ) {
-		string? resp = this.wpa_ctrl_msg.recv();
-		if(resp == null) return Source.CONTINUE;
-		
-		if(resp.contains(WPA_EVENT_CONNECTED) || resp.contains(WPA_EVENT_DISCONNECTED)) {
-			this.show_wlan_state.begin(resp);
-		}
-		
-		this.wpa_ctrl_event( resp );
-		
-		return Source.CONTINUE;
-	}
-	
-	private async void show_wlan_state(string resp) {
+	private async void show_wlan_state(string event) {
 		if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
 		
 		if((Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) return;
 		
-		string ssid = "none";
-		try {
-			ssid = Main.wireless_networks.get_status()["ssid"] ?? "none";
-		} catch ( Error e ) {
-			warning(e.message);
-		}
-		
 		imageoverlay_cancellable = new Cancellable();
-		if(resp.contains(WPA_EVENT_CONNECTED)) {
+		if(event.contains(WPAClient.WPA_EVENT_CONNECTED)) {
 			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_connected.png", 0, 4, 3, imageoverlay_cancellable);
+		
+			string ssid = "none";
+			try {
+				ssid = Main.wireless_networks.get_status()["ssid"] ?? "none";
+			} catch ( Error e ) {
+				warning(e.message);
+			}
 				
 			if(ret == ClockRenderer.ReturnReason.TERMINATED) {
 				yield (Main.settings.objects["message"] as MessageOverlay).message(ssid, MessageType.INFO, 1, imageoverlay_cancellable);
@@ -81,10 +45,9 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		}
 	}
 	
-	public JsonableTreeMap<WirelessNetwork> get_networks() throws WirelessNetworkError {
+	public JsonableTreeMap<WirelessNetwork> get_networks() throws WirelessNetworkError, WPACtrlError {
 		var map = new JsonableTreeMap<WirelessNetwork>();
-		string? output = this.wpa_ctrl_cmd.request("LIST_NETWORKS");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+		string output = this.wpa_ctrl.request("LIST_NETWORKS");
 		
 		try {
 			Regex regex = /^(\d+)\t([^\t]+)\t([^\t]+)\t([^\t]*?)$/m;
@@ -107,9 +70,8 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		return map;
 	}
 	
-	public uint add_network(WirelessNetwork network) throws WirelessNetworkError {
-		string? output = this.wpa_ctrl_cmd.request("ADD_NETWORK");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+	public uint add_network(WirelessNetwork network) throws WirelessNetworkError, WPACtrlError {
+		string output = this.wpa_ctrl.request("ADD_NETWORK");
 		
 		uint id = 0;
 		if(output.scanf("%u", out id) == 1) {
@@ -125,35 +87,29 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		}
 	}
 	
-	public void edit_network(uint id, WirelessNetwork network) throws WirelessNetworkError {
-		string? output = this.wpa_ctrl_cmd.request("SET_NETWORK "+id.to_string()+" ssid \""+network.ssid+"\"");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
-		
+	public void edit_network(uint id, WirelessNetwork network) throws WirelessNetworkError, WPACtrlError {
+		string output = this.wpa_ctrl.request("SET_NETWORK "+id.to_string()+" ssid \""+network.ssid+"\"");
 		if(output != "OK\n") throw new WirelessNetworkError.SET_NETWORK_SSID_FAILED("Set network ssid failed!");;
 		
 		if(network.psk != "*") {
-			output = this.wpa_ctrl_cmd.request("SET_NETWORK "+id.to_string()+" psk \""+network.psk+"\"");
-			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+			output = this.wpa_ctrl.request("SET_NETWORK "+id.to_string()+" psk \""+network.psk+"\"");
 			if(output != "OK\n") throw new WirelessNetworkError.SET_NETWORK_PSK_FAILED("Set network psk failed! (Key too short?)");
 		}
 		
-		output = this.wpa_ctrl_cmd.request((network.enabled ? "ENABLE_NETWORK " : "DISABLE_NETWORK ")+id.to_string());
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+		output = this.wpa_ctrl.request((network.enabled ? "ENABLE_NETWORK " : "DISABLE_NETWORK ")+id.to_string());
 		if(output != "OK\n") throw new WirelessNetworkError.ENABLEDISABLE_NETWORK_FAILED("Enable/disable network failed!");
 		
 		this.save_config();
 	}
 	
-	public void remove_network(uint id) throws WirelessNetworkError {
-		string? output = this.wpa_ctrl_cmd.request("REMOVE_NETWORK "+id.to_string());
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
-		
+	public void remove_network(uint id) throws WirelessNetworkError, WPACtrlError {
+		string output = this.wpa_ctrl.request("REMOVE_NETWORK "+id.to_string());
 		if(output != "OK\n") throw new WirelessNetworkError.REMOVE_NETWORK_FAILED("Remove network failed!");
 		
 		this.save_config();
 	}
 	
-	public async JsonableArrayList<WirelessNetwork> scan_networks(uint8 scan_count = 1, uint8 scan_interval = 5) throws WirelessNetworkError, RegexError {
+	public async JsonableArrayList<WirelessNetwork> scan_networks(uint8 scan_count = 1, uint8 scan_interval = 5) throws WirelessNetworkError, WPACtrlError, RegexError {
 		TreeSet<WirelessNetwork> networks = new TreeSet<WirelessNetwork>( (a,b) => {
 			int r = a.mac.ascii_casecmp(b.mac);
 			if(r!=0) return r;
@@ -163,19 +119,17 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		for(uint8 i=0; i<scan_count; i++) {
 			if(this.wps_running) throw new WirelessNetworkError.WPS_RUNNING("WPS running!");
 			
-			string? output = this.wpa_ctrl_cmd.request("SCAN");
-			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+			string output = this.wpa_ctrl.request("SCAN");
 			if(output != "OK\n") throw new WirelessNetworkError.SCAN_FAILED("Scan failed!");
 			
 			// wait for scan results
-			ulong signal_id = this.wpa_ctrl_event.connect( (event) => {
-				if(event.contains(WPA_EVENT_SCAN_RESULTS)) this.scan_networks.callback();
+			ulong signal_id = this.wpa_ctrl.event.connect( (event) => {
+				if(event.contains(WPAClient.WPA_EVENT_SCAN_RESULTS)) this.scan_networks.callback();
 			} );
 			yield;
-			this.disconnect(signal_id);
+			this.wpa_ctrl.disconnect(signal_id);
 			
-			output = this.wpa_ctrl_cmd.request("SCAN_RESULTS");
-			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+			output = this.wpa_ctrl.request("SCAN_RESULTS");
 			
 			Regex regex = /^((?:[\da-f]{2}:){5}[\da-f]{2})\t\d+\t(-?\d+)\t\S+\t(.*)$/m;
 			MatchInfo match;
@@ -194,21 +148,18 @@ public class WordClock.WirelessNetworks : GLib.Object {
 		return ret;
 	}
 	
-	private void save_config() throws WirelessNetworkError {
-		string? output = this.wpa_ctrl_cmd.request("SAVE_CONFIG");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+	private void save_config() throws WirelessNetworkError, WPACtrlError {
+		string output = this.wpa_ctrl.request("SAVE_CONFIG");
 		if(output != "OK\n") throw new WirelessNetworkError.SAVE_CONFIG_FAILED("Save config failed!");
 	}
 	
-	public void reassociate() throws WirelessNetworkError {
-		string? output = this.wpa_ctrl_cmd.request("REASSOCIATE");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+	public void reassociate() throws WirelessNetworkError, WPACtrlError {
+		string output = this.wpa_ctrl.request("REASSOCIATE");
 		if(output != "OK\n") throw new WirelessNetworkError.REASSOCIATE_FAILED("Reassociate failed!");
 	}
 	
-	public TreeMap<string,string> get_status() throws WirelessNetworkError, RegexError {
-		string? output = this.wpa_ctrl_cmd.request("STATUS");
-		if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+	public TreeMap<string,string> get_status() throws WirelessNetworkError, WPACtrlError, RegexError {
+		string output = this.wpa_ctrl.request("STATUS");
 		
 		TreeMap<string,string> status = new TreeMap<string,string>();
 		
@@ -226,24 +177,23 @@ public class WordClock.WirelessNetworks : GLib.Object {
 	// First Cancellable? parameter is needed, because otherwise cancellable also cancels task and throws exception
 	// see: https://valadoc.org/gio-2.0/GLib.Task.set_check_cancellable.html
 	// see: https://github.com/GNOME/vala/blob/master/codegen/valagasyncmodule.vala#L279
-	public async bool? wps_pbc( Cancellable? cancel_task, Cancellable cancel ) throws WirelessNetworkError {
+	public async bool? wps_pbc( Cancellable? cancel_task, Cancellable cancel ) throws WirelessNetworkError, WPACtrlError {
 		if(this.wps_running) return false;
 		this.wps_running = true;
 		
 		try {
-			string? output = this.wpa_ctrl_cmd.request("WPS_PBC");
-			if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+			string output = this.wpa_ctrl.request("WPS_PBC");
 			if(output != "OK\n") throw new WirelessNetworkError.WPS_PBC_FAILED("WPS PBC failed!");
 			
 			bool? success = null;
-			ulong signal_id = this.wpa_ctrl_event.connect((event) => {
-				if(event.contains(WPS_EVENT_SUCCESS)) {
+			ulong signal_id = this.wpa_ctrl.event.connect((event) => {
+				if(event.contains(WPAClient.WPS_EVENT_SUCCESS)) {
 					success = true;
 					this.wps_pbc.callback();
-				} else if(event.contains(WPS_EVENT_FAIL)) {
+				} else if(event.contains(WPAClient.WPS_EVENT_FAIL)) {
 					success = false;
 					this.wps_pbc.callback();
-				} else if(event.contains(WPS_EVENT_TIMEOUT)) {
+				} else if(event.contains(WPAClient.WPS_EVENT_TIMEOUT)) {
 					this.wps_pbc.callback();
 				}
 			});
@@ -251,12 +201,11 @@ public class WordClock.WirelessNetworks : GLib.Object {
 				this.wps_pbc.callback();
 			});
 			yield;
-			this.disconnect(signal_id);
+			this.wpa_ctrl.disconnect(signal_id);
 			if(!cancel.is_cancelled()) cancel.disconnect(cancel_id);
 			
 			if(cancel.is_cancelled()) {
-				output = this.wpa_ctrl_cmd.request("WPS_CANCEL");
-				if(output == null) throw new WirelessNetworkError.WPA_CTRL_ERROR("Request failed");
+				output = this.wpa_ctrl.request("WPS_CANCEL");
 				if(output != "OK\n") throw new WirelessNetworkError.WPS_CANCEL_FAILED("WPS CANCEL failed!");
 			}
 			
@@ -301,6 +250,5 @@ public errordomain WordClock.WirelessNetworkError {
 	SCAN_FAILED,
 	WPS_PBC_FAILED,
 	WPS_CANCEL_FAILED,
-	WPS_RUNNING,
-	WPA_CTRL_ERROR
+	WPS_RUNNING
 }

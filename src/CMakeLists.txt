@@ -150,6 +150,7 @@ set(VALA_SRC
 	System/OWMWeatherProvider.vala
 	System/OWMWeatherSink.vala
 	System/WirelessNetworks.vala
+	System/WPACtrl.vala
 	System/FirmwareUpdate.vala
 	System/StringChooser.vala
 	System/StringInput.vala
