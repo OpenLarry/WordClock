@@ -7,12 +7,16 @@ using WordClock, Gee;
 public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer {
 	private FrontPanel frontpanel = new WestGermanFrontPanel();
 	
-	public Color words_color { get; set; default =  new Color.from_hsv( 0, 255, 150 ); }
+	public JsonableArrayList<Color> words_colors { get; set; default = new JsonableArrayList<Color>(); }
 	public Color dots_color { get; set; default = new Color.from_hsv( 0, 255, 150 ); }
 	
 	public double fade_secs { get; set; default = 1.0; }
 	
 	public bool display_it_is { get; set; default = true; }
+	
+	construct {
+		this.words_colors.add(new Color.from_hsv( 0, 255, 150 ));
+	}
 	
 	public string frontpanel_name {
 		owned get {
@@ -29,7 +33,10 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 	 * @return Continue
 	 */
 	public bool render_matrix( Color[,] leds_matrix ) {
+		if(this.words_colors.size == 0) return true;
+		
 		var time = new DateTime.now(Main.timezone);
+		BidirListIterator<Color> color_it = words_colors.bidir_list_iterator();
 		
 		// words - smooth fading
 		if(time.get_minute() % 5 == 4 && 60.0 - time.get_seconds() < this.fade_secs) {
@@ -39,36 +46,38 @@ public class WordClock.TimeRenderer : GLib.Object, Jsonable, ClockRenderable, Ma
 			time = time.add_seconds(this.fade_secs);
 			var words_new = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute(), this.display_it_is);
 			
-			var words_common = new HashSet<FrontPanel.WordPosition>();
-			words_common.add_all(words_old);
-			words_common.retain_all(words_new);
-			
-			words_old.remove_all( words_common );
-			words_new.remove_all( words_common );
-			
-			foreach(var word in words_common) {
-				for(int j=0;j<word.length;j++) {
-					leds_matrix[word.x+j,word.y].mix_with(words_color, 255);
-				}
-			}
-			
+			color_it.first();
 			foreach(var word in words_old) {
-				for(int j=0;j<word.length;j++) {
-					leds_matrix[word.x+j,word.y].mix_with(words_color, 255-fade);
+				if(word in words_new) {
+					for(int j=0;j<word.length;j++)
+						leds_matrix[word.x+j,word.y].mix_with(color_it.get(), 255);
+				}else{
+					for(int j=0;j<word.length;j++)
+						leds_matrix[word.x+j,word.y].mix_with(color_it.get(), 255-fade);
 				}
+				
+				if(!color_it.next()) color_it.first();
 			}
+			
+			color_it.first();
 			foreach(var word in words_new) {
 				for(int j=0;j<word.length;j++) {
-					leds_matrix[word.x+j,word.y].mix_with(words_color, fade);
+					leds_matrix[word.x+j,word.y].mix_with(color_it.get(), fade);
 				}
+				
+				if(!color_it.next()) color_it.first();
 			}
 		// words - static
 		}else{
 			var words = this.frontpanel.getTime((uint8) time.get_hour(),(uint8) time.get_minute(), this.display_it_is);
+			
+			color_it.first();
 			foreach(var word in words) {
 				for(int j=0;j<word.length;j++) {
-					leds_matrix[word.x+j,word.y].mix_with(words_color, 255);
+					leds_matrix[word.x+j,word.y].mix_with(color_it.get(), 255);
 				}
+				
+				if(!color_it.next()) color_it.first();
 			}
 		}
 		

@@ -341,29 +341,31 @@
           "-type" : "WordClockTextRenderer"
         },
         "Time" : {
-          "words-color" : {
-            "min-brightness" : 0.0,
-            "max-brightness" : 1850.0,
-            "min-color" : {
-              "timespan" : 3600,
-              "basic-color" : {
-                "h" : 0,
-                "s" : 255,
-                "v" : 70
+          "words-colors" : [
+            {
+              "min-brightness" : 0.0,
+              "max-brightness" : 1850.0,
+              "min-color" : {
+                "timespan" : 3600,
+                "basic-color" : {
+                  "h" : 0,
+                  "s" : 255,
+                  "v" : 70
+                },
+                "-type" : "WordClockHueRotateColor"
               },
-              "-type" : "WordClockHueRotateColor"
-            },
-            "max-color" : {
-              "timespan" : 3600,
-              "basic-color" : {
-                "h" : 0,
-                "s" : 255,
-                "v" : 200
+              "max-color" : {
+                "timespan" : 3600,
+                "basic-color" : {
+                  "h" : 0,
+                  "s" : 255,
+                  "v" : 200
+                },
+                "-type" : "WordClockHueRotateColor"
               },
-              "-type" : "WordClockHueRotateColor"
-            },
-            "-type" : "WordClockBrightnessSensorColor"
-          },
+              "-type" : "WordClockBrightnessSensorColor"
+            }
+          ],
           "dots-color" : {
             "min-brightness" : 0.0,
             "max-brightness" : 1850.0,
@@ -393,21 +395,23 @@
           "-type" : "WordClockTimeRenderer"
         },
         "Time-MonoColor" : {
-          "words-color" : {
-            "min-brightness" : 0.0,
-            "max-brightness" : 1850.0,
-            "min-color" : {
-              "h" : 40,
-              "s" : 255,
-              "v" : 70
-            },
-            "max-color" : {
-              "h" : 40,
-              "s" : 255,
-              "v" : 255
-            },
-            "-type" : "WordClockBrightnessSensorColor"
-          },
+          "words-colors" : [
+            {
+              "min-brightness" : 0.0,
+              "max-brightness" : 1850.0,
+              "min-color" : {
+                "h" : 40,
+                "s" : 255,
+                "v" : 70
+              },
+              "max-color" : {
+                "h" : 40,
+                "s" : 255,
+                "v" : 255
+              },
+              "-type" : "WordClockBrightnessSensorColor"
+            }
+          ],
           "dots-color" : {
             "min-brightness" : 0.0,
             "max-brightness" : 1850.0,

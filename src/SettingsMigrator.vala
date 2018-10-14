@@ -139,6 +139,23 @@ public class WordClock.SettingsMigrator : GLib.Object {
 				renderer.value["-type"] = "WordClockTextRenderer";
 			}
 			
+			debug("Update $.objects.clockrenderer.renderers: Update words_color to words_colors");
+			foreach(Entry renderer in renderers) {
+				try {
+					if(renderer.value["-type"].to_string() != "WordClockTimeRenderer") continue;
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				
+				try {
+					renderer.value["words-colors"] = new JsonWrapper.Node.empty( Json.NodeType.ARRAY );
+					renderer.value["words-colors"][0] = renderer.value["words-color"];
+					renderer.value["words-color"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+			}
+			
 			debug("Update $.objects.message: Migrate to TextRenderer");
 			JsonWrapper.Node message = node["objects"]["message"];
 			
