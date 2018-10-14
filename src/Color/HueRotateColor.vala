@@ -15,6 +15,8 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 	private void hue_by_time( DateTime time ) {
 		uint seconds = time.get_hour() * 60 * 60 + time.get_minute() * 60 + time.get_second();
 		
+		if(this.timespan == 0) this.timespan = 1;
+		
 		uint offset = 0;
 		if( (360/this.timespan) > 1 ) {
 			offset = 360 * time.get_microsecond() / this.timespan / 1000000;
