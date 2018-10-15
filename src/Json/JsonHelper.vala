@@ -36,7 +36,7 @@ namespace WordClock.JsonHelper {
 	}
 	
 	public static string? get_property( string path, out string subpath ) {
-		Regex regex = /^\/([0-9a-z\-,]+?)(\/.+)?$/i;
+		Regex regex = /^\/([0-9a-z\-,_]+?)(\/.+)?$/i;
 		MatchInfo match_info;
 		if( !regex.match( path, 0, out match_info ) ) {
 			subpath = "";
