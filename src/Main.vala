@@ -231,6 +231,10 @@ public class WordClock.Main : GLib.Object {
 			settings.objects["wirelessnetworks"] = wirelessnetworks;
 			settings.objects.set_keys_immutable();
 			
+			debug("Init TestSequenceRenderer");
+			TestSequenceRenderer tsr = new TestSequenceRenderer();
+			tsr.register();
+			
 			debug("Init Lua modules");
 			LuaSignals.init(lua, signalrouter);
 			LuaSettings.init(lua, settings);

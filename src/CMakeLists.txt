@@ -120,6 +120,7 @@ set(VALA_SRC
 	Renderer/LuaRenderer.vala
 	Renderer/CairoRenderer.vala
 	Renderer/TextRenderer.vala
+	Renderer/TestSequenceRenderer.vala
 	Font/Font.vala
 	Font/MicrosoftSansSerifFont.vala
 	Font/HugeMicrosoftSansSerifFont.vala
