@@ -107,7 +107,6 @@ set(VALA_SRC
 	Renderer/BacklightRenderer.vala
 	Renderer/TimeRenderer.vala
 	Renderer/WatchHandRenderer.vala
-	Renderer/BigTimeRenderer.vala
 	Renderer/BootSequenceRenderer.vala
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala

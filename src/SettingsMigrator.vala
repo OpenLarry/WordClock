@@ -179,6 +179,16 @@ public class WordClock.SettingsMigrator : GLib.Object {
 				renderer.value["-type"] = "WordClockTextRenderer";
 			}
 			
+			debug("Update $.objects.clockrenderer.renderers: Remove BigTimeRenderer");
+			foreach(Entry renderer in renderers) {
+				try {
+					if(renderer.value["-type"].to_string() != "WordClockBigTimeRenderer") continue;
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				renderer.value.remove();
+			}
+			
 			debug("Update $.objects.clockrenderer.renderers: Update words_color to words_colors");
 			foreach(Entry renderer in renderers) {
 				try {
