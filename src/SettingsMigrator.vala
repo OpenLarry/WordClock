@@ -319,6 +319,32 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			};
 			
 			updateJsonModifierSink(sinks);
+			
+			debug("Update $.objects.signalrouter.sinks: Replace JsonModifierSink paths 'words-color' with 'words-colors/0'");
+			updateJsonModifierSink = (sinks) => {
+				// modify path if JsonModifierSink is found
+				try {
+					if(sinks["-type"].to_string() == "WordClockJsonModifierSink") {
+						foreach(Entry path in sinks["paths"]) {
+							MatchInfo info;
+							if(/^\/objects\/clockrenderer\/renderers\/([^\/]+)\/words-color(\/.+)?$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/clockrenderer/renderers/"+info.fetch(1)+"/words-colors/0"+info.fetch(2));
+							}
+						}
+					}
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+				
+				// go through sink nodes recursively
+				try {
+					foreach(Entry sink in sinks) {
+						updateJsonModifierSink(sink.value);
+					}
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.INVALID_NODE_TYPE) ) throw e; // skip node if not iterable
+				}
+			};
+			
+			updateJsonModifierSink(sinks);
 		};
 		
 		return migration_funcs;

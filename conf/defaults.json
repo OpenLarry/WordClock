@@ -601,8 +601,8 @@
               }
             ],
             "paths" : [
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
               "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
@@ -895,8 +895,8 @@
               }
             ],
             "paths" : [
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
               "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
@@ -1108,8 +1108,8 @@
               }
             ],
             "paths" : [
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
               "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
@@ -1354,8 +1354,8 @@
             "paths" : [
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/min-color",
               "/objects/clockrenderer/renderers/Time-MonoColor/dots-color/max-color",
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/min-color",
-              "/objects/clockrenderer/renderers/Time-MonoColor/words-color/max-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/min-color",
+              "/objects/clockrenderer/renderers/Time-MonoColor/words-colors/0/max-color",
               "/objects/clockrenderer/renderers/Seconds-MonoColor/color/min-color",
               "/objects/clockrenderer/renderers/Seconds-MonoColor/color/max-color"
             ],
