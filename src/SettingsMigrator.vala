@@ -139,6 +139,46 @@ public class WordClock.SettingsMigrator : GLib.Object {
 				renderer.value["-type"] = "WordClockTextRenderer";
 			}
 			
+			debug("Update $.objects.clockrenderer.renderers: Replace BigDigitRenderer with TextRenderer");
+			foreach(Entry renderer in renderers) {
+				try {
+					if(renderer.value["-type"].to_string() != "WordClockBigDigitRenderer") continue;
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				
+				try {
+					renderer.value["background-color"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				
+				try {
+					renderer.value["color"] = renderer.value["foreground-color"];
+					renderer.value["foreground-color"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+
+				try {
+					renderer.value["text"] = renderer.value["format"];
+					renderer.value["format"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				
+				try {
+					renderer.value["font-name"].remove();
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+				}
+				
+				renderer.value["x-speed"] = 0;
+				renderer.value["x-offset"] = 11;
+				renderer.value["letter-spacing"] = 0;
+				renderer.value["-type"] = "WordClockTextRenderer";
+			}
+			
 			debug("Update $.objects.clockrenderer.renderers: Update words_color to words_colors");
 			foreach(Entry renderer in renderers) {
 				try {

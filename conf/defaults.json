@@ -161,19 +161,25 @@
           "-type" : "WordClockColorRenderer"
         },
         "Digit" : {
-          "background-color" : {
-            "h" : 0,
-            "s" : 0,
-            "v" : 0
-          },
-          "foreground-color" : {
+          "x-speed" : 0,
+          "y-speed" : 0,
+          "x-offset" : 11,
+          "y-offset" : 11,
+          "mosaic" : false,
+          "font" : "DejaVuSans 10px",
+          "color" : {
             "h" : 0,
             "s" : 255,
             "v" : 200
           },
-          "format" : "%M",
-          "font-name" : "WordClockMicrosoftSansSerifFont",
-          "-type" : "WordClockBigDigitRenderer"
+          "markup" : false,
+          "antialias" : false,
+          "hint-metrics" : true,
+          "hint-style" : 3,
+          "letter-spacing" : 0.0,
+          "text" : "%M",
+          "time-format" : true,
+          "-type" : "WordClockTextRenderer"
         },
         "GammaTest" : {
           "-type" : "WordClockGammaTestRenderer"
