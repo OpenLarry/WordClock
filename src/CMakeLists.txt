@@ -111,7 +111,6 @@ set(VALA_SRC
 	Renderer/BootSequenceRenderer.vala
 	Renderer/ColorRenderer.vala
 	Renderer/GammaTestRenderer.vala
-	Renderer/StringRenderer.vala
 	Renderer/ScalaRenderer.vala
 	Renderer/ImageRenderer.vala
 	Renderer/OWMWeatherRenderer.vala
@@ -120,10 +119,6 @@ set(VALA_SRC
 	Renderer/CairoRenderer.vala
 	Renderer/TextRenderer.vala
 	Renderer/TestSequenceRenderer.vala
-	Font/Font.vala
-	Font/MicrosoftSansSerifFont.vala
-	Font/HugeMicrosoftSansSerifFont.vala
-	Font/ConsolasFont.vala
 	Sensors/Lradc.vala
 	Sensors/HardwareInfo.vala
 	Sensors/SensorsObserver.vala

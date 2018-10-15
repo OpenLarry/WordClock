@@ -85,9 +85,6 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(WestGermanFrontPanel);
 		type = typeof(EastGermanFrontPanel);
 		type = typeof(RhineRuhrGermanFrontPanel);
-		type = typeof(MicrosoftSansSerifFont);
-		type = typeof(HugeMicrosoftSansSerifFont);
-		type = typeof(ConsolasFont);
 		
 		type = typeof(ClockRenderer);
 		type = typeof(ClockConfiguration);
@@ -96,7 +93,6 @@ public class WordClock.Main : GLib.Object {
 		type = typeof(BootSequenceRenderer);
 		type = typeof(ColorRenderer);
 		type = typeof(GammaTestRenderer);
-		type = typeof(StringRenderer);
 		type = typeof(WatchHandRenderer);
 		type = typeof(ScalaRenderer);
 		type = typeof(ImageRenderer);
