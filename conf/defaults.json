@@ -543,7 +543,7 @@
     },
     "signalrouter" : {
       "sinks" : {
-        "button0,1" : [
+        "buttonhandler,0" : [
           {
             "years" : 0,
             "months" : 0,
@@ -554,7 +554,7 @@
             "-type" : "WordClockDateTimeModifierSink"
           }
         ],
-        "button1,1" : [
+        "buttonhandler,1" : [
           {
             "years" : 0,
             "months" : 0,
@@ -565,7 +565,7 @@
             "-type" : "WordClockDateTimeModifierSink"
           }
         ],
-        "button2,1" : [
+        "buttonhandler,2" : [
           {
             "-type" : "WordClockWpsPbcSink"
           }

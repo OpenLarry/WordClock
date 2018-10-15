@@ -135,6 +135,7 @@ set(VALA_SRC
 	Sensors/SystemSensor.vala
 	Sensors/CpuLoad.vala
 	Sensors/MemoryUsage.vala
+	Sensors/ButtonHandler.vala
 	SignalRouter/SignalRouter.vala
 	SignalRouter/SignalSource.vala
 	SignalRouter/SignalSink.vala

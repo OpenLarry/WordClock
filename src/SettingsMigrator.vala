@@ -222,6 +222,53 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			};
 			
 			updateJsonModifierSink(sinks);
+			
+			debug("Update $.objects.signalrouter.sinks: Replace button0-2,1 with buttonhandler,0-2");
+			try {
+				sinks["buttonhandler,0"] = sinks["button0,1"];
+				sinks["button0,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+			try {
+				sinks["buttonhandler,1"] = sinks["button1,1"];
+				sinks["button1,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+			try {
+				sinks["buttonhandler,2"] = sinks["button2,1"];
+				sinks["button2,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+			
+			debug("Update $.objects.signalrouter.sinks: Replace JsonModifierSink paths 'button0-2,1' with 'buttonhandler,0-2'");
+			
+			updateJsonModifierSink = (sinks) => {
+				// modify path if JsonModifierSink is found
+				try {
+					if(sinks["-type"].to_string() == "WordClockJsonModifierSink") {
+						foreach(Entry path in sinks["paths"]) {
+							MatchInfo info;
+							if(/^\/objects\/signalrouter\/sinks\/button([0-2]),1(\/.+)?$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/signalrouter/sinks/buttonhandler,"+info.fetch(1)+info.fetch(2));
+							}
+						}
+					}
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+				
+				// go through sink nodes recursively
+				try {
+					foreach(Entry sink in sinks) {
+						updateJsonModifierSink(sink.value);
+					}
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.INVALID_NODE_TYPE) ) throw e; // skip node if not iterable
+				}
+			};
+			
+			updateJsonModifierSink(sinks);
 		};
 		
 		return migration_funcs;

@@ -162,6 +162,12 @@ public class WordClock.Main : GLib.Object {
 			
 			var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
 			
+			debug("Init ButtonHandler");
+			var buttonhandler = new ButtonHandler();
+			buttonhandler.add_button( "0", hwinfo.gpios["button0"] );
+			buttonhandler.add_button( "1", hwinfo.gpios["button1"] );
+			buttonhandler.add_button( "2", hwinfo.gpios["button2"] );
+			
 			debug("Init CPU and memory monitors");
 			hwinfo.system["cpuload"] = new CpuLoad();
 			hwinfo.system["memoryusage"] = new MemoryUsage();
@@ -194,6 +200,7 @@ public class WordClock.Main : GLib.Object {
 			signalrouter.add_source("remote", remote);
 			signalrouter.add_source("sensorsobserver", sensorsobserver);
 			signalrouter.add_source("timeobserver", timeobserver);
+			signalrouter.add_source("buttonhandler", buttonhandler);
 			
 			debug("Init MessageOverlay");
 			MessageOverlay message = new MessageOverlay( renderer );
@@ -359,11 +366,22 @@ public class WordClock.Main : GLib.Object {
 }
 
 namespace WordClock {
-	public async void async_sleep( uint time ) {
-		GLib.Timeout.add(time, () => {
+	public async void async_sleep( uint time, Cancellable? cancel = null ) {
+		uint timeout_id = 0;
+		ulong cancel_id = 0;
+		
+		timeout_id = GLib.Timeout.add(time, () => {
 			async_sleep.callback();
+			timeout_id = 0;
 			return Source.REMOVE;
 		});
+		if(cancel != null) {
+			cancel_id = cancel.connect(() => {
+				async_sleep.callback();
+			});
+		}
 		yield;
+		if(cancel != null && !cancel.is_cancelled()) cancel.disconnect(cancel_id);
+		if(timeout_id > 0) Source.remove(timeout_id);
 	}
 }
