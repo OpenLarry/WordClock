@@ -14,6 +14,11 @@ public class WordClock.DateTimeModifierSink : GLib.Object, Jsonable, SignalSink 
 	
 	public void action () {
 		try{
+			// do not modifiy time if set via ntp
+			int exit_status;
+			Process.spawn_sync("/usr/bin", {"chronyc","waitsync","1"}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null, null, null, out exit_status);
+			if(exit_status == 0) return;
+			
 			string date = new DateTime.now_utc().add_full(this.years,this.months,this.days,this.hours,this.minutes,this.seconds).format("%Y-%m-%d %H:%M:%S");
 			
 			Process.spawn_sync("/bin", {"date","-u","-s",date}, null, SpawnFlags.LEAVE_DESCRIPTORS_OPEN, null);
