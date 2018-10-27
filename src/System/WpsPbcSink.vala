@@ -52,7 +52,12 @@ public class WordClock.WpsPbcSink : GLib.Object, Jsonable, SignalSink {
 			
 			debug("Finished wps");
 		} catch(Error e) {
+			cancellable.cancel();
+			(Main.settings.objects["message"] as MessageOverlay).error("Error!");
 			warning(e.message);
+			Buzzer.beep(200,1000,25);
+			Buzzer.pause(200);
+			Buzzer.beep(200,1000,25);
 		} finally {
 			cancellable = null;
 		}
