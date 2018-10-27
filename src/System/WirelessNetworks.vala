@@ -219,6 +219,10 @@ public class WordClock.WirelessNetworks : GLib.Object, Jsonable {
 			if(cancel.is_cancelled()) {
 				output = this.wpa_ctrl.request("WPS_CANCEL");
 				if(output != "OK\n") throw new WirelessNetworkError.WPS_CANCEL_FAILED("WPS CANCEL failed!");
+				
+				// otherwise wpa_supplicant stops scanning after wps sometimes
+				output = this.wpa_ctrl.request("SCAN");
+				// ignore output
 			}
 			
 			return success;
