@@ -129,7 +129,8 @@ public class WordClock.WirelessNetworks : GLib.Object, Jsonable {
 			if(this.wps_running) throw new WirelessNetworkError.WPS_RUNNING("WPS running!");
 			
 			string output = this.wpa_ctrl.request("SCAN");
-			if(output != "OK\n") throw new WirelessNetworkError.SCAN_FAILED("Scan failed!");
+			// ignore FAIL-BUSY and wait for results of pending scan
+			if(output != "OK\n" && output != "FAIL-BUSY\n") throw new WirelessNetworkError.SCAN_FAILED("Scan failed!");
 			
 			// wait for scan results
 			ulong signal_id = this.wpa_ctrl.event.connect( (event) => {
