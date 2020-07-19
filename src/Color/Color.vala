@@ -6,9 +6,9 @@ using WordClock;
  */
 public class WordClock.Color : GLib.Object, Jsonable {
 	/* MUST NOT BE MODIFIED, fields are public for performance reasons ! */
-	public uint8 r = 0;
-	public uint8 g = 0;
-	public uint8 b = 0;
+	public uint16 r = 0;
+	public uint16 g = 0;
+	public uint16 b = 0;
 	
 	protected uint8 r_no_gamma = 0;
 	protected uint8 g_no_gamma = 0;
@@ -20,22 +20,22 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	
 	protected uint last_update_frame = uint.MAX;
 	
-	private static uint8[] gamma_correction = {};
+	private static uint16[] gamma_correction = {};
 	private static uint8[] gamma_correction_inv = {};
 	
 	const double GAMMA = 2.2;
 	
 	// init gamma correction
 	static construct {
-		gamma_correction = new uint8[256];
+		gamma_correction = new uint16[256];
 		for(uint16 i=0;i<256;i++) {
-			gamma_correction[i] = (uint8) Math.round(Math.pow(i/255.0,GAMMA)*255);
+			gamma_correction[i] = (uint16) Math.round(Math.pow(i/255.0,GAMMA)*65535);
 		}
 		
-		gamma_correction_inv = new uint8[256];
+		gamma_correction_inv = new uint8[65536];
 		uint8 val = 0;
-		for(uint16 i=0;i<256;i++) {
-			while(i > gamma_correction[val] && val < 255) val++;
+		for(uint32 i=0;i<65536;i++) {
+			while(i > gamma_correction[val] && val < 65535) val++;
 			gamma_correction_inv[i] = val;
 		}
 	}
@@ -67,7 +67,8 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		this.v = v ?? this.v;
 		
 		this.to_rgb();
-		this.do_gamma_correction();
+		//this.do_gamma_correction();
+		this.to_rgb_gamma();
 		return this;
 	}
 	
@@ -77,7 +78,8 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		this.b_no_gamma = b ?? this.b_no_gamma;
 		
 		this.to_hsv();
-		this.do_gamma_correction();
+		//this.do_gamma_correction();
+		this.to_rgb_gamma();
 		return this;
 	}
 	
@@ -163,6 +165,39 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		
 		return;
 	}
+	protected void to_rgb_gamma() {
+		uint8 region, fpart;
+        uint16 p, q, t;
+		
+		if(this.s == 0) {
+			this.r = this.g = this.b = gamma_correction[v];
+			return;
+		}
+		
+		region = this.h / 60;
+		fpart = (this.h - (region * 60)) * 4;
+		
+		p = (gamma_correction[this.v] * (255 - this.s)) >> 8;
+		q = (gamma_correction[this.v] * (255 - ((this.s * fpart) >> 8))) >> 8;
+		t = (gamma_correction[this.v] * (255 - ((this.s * (255 - fpart)) >> 8))) >> 8;
+			
+		switch(region) {
+			case 0:
+				this.r = gamma_correction[this.v]; this.g = t; this.b = p; break;
+			case 1:
+				this.r = q; this.g = gamma_correction[this.v]; this.b = p; break;
+			case 2:
+				this.r = p; this.g = gamma_correction[this.v]; this.b = t; break;
+			case 3:
+				this.r = p; this.g = q; this.b = gamma_correction[this.v]; break;
+			case 4:
+				this.r = t; this.g = p; this.b = gamma_correction[this.v]; break;
+			default:
+				this.r = gamma_correction[this.v]; this.g = p; this.b = q; break;
+		}
+		
+		return;
+	}
 	
 	protected virtual void update(uint framediff) {}
 	protected void check_update() {
@@ -202,13 +237,14 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) color.g_no_gamma)*percent) / 255 );
 			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) color.b_no_gamma)*percent) / 255 );
 			this.to_hsv();
-			this.do_gamma_correction();
+			// this.do_gamma_correction();
+            this.to_rgb_gamma();
 		}else{
 			color.check_update();
 			this.check_update();
-			this.r = (uint8) ( (((uint16) this.r)*(255-percent) + ((uint16) color.r)*percent) / 255 );
-			this.g = (uint8) ( (((uint16) this.g)*(255-percent) + ((uint16) color.g)*percent) / 255 );
-			this.b = (uint8) ( (((uint16) this.b)*(255-percent) + ((uint16) color.b)*percent) / 255 );
+			this.r = (uint16) ( (((uint) this.r)*(255-percent) + ((uint) color.r)*percent) / 255 );
+			this.g = (uint16) ( (((uint) this.g)*(255-percent) + ((uint) color.g)*percent) / 255 );
+			this.b = (uint16) ( (((uint) this.b)*(255-percent) + ((uint) color.b)*percent) / 255 );
 			this.do_gamma_correction_inv();
 			this.to_hsv();
 		}
@@ -234,7 +270,9 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.r_no_gamma = (uint8) ( (((uint16) this.r_no_gamma)*(255-percent) + ((uint16) r)*percent) / 255 );
 			this.g_no_gamma = (uint8) ( (((uint16) this.g_no_gamma)*(255-percent) + ((uint16) g)*percent) / 255 );
 			this.b_no_gamma = (uint8) ( (((uint16) this.b_no_gamma)*(255-percent) + ((uint16) b)*percent) / 255 );
-			this.do_gamma_correction();
+			this.to_hsv();
+			// this.do_gamma_correction();
+            this.to_rgb_gamma();
 		}
 		
 		return this;
