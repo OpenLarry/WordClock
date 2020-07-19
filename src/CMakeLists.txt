@@ -189,7 +189,7 @@ add_executable(wordclock
 
 # null coalescing operator does not work as expected in Color class if -ftree-dse is enabled
 # _GNU_SOURCE needed for SCHED_IDLE
-add_definitions(-w -fno-tree-dse -DG_LOG_DOMAIN=\"WordClock\" -D_GNU_SOURCE=1)
+add_definitions(-O3 -w -fno-tree-dse -DG_LOG_DOMAIN=\"WordClock\" -D_GNU_SOURCE=1)
 
 # explicitly add libraries (needed e.g. for Fedora 13+)
 target_link_libraries(wordclock -lm)
