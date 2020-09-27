@@ -173,9 +173,8 @@ PACKAGES
 	posix
 	linux
 	wpa_client
-OPTIONS 
-	--thread
-	--target-glib 2.50
+OPTIONS
+	--target-glib 2.64
 	# --debug
 # GENERATE_HEADER
 	# wordclock

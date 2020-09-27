@@ -234,7 +234,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
                         
                         // loop unrolling would decrease execution time by 25%
                         for(int strip=0; strip<this.leds.length[0]; strip++) {
-                            if((bool) channel[strip] & (1 << bit))
+                            if((channel[strip] & (1 << bit)) != 0)
                                 pix |= this.port_bits[strip];
                         }
                         this.fb32[pos[subframe]] = pix;
@@ -245,7 +245,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
                         
                         // loop unrolling would decrease execution time by 25%
                         for(int strip=0; strip<this.leds.length[0]; strip++) {
-                            if((bool) channel[strip] & (1 << 8))
+                            if((channel[strip] & (1 << 8)) != 0)
                                 pix |= this.port_bits[strip];
                             channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF : 0;
                         }

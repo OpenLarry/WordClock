@@ -280,15 +280,15 @@ public class WordClock.Main : GLib.Object {
 			new RestServer((uint16) port);
 			
 			debug("Register Posix signal callbacks");
-			var signalsource = new Unix.SignalSource( Posix.SIGTERM );
+			var signalsource = new Unix.SignalSource( Posix.Signal.TERM );
 			signalsource.set_callback(Main.shutdown);
 			signalsource.attach( loop.get_context() );
 			
-			signalsource = new Unix.SignalSource( Posix.SIGHUP );
+			signalsource = new Unix.SignalSource( Posix.Signal.HUP );
 			signalsource.set_callback(Main.shutdown);
 			signalsource.attach( loop.get_context() );
 			
-			signalsource = new Unix.SignalSource( Posix.SIGINT );
+			signalsource = new Unix.SignalSource( Posix.Signal.INT );
 			signalsource.set_callback(Main.shutdown);
 			signalsource.attach( loop.get_context() );
 			

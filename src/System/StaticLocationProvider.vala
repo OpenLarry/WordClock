@@ -20,13 +20,16 @@ public class WordClock.StaticLocationProvider : GLib.Object, Jsonable, LocationP
 				this.check_for_change();
 			}
 		}
-		default = new LocationInfo(0,0);
 	}
 	private LocationInfo? _location;
 	private LocationInfo? old_location;
 	
 	private uint timeout = 0;
 	private ulong update_handler_id = 0;
+    
+    construct {
+		this.location = new LocationInfo(0,0);
+    }
 	
 	protected void check_for_change() {
 		if( this._location == null ) return;

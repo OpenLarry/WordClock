@@ -22,7 +22,6 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 			this._location = value;
 			this.update_handler_id = this.location.update.connect( () => {this.async_refresh.begin();} );
 		}
-		default = new StaticLocationProvider();
 	}
 	private LocationProvider _location;
 	
@@ -48,6 +47,7 @@ public class WordClock.OWMWeatherProvider : GLib.Object, Jsonable {
 	public signal void update();
 	
 	construct {
+		this.location = new StaticLocationProvider();
 		this.set_timeout();
 	}
 	

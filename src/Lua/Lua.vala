@@ -21,7 +21,6 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 				this._script = value;
 			}
 		}
-		default = "/etc/wordclock/script.lua";
 	}
 	private string _script = "";
 	public uint log_size { get; set; default = 50; }
@@ -35,6 +34,9 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 	private LinkedList<string> log = new LinkedList<string>();
 	private static TreeMap<unowned LuaVM,Lua> this_map = new TreeMap<unowned LuaVM,Lua>();
 	
+    construct {
+        this.script = "/etc/wordclock/script.lua";
+    }
 	
 	~Lua() {
 		this.deinit();

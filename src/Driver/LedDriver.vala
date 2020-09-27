@@ -12,7 +12,7 @@ public abstract class WordClock.LedDriver : GLib.Object, Jsonable, SystemSensor 
 	
 	protected GLib.Cancellable? cancellable;
 	
-	public LedDriver( Cancellable? cancellable = null ) {
+	protected LedDriver( Cancellable? cancellable = null ) {
 		this.cancellable = cancellable;
 	}
 	public abstract int start( FrameRenderer renderer );

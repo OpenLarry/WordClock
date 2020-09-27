@@ -1,7 +1,7 @@
 # WordClock
 
 ## Requirements
-* Vala compiler (>= 0.30)
+* Vala compiler (>= 0.46)
 * CMake (>= 2.6)
 * libsoup-2.4
 * gio-unix-2.0
