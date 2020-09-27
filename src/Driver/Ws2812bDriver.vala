@@ -309,14 +309,17 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		uint last_frame = 0;
 		timer.start();
         
-        double fastest = 0, render = 0, encode = 0;
+        var performance = new Timer();
+        double render = 0, encode = 0;
 		
 		while(this.cancellable == null || !this.cancellable.is_cancelled()) {
-            var measure = new Timer();
-            fastest += measure.elapsed();
-            measure.start();
-			renderer.render();
-            render += measure.elapsed();
+            if(Main.in_debug_mode()) {
+                performance.start();
+                renderer.render();
+                render += performance.elapsed();
+            }else{
+                renderer.render();
+            }
 			
 			this.frame++;
 			
@@ -324,7 +327,10 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			if(time_diff >= 1 || (this.frame - last_frame) >= this.fps) {
 				this.current_fps = (this.frame - last_frame) / time_diff;
                 
-                stdout.printf ("fastest: %f, render: %f, encode: %f, fps: %f\n", fastest/this.frame, render/this.frame, encode/this.frame, this.current_fps);
+                if(Main.in_debug_mode()) {
+                    stdout.printf("Performance: utilization: %f%%, render: %f, encode: %f, fps: %f\r", (render+encode)*100/timer.elapsed(), render/this.frame, encode/this.frame, this.current_fps);
+                    stdout.flush();
+                }
                 
 				last_time += time_diff;
 				last_frame = this.frame;
@@ -340,9 +346,13 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
             var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
             assert(ret==0);
             
-            measure.start();
-            this.encode_to_fb();
-            encode += measure.elapsed();
+            if(Main.in_debug_mode()) {
+                performance.start();
+                this.encode_to_fb();
+                encode += performance.elapsed();
+            }else{
+                this.encode_to_fb();
+            }
 		}
 		
 		this.current_fps = 0;

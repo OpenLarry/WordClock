@@ -361,6 +361,10 @@ public class WordClock.Main : GLib.Object {
 		
 		return Source.REMOVE;
 	}
+    
+    public static bool in_debug_mode() {
+        return debug_mode;
+    }
 }
 
 namespace WordClock {
