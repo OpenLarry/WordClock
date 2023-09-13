@@ -19,9 +19,10 @@ public class WordClock.SettingsMigrator : GLib.Object {
 		
 		TreeMap<string,MigrationFunc> migration_funcs = get_migration_funcs();
 		foreach(Map.Entry<string,MigrationFunc> e in migration_funcs.entries) {
+			MigrationFunc func = e.value; // fixes bug in Vala >= 0.48 and avoids "called object is not a function or function pointer" error
 			if(Version.compare(from,e.key) <= 0 && (!Version.is_official(to) || Version.compare(e.key,to) < 0)) {
 				debug("Migration from version %s", (e.key=="") ? "none" : e.key);
-				e.value(node);
+				func(node);
 			}
 		}
 		
