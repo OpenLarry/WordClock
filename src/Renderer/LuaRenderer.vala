@@ -137,9 +137,9 @@ public class WordClock.LuaRenderer : GLib.Object, Jsonable, ClockRenderable, Mat
 				break;
 				case ColorModel.HSV:
 					if(a == 255) {
-						color.set_hsv((uint16) rh,(uint8) gs,(uint8) bv);
+						color.set_hsv((uint8) rh,(uint8) gs,(uint8) bv);
 					}else{
-						color.mix_with( new Color.from_hsv((uint16) rh,(uint8) gs,(uint8) bv), (uint8) a );
+						color.mix_with( new Color.from_hsv((uint8) rh,(uint8) gs,(uint8) bv), (uint8) a );
 					}
 				break;
 			}

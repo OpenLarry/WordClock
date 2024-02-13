@@ -15,11 +15,10 @@ public class WordClock.ModifyColor : Color, Jsonable {
 	protected override void update(uint framediff) {
 		this.mix_with( this.basic_color, 255 );
 		
-		uint16 h;
-		uint8 s, v;
+		uint8 h, s, v;
 		this.get_hsv( out h, out s, out v );
 		
-		h += 360 + this.add_h;
+		h = (uint8) (this.add_h + h);
 		s = (uint8) (this.add_s + multiply_s * s).clamp(uint8.MIN, uint8.MAX);
 		v = (uint8) (this.add_v + multiply_v * v).clamp(uint8.MIN, uint8.MAX);
 		

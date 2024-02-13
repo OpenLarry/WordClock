@@ -155,22 +155,22 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 				for(int i=0;i<leds_backlight.length;i++) {
 					leds_backlight[i].set_hsv( 0, 0, (uint8) uint.min( (this.frame*10), 255 ) );
 				}
-				leds_backlight[(leds_backlight.length+this.frame+1)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, (uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.frame+0)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, (uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.frame-1)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, (uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.frame-2)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, (uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.frame-3)%leds_backlight.length].set_hsv( (uint16) ((this.frame*3) % 360), 255, (uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.frame+1)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.frame+0)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.frame-1)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.frame-2)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.frame-3)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
 				this.last_frame = this.frame;
 				break;
 			case 5: // stay black, fade out backlight
 				for(int i=0;i<leds_backlight.length;i++) {
 					leds_backlight[i].set_hsv( 0, 0, 255-(uint8) uint.min( (this.frame*10), 255 ) );
 				}
-				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+1)%leds_backlight.length].set_hsv( (uint16) (((this.last_frame+this.frame)*3) % 360), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+0)%leds_backlight.length].set_hsv( (uint16) (((this.last_frame+this.frame)*3) % 360), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-1)%leds_backlight.length].set_hsv( (uint16) (((this.last_frame+this.frame)*3) % 360), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-2)%leds_backlight.length].set_hsv( (uint16) (((this.last_frame+this.frame)*3) % 360), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
-				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-3)%leds_backlight.length].set_hsv( (uint16) (((this.last_frame+this.frame)*3) % 360), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+1)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+0)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-1)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-2)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-3)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
 				break;
 		}
 		

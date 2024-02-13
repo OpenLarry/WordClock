@@ -18,14 +18,14 @@ public class WordClock.HueRotateColor : Color, Jsonable {
 		if(this.timespan == 0) this.timespan = 1;
 		
 		uint offset = 0;
-		if( (360/this.timespan) > 1 ) {
-			offset = 360 * time.get_microsecond() / this.timespan / 1000000;
+		if( (256/this.timespan) > 1 ) {
+			offset = 256 * time.get_microsecond() / this.timespan / 1000000;
 		}
 		
 		this.mix_with( this.basic_color, 255 );
-		uint16 hue;
+		uint8 hue;
 		this.basic_color.get_hsv(out hue, null, null);
-		hue = (hue + (int16) (((seconds%this.timespan) * 360)/this.timespan + offset)) % 360;
+		hue = hue + (uint8) (((seconds%this.timespan) * 256)/this.timespan + offset);
 		
 		this.set_hsv( hue, null, null );
 	}

@@ -38,11 +38,11 @@ public class WordClock.WatchHandRenderer : GLib.Object, Jsonable, ClockRenderabl
 			uint8 fade = (uint8) (Math.fmod( position, 1.0 ) * 256);
 			
 			// mix with seconds color, do fading
-			leds_backlight[(pos-this.width/2+60          )%60].mix_with( color, 255-fade, false);
+			leds_backlight[(pos-this.width/2+60          )%60].mix_with( color, 255-fade );
 			for(int i=1;i<this.width;i++) {
 				leds_backlight[(pos-this.width/2+60+i)%60].mix_with( color, 255 );
 			}
-			leds_backlight[(pos+this.width/2+this.width%2)%60].mix_with( color, fade, false);
+			leds_backlight[(pos+this.width/2+this.width%2)%60].mix_with( color, fade );
 		}
 		
 		return true;
