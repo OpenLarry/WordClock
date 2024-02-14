@@ -6,11 +6,11 @@ using WordClock;
  */
 public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	const string DEVICE = "/dev/fb0";
-    const uint8 SUBBITS = 3;
-    const uint8 SUBFRAMES = 1 << SUBBITS;
+    public const uint8 SUBBITS = 3;
+    public const uint8 SUBFRAMES = 1 << SUBBITS;
     
-    const uint8 SUBFRAMEDIFF = (0xFF / SUBFRAMES) + 1;
-    const uint16 MAXCHANNEL = 0xFFFF - SUBFRAMEDIFF;
+    public const uint8 SUBFRAMEDIFF = (0xFF / SUBFRAMES) + 1;
+    public const uint16 MAXCHANNEL = 0xFFFF - SUBFRAMEDIFF;
     
     private uint8[] subframe_order;
 	
