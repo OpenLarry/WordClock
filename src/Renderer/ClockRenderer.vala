@@ -103,27 +103,23 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 	public uint8[] dump_colors() {
 		uint8[] ret = new uint8[(this.matrix.length[0] * this.matrix.length[1] + this.dots.length + this.backlight.length) * 3];
 		
-		uint8 r,g,b;
 		int i=0;
 		for(int y=0;y<this.matrix.length[1];y++) {
 			for(int x=0;x<this.matrix.length[0];x++) {
-				this.matrix[x,y].get_rgb(out r, out g, out b, false);
-				ret[i++] = r;
-				ret[i++] = g;
-				ret[i++] = b;
+				ret[i++] = this.matrix[x,y].r >> 8;
+				ret[i++] = this.matrix[x,y].g >> 8;
+				ret[i++] = this.matrix[x,y].b >> 8;
 			}
 		}
 		for(int x=0;x<this.dots.length;x++) {
-			this.dots[x].get_rgb(out r, out g, out b, false);
-			ret[i++] = r;
-			ret[i++] = g;
-			ret[i++] = b;
+			ret[i++] = this.dots[x].r >> 8;
+			ret[i++] = this.dots[x].g >> 8;
+			ret[i++] = this.dots[x].b >> 8;
 		}
 		for(int x=0;x<this.backlight.length;x++) {
-			this.backlight[x].get_rgb(out r, out g, out b, false);
-			ret[i++] = r;
-			ret[i++] = g;
-			ret[i++] = b;
+			ret[i++] = this.backlight[x].r >> 8;
+			ret[i++] = this.backlight[x].g >> 8;
+			ret[i++] = this.backlight[x].b >> 8;
 		}
 		
 		return ret;
