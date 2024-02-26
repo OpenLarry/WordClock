@@ -210,6 +210,9 @@ public class WordClock.Main : GLib.Object {
 			
 			debug("Init WirelessNetworks");
 			WirelessNetworks wirelessnetworks = new WirelessNetworks();
+
+			debug("Init BootSequenceRenderer");
+			BootSequenceRenderer bootsequence = new BootSequenceRenderer();
 			
 			debug("Init Settings");
 			settings = new Settings();
@@ -223,6 +226,7 @@ public class WordClock.Main : GLib.Object {
 			settings.objects["lua"] = lua;
 			settings.objects["filteredmotion"] = filteredmotion;
 			settings.objects["wirelessnetworks"] = wirelessnetworks;
+			settings.objects["bootsequence"] = bootsequence;
 			settings.objects.set_keys_immutable();
 			
 			debug("Init TestSequenceRenderer");
@@ -295,10 +299,9 @@ public class WordClock.Main : GLib.Object {
 			// Debug parameter skips boot sequence
 			if(!debug_mode) {
 				debug("Setup boot sequence");
-				BootSequenceRenderer boot = new BootSequenceRenderer();
 				ColorRenderer black = new ColorRenderer();
 				black.color.set_hsv(0,0,0);
-				renderer.overwrite.begin( { black, boot }, { black, boot }, { black, boot }, null, () => {
+				renderer.overwrite.begin( { black, bootsequence }, { black, bootsequence }, { black, bootsequence }, null, () => {
 					debug("Boot sequence finished");
 				});
 			}

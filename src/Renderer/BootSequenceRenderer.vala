@@ -5,6 +5,12 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
+	public bool matrix_test { get; set; default = true; }
+
+	public Color matrix_color { get; set; default = new Color.from_hsv(0, 0, 255); }
+	public Color dots_color { get; set; default = new Color.from_hsv(0, 0, 255); }
+	public Color backlight_color { get; set; default = new Color.from_hsv(0, 0, 255); }
+
 	private TextRenderer text_renderer = new TextRenderer();
 	private ImageRenderer image_renderer = new ImageRenderer();
 	
@@ -58,21 +64,24 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 				
 				break;
 			case 1: // fade to white
-				if(this.frame > 26) {
+				if(!matrix_test || this.frame > 26) {
 					this.phase++;
 					this.frame = 0;
 					return this.render_matrix(leds_matrix);
 				}
 				
+				Color color = new Color.from_hsv(0, 0, 0);
+				color.mix_with(matrix_color, (uint8) uint.min( this.frame*10, 255 ));
+
 				for(int i=0; i<leds_matrix.length[0]; i++) {
 					for(int j=0; j<leds_matrix.length[1]; j++) {
-						leds_matrix[i,j].set_hsv( 0, 0, (uint8) uint.min( this.frame*10, 255 ) );
+						leds_matrix[i,j].mix_with(color, 255);
 					}
 				}
 				
 				break;
 			case 2: // stay white
-				if(this.frame > 50) {
+				if(!matrix_test || this.frame > 50) {
 					this.phase++;
 					this.frame = 0;
 					return this.render_matrix(leds_matrix);
@@ -80,21 +89,24 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 				
 				for(int i=0; i<leds_matrix.length[0]; i++) {
 					for(int j=0; j<leds_matrix.length[1]; j++) {
-						leds_matrix[i,j].set_hsv( 0, 0, 255 );
+						leds_matrix[i,j].mix_with(matrix_color, 255);
 					}
 				}
 				
 				break;
 			case 3: // fade to black
-				if(this.frame > 26) {
+				if(!matrix_test || this.frame > 26) {
 					this.phase++;
 					this.frame = 0;
 					return this.render_matrix(leds_matrix);
 				}
 				
+				Color color = new Color.from_hsv(0, 0, 0);
+				color.mix_with(matrix_color, 255-(uint8) uint.min( this.frame*10, 255 ));
+				
 				for(int i=0; i<leds_matrix.length[0]; i++) {
 					for(int j=0; j<leds_matrix.length[1]; j++) {
-						leds_matrix[i,j].set_hsv( 0, 0, 255-(uint8) uint.min( this.frame*10, 255 ) );
+						leds_matrix[i,j].mix_with(color, 255);
 					}
 				}
 				
@@ -128,22 +140,22 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 	}
 	
 	public bool render_dots( Color[] leds_dots ) {
+		Color color = new Color.from_hsv(0, 0, 0);
+
 		switch(this.phase) {
 			case 1: // fade to white
-				for(int i=0; i<leds_dots.length; i++) {
-					leds_dots[i].set_hsv( 0, 0, (uint8) uint.min( this.frame*10, 255 ) );
-				}
+				color.mix_with(dots_color, (uint8) uint.min( this.frame*10, 255 ));
 				break;
 			case 2: // stay white
-				for(int i=0; i<leds_dots.length; i++) {
-					leds_dots[i].set_hsv( 0, 0, 255 );
-				}
+				color.mix_with(dots_color, 255);
 				break;
 			case 3: // fade to black
-				for(int i=0; i<leds_dots.length; i++) {
-					leds_dots[i].set_hsv( 0, 0, 255-(uint8) uint.min( this.frame*10, 255 ) );
-				}
+				color.mix_with(dots_color, 255-(uint8) uint.min( this.frame*10, 255 ));
 				break;
+		}
+		
+		for(int i=0; i<leds_dots.length; i++) {
+			leds_dots[i].mix_with(color, 255);
 		}
 		
 		return true;
@@ -152,9 +164,13 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 	public bool render_backlight( Color[] leds_backlight ) {
 		switch(this.phase) {
 			case 4: // show version text, fade in backlight
+				Color color = new Color.from_hsv(0, 0, 0);
+				color.mix_with(backlight_color, (uint8) uint.min( this.frame*10, 255 ));
+				
 				for(int i=0;i<leds_backlight.length;i++) {
-					leds_backlight[i].set_hsv( 0, 0, (uint8) uint.min( (this.frame*10), 255 ) );
+					leds_backlight[i].mix_with(color, 255);
 				}
+
 				leds_backlight[(leds_backlight.length+this.frame+1)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
 				leds_backlight[(leds_backlight.length+this.frame+0)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
 				leds_backlight[(leds_backlight.length+this.frame-1)%leds_backlight.length].set_hsv( (uint8) (this.frame*2), 255, (uint8) uint.min( (this.frame*10), 255 ) );
@@ -163,9 +179,13 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 				this.last_frame = this.frame;
 				break;
 			case 5: // stay black, fade out backlight
+				Color color = new Color.from_hsv(0, 0, 0);
+				color.mix_with(backlight_color, 255-(uint8) uint.min( this.frame*10, 255 ));
+
 				for(int i=0;i<leds_backlight.length;i++) {
-					leds_backlight[i].set_hsv( 0, 0, 255-(uint8) uint.min( (this.frame*10), 255 ) );
+					leds_backlight[i].mix_with(color, 255);
 				}
+
 				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+1)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
 				leds_backlight[(leds_backlight.length+this.last_frame+this.frame+0)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
 				leds_backlight[(leds_backlight.length+this.last_frame+this.frame-1)%leds_backlight.length].set_hsv( (uint8) ((this.last_frame+this.frame)*2), 255, 255-(uint8) uint.min( (this.frame*10), 255 ) );
