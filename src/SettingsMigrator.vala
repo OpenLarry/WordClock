@@ -347,6 +347,53 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			
 			updateJsonModifierSink(sinks);
 		};
+
+		migration_funcs["v0.9.3"] = (node) => {
+			debug("Update $.objects.clockrenderer.renderers: Adjust Color hues");
+			
+			RecursiveMigrationFunc updateColors = null;
+			updateColors = (renderers) => {
+				// adjust hue color range
+				try {
+					int32 val = (int32) renderers["h"].get_typed_value(typeof(int32));
+
+					val = val % 360;
+					if(val < 120)
+						val = val * 96 / 120;
+					else if(val < 240)
+						val = 96 + (val - 120) * 64 / 120;
+					else
+						val = 160 + (val - 240) * 96 / 120;
+					
+					renderers["h"].set_value(val);
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+
+				
+				try {
+					if(renderers["-type"].to_string() == "WordClockModifyColor") {
+						int32 val = (int32) renderers["add-h"].get_typed_value(typeof(int32));
+						val = val * 256 / 360;
+						renderers["add-h"].set_value(val);
+					}
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+				
+				try {
+					foreach(Entry renderer in renderers) {
+						updateColors(renderer.value);
+					}
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.INVALID_NODE_TYPE) ) throw e; // skip node if not iterable
+				}
+			};
+			
+			updateColors(node["objects"]["clockrenderer"]["renderers"]);
+
+			debug("Update $.objects.signalrouter.sinks: Adjust Color hues");
+			updateColors(node["objects"]["signalrouter"]["sinks"]);
+
+			debug("Update $.objects.message: Adjust Color hues");
+			updateColors(node["objects"]["message"]);
+		};
 		
 		return migration_funcs;
 	}
