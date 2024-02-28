@@ -27,24 +27,24 @@ public class WordClock.WirelessNetworks : GLib.Object, Jsonable {
 	private async void connection_overlay(bool connected) {
 		if(imageoverlay_cancellable != null) imageoverlay_cancellable.cancel();
 		
-		if((Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite_active()) return;
+		if(Main.settings.get<ClockRenderer>().overwrite_active()) return;
 		
 		imageoverlay_cancellable = new Cancellable();
 		if(connected) {
-			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_connected.png", 0, 4, 3, imageoverlay_cancellable);
+			ClockRenderer.ReturnReason ret = yield Main.settings.get<ImageOverlay>().image("/usr/share/wordclock/wlan_connected.png", 0, 4, 3, imageoverlay_cancellable);
 		
 			string ssid = "none";
 			try {
-				ssid = (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_status()["ssid"] ?? "none";
+				ssid = ((WirelessNetworks) Main.settings.objects["wirelessnetworks"]).get_status()["ssid"] ?? "none";
 			} catch ( Error e ) {
 				warning(e.message);
 			}
 				
 			if(ret == ClockRenderer.ReturnReason.TERMINATED) {
-				yield (Main.settings.objects["message"] as MessageOverlay).message(ssid, MessageType.INFO, 1, imageoverlay_cancellable);
+				yield ((MessageOverlay) Main.settings.objects["message"]).message(ssid, MessageType.INFO, 1, imageoverlay_cancellable);
 			}
 		} else {
-			yield (Main.settings.objects["image"] as ImageOverlay).image("/usr/share/wordclock/wlan_disconnected.png", 0, 2, 3, imageoverlay_cancellable);
+			yield ((ImageOverlay) Main.settings.objects["image"]).image("/usr/share/wordclock/wlan_disconnected.png", 0, 2, 3, imageoverlay_cancellable);
 		}
 	}
 	

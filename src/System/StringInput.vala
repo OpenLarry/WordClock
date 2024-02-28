@@ -37,16 +37,16 @@ public class WordClock.StringInput : GLib.Object {
 		
 		try {
 			if(this.message != null) {
-				yield (Main.settings.objects["message"] as MessageOverlay).message(this.message, MessageType.INFO, 1, this.cancellable);
+				yield Main.settings.get<MessageOverlay>().message(this.message, MessageType.INFO, 1, this.cancellable);
 			}
 			
 			this.string = "A";
 			
 			this.update_text();
-			text_renderer.color = (Main.settings.objects["message"] as MessageOverlay).info_color;
-			text_renderer.font = (Main.settings.objects["message"] as MessageOverlay).font;
+			text_renderer.color = Main.settings.get<MessageOverlay>().info_color;
+			text_renderer.font = Main.settings.get<MessageOverlay>().font;
 			
-			background.color = (Main.settings.objects["message"] as MessageOverlay).background_color;
+			background.color = Main.settings.get<MessageOverlay>().background_color;
 			
 			// letter blink timer
 			Timeout.add(500, () => {
@@ -59,7 +59,7 @@ public class WordClock.StringInput : GLib.Object {
 			});
 			
 			this.cancellable = new Cancellable();
-			ClockRenderer.ReturnReason ret = yield (Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite( { background, text_renderer }, { background }, { background }, this.cancellable);
+			ClockRenderer.ReturnReason ret = yield Main.settings.get<ClockRenderer>().overwrite( { background, text_renderer }, { background }, { background }, this.cancellable);
 			if(ret == ClockRenderer.ReturnReason.REPLACED) this.action(StringInputAction.ABORT);
 			
 			return this.string;

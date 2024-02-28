@@ -26,14 +26,14 @@ public class WordClock.StringChooser : GLib.Object {
 		
 		try{
 			if(this.message != null) {
-				yield (Main.settings.objects["message"] as MessageOverlay).message(this.message, MessageType.INFO, 1, this.cancellable);
+				yield Main.settings.get<MessageOverlay>().message(this.message, MessageType.INFO, 1, this.cancellable);
 			}
 			
 			if(this.strings.length == 0) return -1;
 			
 			while(running) {
 				this.cancellable = new Cancellable();
-				ClockRenderer.ReturnReason ret = yield (Main.settings.objects["message"] as MessageOverlay).message(this.strings[this.pos], MessageType.INFO, -1, this.cancellable);
+				ClockRenderer.ReturnReason ret = yield Main.settings.get<MessageOverlay>().message(this.strings[this.pos], MessageType.INFO, -1, this.cancellable);
 				if(ret == ClockRenderer.ReturnReason.REPLACED) this.action(StringChooserAction.ABORT);
 			}
 			

@@ -89,7 +89,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 
 	protected virtual void update(uint framediff) {}
 	protected void check_update() {
-		uint frame = (Main.hwinfo.system["leddriver"] as LedDriver).frame;
+		uint frame = ((LedDriver) Main.hwinfo.system["leddriver"]).frame;
 		if(this.last_update_frame != frame) {
 			uint framediff = frame - this.last_update_frame;
 			this.last_update_frame = frame;

@@ -42,7 +42,7 @@ public class WordClock.NetworkColor : Color, Jsonable {
 				// segmentation fault without casting! bug in glib?
 				sources[this.port] = (SocketSource) sockets[this.port].create_source(IOCondition.IN);
 				sources[this.port].set_callback( (sock) => {
-					uint port = (sock.local_address as InetSocketAddress).port;
+					uint port = ((InetSocketAddress) sock.local_address).port;
 					
 					try {
 						uint8 rgb[3] = {0};

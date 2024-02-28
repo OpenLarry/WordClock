@@ -11,6 +11,6 @@ public class WordClock.ImageSink : GLib.Object, Jsonable, SignalSink {
 	public uint count { get; set; default = 1; }
 	
 	public void action () {
-		(Main.settings.objects["image"] as ImageOverlay).display(this.path, this.x_speed, this.y_speed, (int) this.count.clamp(1,int.MAX));
+		Main.settings.get<ImageOverlay>().display(this.path, this.x_speed, this.y_speed, (int) this.count.clamp(1,int.MAX));
 	}
 }

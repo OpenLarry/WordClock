@@ -10,7 +10,7 @@ public class WordClock.OWMWeatherRenderer : GLib.Object, Jsonable, ClockRenderab
 	private ImageRenderer renderer = new ImageRenderer();
 	
 	public bool render_matrix( Color[,] matrix ) {
-		JsonWrapper.Node? info = (Main.settings.objects["weather"] as OWMWeatherProvider).get_weather();
+		JsonWrapper.Node? info = Main.settings.get<OWMWeatherProvider>().get_weather();
 		
 		if(info==null) return true;
 		

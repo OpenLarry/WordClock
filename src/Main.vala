@@ -216,17 +216,17 @@ public class WordClock.Main : GLib.Object {
 			
 			debug("Init Settings");
 			settings = new Settings();
-			settings.objects["clockrenderer"] = renderer;
-			settings.objects["signalrouter"] = signalrouter;
-			settings.objects["sensorsobserver"] = sensorsobserver;
-			settings.objects["message"] = message;
-			settings.objects["image"] = image;
-			settings.objects["timeobserver"] = timeobserver;
-			settings.objects["weather"] = weather;
-			settings.objects["lua"] = lua;
-			settings.objects["filteredmotion"] = filteredmotion;
-			settings.objects["wirelessnetworks"] = wirelessnetworks;
-			settings.objects["bootsequence"] = bootsequence;
+			settings.set("clockrenderer", renderer);
+			settings.set("signalrouter", signalrouter);
+			settings.set("sensorsobserver", sensorsobserver);
+			settings.set("message", message);
+			settings.set("image", image);
+			settings.set("timeobserver", timeobserver);
+			settings.set("weather", weather);
+			settings.set("lua", lua);
+			settings.set("filteredmotion", filteredmotion);
+			settings.set("wirelessnetworks", wirelessnetworks);
+			settings.set("bootsequence", bootsequence);
 			settings.objects.set_keys_immutable();
 			
 			debug("Init TestSequenceRenderer");

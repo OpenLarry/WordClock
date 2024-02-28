@@ -8,12 +8,22 @@ public class WordClock.Settings : GLib.Object, Jsonable {
 	private uint timeout = 0;
 	
 	private string path;
+	private TreeMap<Type, Jsonable> type_map = new TreeMap<Type, Jsonable>();
 	
 	public uint save_time { get; set; default = 5; }
 	public JsonableTreeMap<Jsonable> objects { get; set; default = new JsonableTreeMap<Jsonable>(); }
 	
 	public Settings() {
 		this.path = SettingsMigrator.get_settings_path();
+	}
+
+	public new T get<T>() {
+		return (T) type_map[typeof(T)];
+	}
+
+	public new void set(string key, Jsonable val) {
+		type_map[val.get_class().get_type()] = val;
+		objects[key] = val;
 	}
 	
 	public void load( string? version = null ) throws Error {

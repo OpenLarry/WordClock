@@ -18,15 +18,15 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 		
 		debug("Trigger WirelessNetworkInputSink");
 		
-		SignalRouter signalrouter = (Main.settings.objects["signalrouter"] as SignalRouter);
+		SignalRouter signalrouter = Main.settings.get<SignalRouter>();
 		
 		
 		try {
-			(Main.settings.objects["message"] as MessageOverlay).message.begin("Scanning...", MessageType.INFO, -1);
+			Main.settings.get<MessageOverlay>().message.begin("Scanning...", MessageType.INFO, -1);
 			
 			// scan networks
 			string[] networks_array = {};
-			ArrayList<WirelessNetwork> scan_networks = yield (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).scan_networks(3);
+			ArrayList<WirelessNetwork> scan_networks = yield Main.settings.get<WirelessNetworks>().scan_networks(3);
 			foreach(WirelessNetwork network in scan_networks) {
 				networks_array += network.ssid;
 			}
@@ -73,7 +73,7 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 			
 			// save network
 			uint? network_id = null;
-			TreeMap<string,WirelessNetwork> get_networks = (Main.settings.objects["wirelessnetworks"] as WirelessNetworks).get_networks();
+			TreeMap<string,WirelessNetwork> get_networks = Main.settings.get<WirelessNetworks>().get_networks();
 			foreach(Map.Entry<string,WirelessNetwork> e in get_networks.entries) {
 				if(e.value.ssid == ssid) {
 					network_id = (uint) uint64.parse(e.key);
@@ -81,20 +81,20 @@ public class WordClock.WirelessNetworkInputSink : GLib.Object, Jsonable, SignalS
 				}
 			}
 			if(network_id == null) {
-				(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).add_network(new WirelessNetwork(ssid,psk,true));
-				yield (Main.settings.objects["message"] as MessageOverlay).message("OK", MessageType.SUCCESS, 1);
+				Main.settings.get<WirelessNetworks>().add_network(new WirelessNetwork(ssid,psk,true));
+				yield Main.settings.get<MessageOverlay>().message("OK", MessageType.SUCCESS, 1);
 			}else{
-				(Main.settings.objects["wirelessnetworks"] as WirelessNetworks).edit_network(network_id, new WirelessNetwork(ssid,psk,true));
-				yield (Main.settings.objects["message"] as MessageOverlay).message("OK", MessageType.SUCCESS, 1);
+				Main.settings.get<WirelessNetworks>().edit_network(network_id, new WirelessNetwork(ssid,psk,true));
+				yield Main.settings.get<MessageOverlay>().message("OK", MessageType.SUCCESS, 1);
 			}
 		} catch( WirelessNetworkError e ) {
 			if(e is WirelessNetworkError.SET_NETWORK_PSK_FAILED) {
-				yield (Main.settings.objects["message"] as MessageOverlay).message("Error! Password too short?", MessageType.ERROR, 1);
+				yield Main.settings.get<MessageOverlay>().message("Error! Password too short?", MessageType.ERROR, 1);
 			}else{
-				yield (Main.settings.objects["message"] as MessageOverlay).message(e.message, MessageType.ERROR, 1);
+				yield Main.settings.get<MessageOverlay>().message(e.message, MessageType.ERROR, 1);
 			}
 		} catch( Error e ) {
-			yield (Main.settings.objects["message"] as MessageOverlay).message(e.message, MessageType.ERROR, 1);
+			yield Main.settings.get<MessageOverlay>().message(e.message, MessageType.ERROR, 1);
 		} finally {
 			running = false;
 			debug("Finished WirelessNetworkInputSink");

@@ -82,7 +82,7 @@ public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRender
 	}
 	
 	public void register() {
-		SignalRouter signalrouter = (Main.settings.objects["signalrouter"] as SignalRouter);
+		SignalRouter signalrouter = Main.settings.get<SignalRouter>();
 		signalrouter.add_signal_func(/^buttonhandler,012-1$/, (id,sig) => {
 			this.toggle_test_sequence.begin();
 			return true; 
@@ -96,7 +96,7 @@ public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRender
 		}
 		
 		this.cancellable = new Cancellable();
-		SignalRouter signalrouter = (Main.settings.objects["signalrouter"] as SignalRouter);
+		SignalRouter signalrouter = Main.settings.get<SignalRouter>();
 		uint signalfunc = signalrouter.add_signal_func(/^buttonhandler,[0-2](-1)?$/, (id,sig) => {
 			switch(sig) {
 				case "buttonhandler,0":
@@ -125,7 +125,7 @@ public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRender
 			return true; 
 		}, true);
 		
-		yield (Main.settings.objects["clockrenderer"] as ClockRenderer).overwrite( { this }, { this }, { this }, this.cancellable);
+		yield Main.settings.get<ClockRenderer>().overwrite( { this }, { this }, { this }, this.cancellable);
 		
 		signalrouter.remove_signal_func(signalfunc);
 		this.cancellable = null;
