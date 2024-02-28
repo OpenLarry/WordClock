@@ -204,8 +204,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
         
 		uint[] pos = new uint[SUBFRAMES];
         for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
-            //pos[subframe] = (this.framebuffer_offset(this.subframe_order[subframe]) + 2) / 2; // for uint32 framebuffer
-            pos[subframe] = (this.framebuffer_offset(subframe) + 2) / 2; // for uint32 framebuffer
+            pos[subframe] = (this.framebuffer_offset(this.subframe_order[subframe]) + 2) / 2; // for uint32 framebuffer
 		}
         
         uint16[] channel = new uint16[this.leds.length[0]];
