@@ -6,17 +6,17 @@
       "matrix-color" : {
         "h" : 0,
         "s" : 0,
-        "v" : 255
+        "v" : 200
       },
       "dots-color" : {
         "h" : 0,
         "s" : 0,
-        "v" : 255
+        "v" : 200
       },
       "backlight-color" : {
         "h" : 0,
         "s" : 0,
-        "v" : 255
+        "v" : 200
       },
       "-type" : "WordClockBootSequenceRenderer"
     },
