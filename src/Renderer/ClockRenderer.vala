@@ -106,20 +106,14 @@ public class WordClock.ClockRenderer : GLib.Object, FrameRenderer, Jsonable {
 		int i=0;
 		for(int y=0;y<this.matrix.length[1];y++) {
 			for(int x=0;x<this.matrix.length[0];x++) {
-				ret[i++] = this.matrix[x,y].r >> 8;
-				ret[i++] = this.matrix[x,y].g >> 8;
-				ret[i++] = this.matrix[x,y].b >> 8;
+				this.matrix[x,y].get_rgb(out ret[i++], out ret[i++], out ret[i++]);
 			}
 		}
 		for(int x=0;x<this.dots.length;x++) {
-			ret[i++] = this.dots[x].r >> 8;
-			ret[i++] = this.dots[x].g >> 8;
-			ret[i++] = this.dots[x].b >> 8;
+			this.dots[x].get_rgb(out ret[i++], out ret[i++], out ret[i++]);
 		}
 		for(int x=0;x<this.backlight.length;x++) {
-			ret[i++] = this.backlight[x].r >> 8;
-			ret[i++] = this.backlight[x].g >> 8;
-			ret[i++] = this.backlight[x].b >> 8;
+			this.backlight[x].get_rgb(out ret[i++], out ret[i++], out ret[i++]);
 		}
 		
 		return ret;
