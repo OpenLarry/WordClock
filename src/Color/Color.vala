@@ -15,6 +15,16 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	protected uint8 v = 0;
 	
 	protected uint last_update_frame = uint.MAX;
+
+	private static int8 sin[256];
+	private static int8 cos[256];
+
+	static construct {
+		for(double i=0; i<256; i += 1) {
+			sin[(uint8) i] = (int8) (Math.sin(i * Math.PI / 128) * 127);
+			cos[(uint8) i] = (int8) (Math.cos(i * Math.PI / 128) * 127);
+		}
+	}
 	
 	/**
 	 * Create a new instance for representing any colors
@@ -125,15 +135,25 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			if(this.s == 0 && color.s != 0 || this.v == 0 && color.v != 0)
 				this.h = color.h;
 
-			if(this.s != 0 && color.s != 0 && this.v != 0 && color.v != 0)
+			// blend only when necessary
+			if(this.s != 0 && color.s != 0 && this.v != 0 && color.v != 0 && this.h != color.h)
 			{
-				int8 hdiff = (int8) (color.h - this.h);
-				this.h = this.h + (hdiff * percent / 255);
+				int thisx = cos[this.h] * this.s;
+				int thisy = sin[this.h] * this.s;
+				int thatx = cos[color.h] * color.s;
+				int thaty = sin[color.h] * color.s;
+
+				int newx = (thisx * (255-percent) + thatx * percent) / 255;
+				int newy = (thisy * (255-percent) + thaty * percent) / 255;
+
+				this.h = (uint8)(int8) (Math.atan2(newy, newx) / Math.PI * 128);
+				this.s = (uint8) (Math.sqrt(newx*newx + newy*newy) / 127);
+			}else{
+				this.s = (uint8) ( (((uint16) this.s)*(255-percent) + ((uint16) color.s)*percent) / 255 );
 			}
 
-			this.s = (uint8) ( (((uint16) this.s)*(255-percent) + ((uint16) color.s)*percent) / 255 );
 			this.v = (uint8) ( (((uint16) this.v)*(255-percent) + ((uint16) color.v)*percent) / 255 );
-            this.to_rgb();
+			this.to_rgb();
 		}
 		
 		return this;
@@ -493,21 +513,21 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		// and add the brightness_floor to r, g, and b.
 		if( this.s != 255 ) {
 			if( this.s == 0) {
-				this.r = 0xFF00; this.b = 0xFF00; this.g = 0xFF00;
+				this.r = 0xFF00 / 2; this.b = 0xFF00 / 2; this.g = 0xFF00 / 2;
 			} else {
 				uint16 sat16 = this.s << 8;
 				uint16 desat16 = 0xFF00 - sat16;
 				desat16 = scale16_video( desat16, desat16);
 
 				uint16 satscale = 0xFF00 - desat16;
-				//satscale = this.s; // uncomment to revert to pre-2021 saturation behavior
+				//satscale = this.s << 8; // uncomment to revert to pre-2021 saturation behavior
 
 				//nscale8x3_video( r, g, b, this.s);
 				this.r = scale16( this.r, satscale);
 				this.g = scale16( this.g, satscale);
 				this.b = scale16( this.b, satscale);
 				
-				uint16 brightness_floor = desat16;
+				uint16 brightness_floor = desat16 / 2;
 				this.r += brightness_floor;
 				this.g += brightness_floor;
 				this.b += brightness_floor;
