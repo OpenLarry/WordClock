@@ -55,22 +55,42 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		return this;
 	}
 	
-	public Color set_rgb( uint8? r, uint8? g, uint8? b ) {
-		if(r != null) this.r = r << 8;
-		if(g != null) this.g = g << 8;
-		if(b != null) this.b = b << 8;
-		
-		this.to_hsv();
-		this.to_rgb();
-		return this;
-	}
+	public Color set_rgb( uint8 r, uint8 g, uint8 b ) {
+		uint8 rgbMin = uint8.min(r,uint8.min(g,b));
+		uint8 rgbMax = uint8.max(r,uint8.max(g,b));
 
-	public Color set_rgb16( uint16? r, uint16? g, uint16? b ) {
-		this.r = r ?? this.r;
-		this.g = g ?? this.g;
-		this.b = b ?? this.b;
+		this.v = rgbMax;
+		if (this.v == 0) {
+			this.h = 0;
+			this.s = 0;
+			this.to_rgb();
+			return this;
+		}
+
+		this.s = (uint8) (255 * (rgbMax - rgbMin) / this.v);
+		if (this.s == 0) {
+			this.h = 0;
+			this.to_rgb();
+			return this;
+		}
+
+		if (rgbMax == r) {
+			if( g > b )
+				this.h = 0 + 64 * (g - b) / (rgbMax - rgbMin);
+			else
+				this.h = 0 + 48 * (g - b) / (rgbMax - rgbMin);
+		}else if (rgbMax == g) {
+			if( b > r )
+				this.h = 96 + 40 * (b - r) / (rgbMax - rgbMin);
+			else
+				this.h = 96 + 32 * (b - r) / (rgbMax - rgbMin);
+		}else{
+			if( r > g )
+				this.h = 160 + 48 * (r - g) / (rgbMax - rgbMin);
+			else
+				this.h = 160 + 24 * (r - g) / (rgbMax - rgbMin);
+		}
 		
-		this.to_hsv();
 		this.to_rgb();
 		return this;
 	}
@@ -84,7 +104,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	
 	public void get_rgb( out uint8 r, out uint8 g, out uint8 b, bool check_update = true ) {
 		if(check_update) this.check_update();
-		
+
 		if (this.s == 0)
 		{
 			r = this.v;
@@ -139,13 +159,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 				r = this.v; g = p; b = q;
 				break;
 		}
-	}
-	
-	public void get_rgb16( out uint16 r, out uint16 g, out uint16 b, bool check_update = true ) {
-		if(check_update) this.check_update();
-		r = this.r;
-		g = this.g;
-		b = this.b;
 	}
 
 	protected virtual void update(uint framediff) {}
@@ -225,13 +238,14 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.set_rgb(r,g,b);
 		}else{
 			this.check_update();
+
 			uint8 thisr, thisg, thisb;
 			get_rgb(out thisr, out thisg, out thisb);
-			this.r = ((uint16) thisr)*(255-percent) + ((uint16) r)*percent;
-			this.g = ((uint16) thisg)*(255-percent) + ((uint16) g)*percent;
-			this.b = ((uint16) thisb)*(255-percent) + ((uint16) b)*percent;
-			this.to_hsv();
-			this.to_rgb();
+			thisr = (uint8) ((((uint16) thisr)*(255-percent) + ((uint16) r)*percent) / 255);
+			thisg = (uint8) ((((uint16) thisg)*(255-percent) + ((uint16) g)*percent) / 255);
+			thisb = (uint8) ((((uint16) thisb)*(255-percent) + ((uint16) b)*percent) / 255);
+
+			this.set_rgb(thisr, thisg, thisb);
 		}
 		
 		return this;
@@ -258,45 +272,6 @@ public class WordClock.Color : GLib.Object, Jsonable {
 		this.check_update();
 		other.check_update();
 		return this.h == other.h && this.s == other.s && this.v == other.v;
-	}
-
-	protected void to_hsv() {
-		uint8 r = (uint8) (this.r >> 8);
-		uint8 g = (uint8) (this.g >> 8);
-		uint8 b = (uint8) (this.b >> 8);
-
-		uint8 rgbMin = uint8.min(r,uint8.min(g,b));
-		uint8 rgbMax = uint8.max(r,uint8.max(g,b));
-
-		this.v = rgbMax;
-		if (this.v == 0) {
-			this.h = 0;
-			this.s = 0;
-			return;
-		}
-
-		this.s = (uint8) (255 * (rgbMax - rgbMin) / this.v);
-		if (this.s == 0) {
-			this.h = 0;
-			return;
-		}
-
-		if (rgbMax == r) {
-			if( g > b )
-				this.h = 0 + 64 * (g - b) / (rgbMax - rgbMin);
-			else
-				this.h = 0 + 48 * (g - b) / (rgbMax - rgbMin);
-		}else if (rgbMax == g) {
-			if( b > r )
-				this.h = 96 + 40 * (b - r) / (rgbMax - rgbMin);
-			else
-				this.h = 96 + 32 * (b - r) / (rgbMax - rgbMin);
-		}else{
-			if( r > g )
-				this.h = 160 + 48 * (r - g) / (rgbMax - rgbMin);
-			else
-				this.h = 160 + 24 * (r - g) / (rgbMax - rgbMin);
-		}
 	}
 
 
