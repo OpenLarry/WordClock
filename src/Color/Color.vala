@@ -83,11 +83,62 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	}
 	
 	public void get_rgb( out uint8 r, out uint8 g, out uint8 b, bool check_update = true ) {
-		uint16 lr, lg, lb;
-		get_rgb16(out lr, out lg, out lb, check_update);
-		r = (uint8) (lr >> 8);
-		g = (uint8) (lg >> 8);
-		b = (uint8) (lb >> 8);
+		if(check_update) this.check_update();
+		
+		if (this.s == 0)
+		{
+			r = this.v;
+			g = this.v;
+			b = this.v;
+			return;
+		}
+
+		uint8 region, remainder;
+		if(this.h < 64) {
+			region = 0;
+			remainder = this.h << 2;
+		}else if(this.h < 96) {
+			region = 1;
+			remainder = this.h << 3;
+		}else if(this.h < 136) {
+			region = 2;
+			remainder = (this.h - 96) * 256 / 40;
+		}else if(this.h < 160) {
+			region = 3;
+			remainder = (this.h - 136) * 256 / 24;
+		}else if(this.h < 208) {
+			region = 4;
+			remainder = (this.h - 160) * 256 / 48;
+		}else{
+			region = 5;
+			remainder = (this.h - 208) * 256 / 48;
+		}
+		
+		uint8 p = (this.v * (255 - this.s)) >> 8;
+		uint8 q = (this.v * (255 - ((this.s * remainder) >> 8))) >> 8;
+		uint8 t = (this.v * (255 - ((this.s * (255 - remainder)) >> 8))) >> 8;
+		
+		switch (region)
+		{
+			case 0:
+				r = this.v; g = t; b = p;
+				break;
+			case 1:
+				r = q; g = this.v; b = p;
+				break;
+			case 2:
+				r = p; g = this.v; b = t;
+				break;
+			case 3:
+				r = p; g = q; b = this.v;
+				break;
+			case 4:
+				r = t; g = p; b = this.v;
+				break;
+			default:
+				r = this.v; g = p; b = q;
+				break;
+		}
 	}
 	
 	public void get_rgb16( out uint16 r, out uint16 g, out uint16 b, bool check_update = true ) {
@@ -174,9 +225,11 @@ public class WordClock.Color : GLib.Object, Jsonable {
 			this.set_rgb(r,g,b);
 		}else{
 			this.check_update();
-			this.r = (uint16) ( (((uint32) this.r)*(255-percent) + ((uint16) r << 8)*percent) / 255 );
-			this.g = (uint16) ( (((uint32) this.g)*(255-percent) + ((uint16) g << 8)*percent) / 255 );
-			this.b = (uint16) ( (((uint32) this.b)*(255-percent) + ((uint16) b << 8)*percent) / 255 );
+			uint8 thisr, thisg, thisb;
+			get_rgb(out thisr, out thisg, out thisb);
+			this.r = ((uint16) thisr)*(255-percent) + ((uint16) r)*percent;
+			this.g = ((uint16) thisg)*(255-percent) + ((uint16) g)*percent;
+			this.b = ((uint16) thisb)*(255-percent) + ((uint16) b)*percent;
 			this.to_hsv();
 			this.to_rgb();
 		}
