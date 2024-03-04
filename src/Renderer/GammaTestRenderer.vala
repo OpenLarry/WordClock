@@ -48,9 +48,9 @@ public class WordClock.GammaTestRenderer : GLib.Object, Jsonable, ClockRenderabl
 		uint8 k = (uint8) (((this.k/25)%2 == 0) ? this.k % 25 : 25 - (this.k % 25));
 		for(int i=0;i<leds_backlight.length;i++) {
 			if(i%2 == 0) {
-				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) k*10+k/5);
+				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) k*10+k/5, false);
 			}else{
-				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) 255-k*10-k/5);
+				leds_backlight[i].mix_with(this.color_dark, 255).mix_with(this.color_bright, (uint8) 255-k*10-k/5, false);
 			}
 		}
 		

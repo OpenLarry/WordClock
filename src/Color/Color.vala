@@ -18,11 +18,13 @@ public class WordClock.Color : GLib.Object, Jsonable {
 
 	private static int8 sin[256];
 	private static int8 cos[256];
+	private static uint8 gamma_inv[256];
 
 	static construct {
 		for(double i=0; i<256; i += 1) {
 			sin[(uint8) i] = (int8) (Math.sin(i * Math.PI / 128) * 127);
 			cos[(uint8) i] = (int8) (Math.cos(i * Math.PI / 128) * 127);
+			gamma_inv[(uint8) i] = (uint8) (Math.sqrt(i / 255) * 255);
 		}
 	}
 	
@@ -177,7 +179,7 @@ public class WordClock.Color : GLib.Object, Jsonable {
 	 * @param percent Mixing factor between 0 (this color) and 255 (param color)
 	 * @return this color
 	 */
-	public Color mix_with( Color color, uint8 percent = 127 ) {
+	public Color mix_with( Color color, uint8 percent = 127, bool gamma = true ) {
 		if(percent == 0) {
 			this.check_update();
 		}else if(percent == 255) {
@@ -216,7 +218,14 @@ public class WordClock.Color : GLib.Object, Jsonable {
 				this.s = (uint8) ( (((uint16) this.s)*(255-percent) + ((uint16) color.s)*percent) / 255 );
 			}
 
-			this.v = (uint8) ( (((uint16) this.v)*(255-percent) + ((uint16) color.v)*percent) / 255 );
+			if(gamma) {
+				this.v = (uint8) ( (((uint16) this.v)*(255-percent) + ((uint16) color.v)*percent) / 255 );
+			}else{
+				uint32 thisv = this.v * this.v;
+				uint32 thatv = color.v * color.v;
+				uint32 v = thisv*(255-percent) + thatv*percent;
+				this.v = gamma_inv[v / (255*255)];
+			}
 			this.to_rgb();
 		}
 		
