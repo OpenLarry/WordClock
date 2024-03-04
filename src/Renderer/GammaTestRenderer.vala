@@ -5,8 +5,8 @@ using WordClock;
  * @version 1.0
  */
 public class WordClock.GammaTestRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
-	public Color color_dark = new Color.from_hsv( 0, 0, 0 );
-	public Color color_bright = new Color.from_hsv( 0, 0, 255 );
+	public Color color_dark { get; set; default = new Color.from_hsv( 0, 0, 0 ); }
+	public Color color_bright { get; set; default = new Color.from_hsv( 0, 0, 255 ); }
 	
 	public uint16 k = 0;
 	

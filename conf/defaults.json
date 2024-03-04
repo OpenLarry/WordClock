@@ -201,6 +201,16 @@
           "-type" : "WordClockTextRenderer"
         },
         "GammaTest" : {
+          "color-dark" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 0
+          },
+          "color-bright" : {
+            "h" : 0,
+            "s" : 0,
+            "v" : 255
+          },
           "-type" : "WordClockGammaTestRenderer"
         },
         "Hours" : {
