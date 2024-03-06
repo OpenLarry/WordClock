@@ -7,9 +7,9 @@ using WordClock;
 public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRenderable, MatrixRenderer, DotsRenderer, BacklightRenderer {
 	public bool matrix_test { get; set; default = true; }
 
-	public Color matrix_color { get; set; default = new Color.from_hsv(0, 0, 200); }
-	public Color dots_color { get; set; default = new Color.from_hsv(0, 0, 200); }
-	public Color backlight_color { get; set; default = new Color.from_hsv(0, 0, 200); }
+	public Color matrix_color { get; set; default = new Color.from_hsv(0, 0, 255); }
+	public Color dots_color { get; set; default = new Color.from_hsv(0, 0, 255); }
+	public Color backlight_color { get; set; default = new Color.from_hsv(0, 0, 255); }
 
 	private TextRenderer text_renderer = new TextRenderer();
 	private ImageRenderer image_renderer = new ImageRenderer();
