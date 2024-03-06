@@ -6,13 +6,13 @@ using WordClock;
  */
 public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	const string DEVICE = "/dev/fb0";
-    public const uint8 SUBBITS = 3;
-    public const uint8 SUBFRAMES = 1 << SUBBITS;
-    
-    public const uint8 SUBFRAMEDIFF = (0xFF / SUBFRAMES) + 1;
-    public const uint16 MAXCHANNEL = 0xFFFF - SUBFRAMEDIFF;
-    
-    private uint8[] subframe_order;
+	public const uint8 SUBBITS = 3;
+	public const uint8 SUBFRAMES = 1 << SUBBITS;
+	
+	public const uint8 SUBFRAMEDIFF = (0xFF / SUBFRAMES) + 1;
+	public const uint16 MAXCHANNEL = 0xFFFF - SUBFRAMEDIFF;
+	
+	private uint8[] subframe_order;
 	
 	private int fd;
 	private weak uint16 *fb;
@@ -21,14 +21,14 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	
 	private Color[,] leds;
 	private uint8[] ports;
-    private uint32[] port_bits;
-    
-    private uint fb_vtotal; // number of lines per vsync
-    private uint fb_htotal; // number of dots per hsync
-    
-    private uint[] active_buffer = new uint[2];
-    private uint8 buffer_prepared = 0;
-    private uint8 buffer_count;
+	private uint32[] port_bits;
+	
+	private uint fb_vtotal; // number of lines per vsync
+	private uint fb_htotal; // number of dots per hsync
+	
+	private uint[] active_buffer = new uint[2];
+	private uint8 buffer_prepared = 0;
+	private uint8 buffer_count;
 	
 	/**
 	 * power consumption in watts
@@ -43,7 +43,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 					sum += this.leds[i,j].b;
 				}
 			}
-            sum >>= 8;
+			sum >>= 8;
 			return 0.00000000087198f * sum * sum + 0.00037150f * sum + 2.8f;
 		}
 	}
@@ -58,21 +58,21 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		base(cancellable);
 		
 		this.ports = ports;
-        
-        this.port_bits = new uint32[this.ports.length];
-        for(uint8 i=0;i<this.ports.length;i++) {
-            this.port_bits[i] = 0x00010001 << this.ports[i];
-        }
-        
-        this.subframe_order = new uint8[SUBFRAMES];
-        for(uint8 i=0;i<SUBFRAMES;i++) {
-            // https://stackoverflow.com/a/2602885
-            uint8 b=i;
-            b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-            b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-            b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-            this.subframe_order[i] = b >> (8-SUBBITS);
-        }
+		
+		this.port_bits = new uint32[this.ports.length];
+		for(uint8 i=0;i<this.ports.length;i++) {
+			this.port_bits[i] = 0x00010001 << this.ports[i];
+		}
+		
+		this.subframe_order = new uint8[SUBFRAMES];
+		for(uint8 i=0;i<SUBFRAMES;i++) {
+			// https://stackoverflow.com/a/2602885
+			uint8 b=i;
+			b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+			b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+			b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+			this.subframe_order[i] = b >> (8-SUBBITS);
+		}
 	
 		this.fd = Posix.open(DEVICE, Posix.O_RDWR);
 		assert(this.fd>=0); debug("Framebuffer device opened");
@@ -97,19 +97,19 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// resolution
 		this.fb_var.xres = 142; // [3 colors] x [8 bit] x [6 FB-bit per bit] - (2 bit hsync)
-        this.fb_htotal = this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len;
+		this.fb_htotal = this.fb_var.left_margin+this.fb_var.xres+this.fb_var.right_margin+this.fb_var.hsync_len;
 		this.fb_var.yres = (uint32) // 120 LEDs = min, but expand to maximum size
-            (1000000000000 / this.fps / this.fb_var.pixclock / this.fb_htotal
-            - (this.fb_var.upper_margin+this.fb_var.lower_margin+this.fb_var.vsync_len));
-        this.fb_vtotal = this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin+this.fb_var.vsync_len;;
+			(1000000000000 / this.fps / this.fb_var.pixclock / this.fb_htotal
+			- (this.fb_var.upper_margin+this.fb_var.lower_margin+this.fb_var.vsync_len));
+		this.fb_vtotal = this.fb_var.upper_margin+this.fb_var.yres+this.fb_var.lower_margin+this.fb_var.vsync_len;;
 		
 		// vsync
 		this.fb_var.xres_virtual = this.fb_var.xres;
 		this.fb_var.yres_virtual = this.fb_var.yres * 2;
 		this.fb_var.xoffset = 0;
 		this.fb_var.yoffset = 0;
-        
-        this.buffer_count = (uint8) ((this.fb_var.yres_virtual / this.fb_var.yres) * (this.fb_var.xres_virtual / this.fb_var.xres));
+		
+		this.buffer_count = (uint8) ((this.fb_var.yres_virtual / this.fb_var.yres) * (this.fb_var.xres_virtual / this.fb_var.xres));
 		
 		// put frambuffer settings
 		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
@@ -125,68 +125,68 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		// map framebuffer into memory
 		this.fb = Posix.mmap(null, this.fb_var.xres_virtual * this.fb_var.yres_virtual * sizeof(uint16), Posix.PROT_READ|Posix.PROT_WRITE, Posix.MAP_SHARED, this.fd, 0);
-        
+		
 		assert(this.fb!=null);
-        
-        // working with 32 bit integers is faster than 2x16 bit
-        this.fb32 = (uint32*) this.fb;
+		
+		// working with 32 bit integers is faster than 2x16 bit
+		this.fb32 = (uint32*) this.fb;
 	}
-    
-    /**
-        * Adjust new buffer
-        */
-    private void prepare_buffer() {
-        this.active_buffer[0] += this.fb_var.xres;
-        if(this.active_buffer[0] >= this.fb_var.xres_virtual) {
-            this.active_buffer[0] = 0;
-            
-            this.active_buffer[1] += this.fb_var.yres;
-            if(this.active_buffer[1] >= this.fb_var.yres_virtual) {
-                this.active_buffer[1] = 0;
-            }
-        }
-        
-        if(this.buffer_prepared < this.buffer_count) {
-            this.encode_grid();
-            this.buffer_prepared++;
-        }
-    }
-    
-    private void encode_grid() {
-       uint frame_offset = this.framebuffer_offset();
-        
-       for(uint32 y = 0; y < this.fb_var.yres; y++) {
-            for(uint32 x = 0; x < this.fb_var.xres; x++) {
-                uint32 pos = frame_offset + y * this.fb_var.xres_virtual + x;
-                this.fb[pos] = 0x0000;
-            }
-        }
-        
-        for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
-            uint32 subframe_offset = this.framebuffer_offset(subframe);
-            
-            for(uint32 y = 0; y < this.leds.length[1]; y++) {
-                for(uint32 x = 0; x < this.fb_var.xres; x++) {
-                    uint32 pos = subframe_offset + y * this.fb_var.xres_virtual + x;
-                    if(x % 6 == 0 || x % 6 == 1)
-                        this.fb[pos] = 0xFFFF;
-                }
-            }
-        }
-    }
-    
-    
-    private void finish_buffer() {
+	
+	/**
+	 * Adjust new buffer
+	 */
+	private void prepare_buffer() {
+		this.active_buffer[0] += this.fb_var.xres;
+		if(this.active_buffer[0] >= this.fb_var.xres_virtual) {
+			this.active_buffer[0] = 0;
+			
+			this.active_buffer[1] += this.fb_var.yres;
+			if(this.active_buffer[1] >= this.fb_var.yres_virtual) {
+				this.active_buffer[1] = 0;
+			}
+		}
+		
+		if(this.buffer_prepared < this.buffer_count) {
+			this.encode_grid();
+			this.buffer_prepared++;
+		}
+	}
+	
+	private void encode_grid() {
+	   uint frame_offset = this.framebuffer_offset();
+		
+	   for(uint32 y = 0; y < this.fb_var.yres; y++) {
+			for(uint32 x = 0; x < this.fb_var.xres; x++) {
+				uint32 pos = frame_offset + y * this.fb_var.xres_virtual + x;
+				this.fb[pos] = 0x0000;
+			}
+		}
+		
+		for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
+			uint32 subframe_offset = this.framebuffer_offset(subframe);
+			
+			for(uint32 y = 0; y < this.leds.length[1]; y++) {
+				for(uint32 x = 0; x < this.fb_var.xres; x++) {
+					uint32 pos = subframe_offset + y * this.fb_var.xres_virtual + x;
+					if(x % 6 == 0 || x % 6 == 1)
+						this.fb[pos] = 0xFFFF;
+				}
+			}
+		}
+	}
+	
+	
+	private void finish_buffer() {
 		// switch front- and backbuffer
 		this.fb_var.xoffset = this.active_buffer[0];
 		this.fb_var.yoffset = this.active_buffer[1];
 		var ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPAN_DISPLAY, &this.fb_var);
 		assert(ret==0);
-    }
-    
-    private uint32 framebuffer_offset( uint8 subframe = 0 ) {
-        return this.active_buffer[0] + (this.active_buffer[1] + (this.fb_vtotal * subframe / SUBFRAMES)) * this.fb_var.xres_virtual;
-    }
+	}
+	
+	private uint32 framebuffer_offset( uint8 subframe = 0 ) {
+		return this.active_buffer[0] + (this.active_buffer[1] + (this.fb_vtotal * subframe / SUBFRAMES)) * this.fb_var.xres_virtual;
+	}
 	
 	/**
 	 * Encode LED color array into framebuffer LED timings
@@ -199,63 +199,63 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		 * - Pixel data 111100 = LED bit 1
 		 * One LED (3x8 bit) needs 3x8x6 - 2 = 142 pixels
 		 */
-         
-        this.prepare_buffer();
-        
+		 
+		this.prepare_buffer();
+		
 		uint[] pos = new uint[SUBFRAMES];
-        for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
-            pos[subframe] = (this.framebuffer_offset(this.subframe_order[subframe]) + 2) / 2; // for uint32 framebuffer
+		for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
+			pos[subframe] = (this.framebuffer_offset(this.subframe_order[subframe]) + 2) / 2; // for uint32 framebuffer
 		}
-        
-        uint16[] channel = new uint16[this.leds.length[0]];
-        
-        for(uint8 led=0; led<this.leds.length[1]; led++) {
-            for(uint8 color=0; color<3; color++) {
-                for(int strip=0; strip<this.leds.length[0]; strip++) {
-                    switch(color) {
-                        case 0:
-                            channel[strip] = this.leds[strip,led].g;
-                        break;
-                        case 1:
-                            channel[strip] = this.leds[strip,led].r;
-                        break;
-                        case 2:
-                            channel[strip] = this.leds[strip,led].b;
-                        break;
-                    }
-                    channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF / 2 : 0;
-                }
-                
-                for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
-                    // loop unrolling would decrease execution time by 10%
-                    for(int8 bit=15; bit>8; bit--) {
-                        uint32 pix = 0x00000000;
-                        
-                        // loop unrolling would decrease execution time by 25%
-                        for(int strip=0; strip<this.leds.length[0]; strip++) {
-                            if((channel[strip] & (1 << bit)) != 0)
-                                pix |= this.port_bits[strip];
-                        }
-                        this.fb32[pos[subframe]] = pix;
-                        pos[subframe] += 3;
-                    }
-                    { // bit = 8
-                        uint32 pix = 0x00000000;
-                        
-                        // loop unrolling would decrease execution time by 25%
-                        for(int strip=0; strip<this.leds.length[0]; strip++) {
-                            if((channel[strip] & (1 << 8)) != 0)
-                                pix |= this.port_bits[strip];
-                            channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF : 0;
-                        }
-                        this.fb32[pos[subframe]] = pix;
-                        pos[subframe] += (color<2) ? 3 : 2; // TODO: xres_virtual
-                    }
-                }
-            }
-        }
-        
-        this.finish_buffer();
+		
+		uint16[] channel = new uint16[this.leds.length[0]];
+		
+		for(uint8 led=0; led<this.leds.length[1]; led++) {
+			for(uint8 color=0; color<3; color++) {
+				for(int strip=0; strip<this.leds.length[0]; strip++) {
+					switch(color) {
+						case 0:
+							channel[strip] = this.leds[strip,led].g;
+						break;
+						case 1:
+							channel[strip] = this.leds[strip,led].r;
+						break;
+						case 2:
+							channel[strip] = this.leds[strip,led].b;
+						break;
+					}
+					channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF / 2 : 0;
+				}
+				
+				for(uint8 subframe = 0; subframe < SUBFRAMES; subframe++) {
+					// loop unrolling would decrease execution time by 10%
+					for(int8 bit=15; bit>8; bit--) {
+						uint32 pix = 0x00000000;
+						
+						// loop unrolling would decrease execution time by 25%
+						for(int strip=0; strip<this.leds.length[0]; strip++) {
+							if((channel[strip] & (1 << bit)) != 0)
+								pix |= this.port_bits[strip];
+						}
+						this.fb32[pos[subframe]] = pix;
+						pos[subframe] += 3;
+					}
+					{ // bit = 8
+						uint32 pix = 0x00000000;
+						
+						// loop unrolling would decrease execution time by 25%
+						for(int strip=0; strip<this.leds.length[0]; strip++) {
+							if((channel[strip] & (1 << 8)) != 0)
+								pix |= this.port_bits[strip];
+							channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF : 0;
+						}
+						this.fb32[pos[subframe]] = pix;
+						pos[subframe] += (color<2) ? 3 : 2; // TODO: xres_virtual
+					}
+				}
+			}
+		}
+		
+		this.finish_buffer();
 	}
 	
 	/**
@@ -307,30 +307,30 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		double last_time = 0;
 		uint last_frame = 0;
 		timer.start();
-        
-        var performance = new Timer();
-        double render = 0, encode = 0;
+		
+		var performance = new Timer();
+		double render = 0, encode = 0;
 		
 		while(this.cancellable == null || !this.cancellable.is_cancelled()) {
-            if(Main.in_debug_mode()) {
-                performance.start();
-                renderer.render();
-                render += performance.elapsed();
-            }else{
-                renderer.render();
-            }
+			if(Main.in_debug_mode()) {
+				performance.start();
+				renderer.render();
+				render += performance.elapsed();
+			}else{
+				renderer.render();
+			}
 			
 			this.frame++;
 			
 			double time_diff = timer.elapsed() - last_time;
 			if(time_diff >= 1 || (this.frame - last_frame) >= this.fps) {
 				this.current_fps = (this.frame - last_frame) / time_diff;
-                
-                if(Main.in_debug_mode()) {
-                    stdout.printf("Performance: utilization: %f%%, render: %f, encode: %f, fps: %f\r", (render+encode)*100/timer.elapsed(), render/this.frame, encode/this.frame, this.current_fps);
-                    stdout.flush();
-                }
-                
+				
+				if(Main.in_debug_mode()) {
+					stdout.printf("Performance: utilization: %f%%, render: %f, encode: %f, fps: %f\r", (render+encode)*100/timer.elapsed(), render/this.frame, encode/this.frame, this.current_fps);
+					stdout.flush();
+				}
+				
 				last_time += time_diff;
 				last_frame = this.frame;
 				
@@ -341,17 +341,17 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 				});
 			}
 			
-            // wait for vsync
-            var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
-            assert(ret==0);
-            
-            if(Main.in_debug_mode()) {
-                performance.start();
-                this.encode_to_fb();
-                encode += performance.elapsed();
-            }else{
-                this.encode_to_fb();
-            }
+			// wait for vsync
+			var ret = Posix.ioctl(this.fd, 1074021920 /*FBIO_WAITFORVSYNC const missing in vala*/, &arg);
+			assert(ret==0);
+			
+			if(Main.in_debug_mode()) {
+				performance.start();
+				this.encode_to_fb();
+				encode += performance.elapsed();
+			}else{
+				this.encode_to_fb();
+			}
 		}
 		
 		this.current_fps = 0;

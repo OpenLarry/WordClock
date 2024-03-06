@@ -34,9 +34,9 @@ public class WordClock.Lua : GLib.Object, Jsonable {
 	private LinkedList<string> log = new LinkedList<string>();
 	private static TreeMap<unowned LuaVM,Lua> this_map = new TreeMap<unowned LuaVM,Lua>();
 	
-    construct {
-        this.script = "/etc/wordclock/script.lua";
-    }
+	construct {
+		this.script = "/etc/wordclock/script.lua";
+	}
 	
 	~Lua() {
 		this.deinit();

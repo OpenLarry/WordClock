@@ -34,7 +34,7 @@ public class WordClock.SystemInfo : GLib.Object, Jsonable {
 	// get hostname
 	public string hostname {
 		owned get {
-			char[] str = "                ".to_utf8();
+			char[] str = new char[16];
 			if(Posix.gethostname(str) == 0) {
 				return (string) str;
 			}	

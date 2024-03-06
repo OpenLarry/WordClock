@@ -28,8 +28,8 @@ namespace Lirc {
 	//probably be worth my time to totally rewrite it so I can make
 	//use of some f the features of Vala.
 	
-    public class Context : Object
-    {
+	public class Context : Object
+	{
 		public UnixSocketAddress socket_address { get; private set; }
 		public string prog { get; private set;}
 		public bool verbose { get; private set;}
