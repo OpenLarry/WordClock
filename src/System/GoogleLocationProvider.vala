@@ -7,7 +7,7 @@ using Gee;
  * @version 1.0
  */
 public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationProvider {
-	const string GOOGLE_LOCATION_API = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAY8X2PHxod0tWS5BC-HGFl_t6BQLrIVEc";
+	const string GOOGLE_LOCATION_API = "https://www.googleapis.com/geolocation/v1/geolocate";
 	
 	const uint8 RETRY_COUNT = 10;
 	const uint8 RETRY_INTERVAL = 60;
@@ -27,6 +27,19 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 		}
 	}
 	private uint _refresh_interval = 86400;
+
+	public string apikey {
+		get {
+			return this._apikey;
+		}
+		set {
+			if(value != this._apikey) {
+				this._apikey = value;
+				this.async_refresh.begin();
+			}
+		}
+	}
+	private string _apikey = "";
 	
 	private uint timeout = 0;
 	private bool refresh_running = false;
@@ -58,6 +71,8 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 	}
 	
 	public async void async_refresh() {
+		if(this.apikey.length == 0) return;
+
 		if(this.refresh_running) return;
 		this.refresh_running = true;
 		
@@ -91,9 +106,14 @@ public class WordClock.GoogleLocationProvider : GLib.Object, Jsonable, LocationP
 			obj["macAddress"] = network.mac;
 			node["wifiAccessPoints"][-1] = obj;
 		}
+
+		Soup.URI uri = new Soup.URI(GOOGLE_LOCATION_API);
+		HashTable<string,string> query = new HashTable<string,string>(str_hash, null);
+		query.insert("key", this.apikey);
+		uri.set_query_from_form(query);
 		
 		// send request
-		Soup.Message msg = new Soup.Message("POST", GOOGLE_LOCATION_API);
+		Soup.Message msg = new Soup.Message.from_uri("POST", uri);
 		msg.set_request("application/json", Soup.MemoryUse.COPY, node.to_json_string().data);
 		
 		debug("Send request to Google Location API");

@@ -1541,6 +1541,7 @@
       "language" : "de",
       "location" : {
         "refresh-interval" : 86400,
+        "apikey" : "AIzaSyAY8X2PHxod0tWS5BC-HGFl_t6BQLrIVEc",
         "-type" : "WordClockGoogleLocationProvider"
       },
       "refresh-interval" : 1800,

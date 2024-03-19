@@ -8,8 +8,8 @@ public class WordClock.SettingsMigrator : GLib.Object {
 	const string SETTINGS_PATH = "/etc/wordclock/";
 	
 	[CCode (has_target=false)]
-	private delegate void MigrationFunc( JsonWrapper.Node node ) throws JsonWrapper.Error;
-	private delegate void RecursiveMigrationFunc( JsonWrapper.Node node ) throws JsonWrapper.Error;
+	private delegate void MigrationFunc( JsonWrapper.Node node ) throws GLib.Error;
+	private delegate void RecursiveMigrationFunc( JsonWrapper.Node node ) throws GLib.Error;
 	
 	public static void migrate( JsonWrapper.Node node, string from = get_old_settings_version(), string to = Version.GIT_DESCRIBE) throws GLib.Error {
 		if(!Version.is_official(from)) throw new SettingsMigratorError.INVALID_VERSION("Invalid version: %s".printf(from ?? "null"));
@@ -393,6 +393,13 @@ public class WordClock.SettingsMigrator : GLib.Object {
 
 			debug("Update $.objects.message: Adjust Color hues");
 			updateColors(node["objects"]["message"]);
+		};
+
+		migration_funcs["v0.10"] = (node) => {
+			debug("Update $.objects.weather.location: Add apikey");
+			
+			JsonWrapper.Node defaults = new JsonWrapper.Node.from_json_file( get_settings_path("defaults") );
+			node["objects"]["weather"]["location"]["apikey"] = defaults["objects"]["weather"]["location"]["apikey"];
 		};
 		
 		return migration_funcs;
