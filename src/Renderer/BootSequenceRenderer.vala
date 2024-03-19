@@ -28,11 +28,11 @@ public class WordClock.BootSequenceRenderer : GLib.Object, Jsonable, ClockRender
 		this.text_renderer.color.set_hsv(0, 0, 255);
 		
 		/*
-		 * Don't fade out boot logo after 1 minute of system uptime.
+		 * Don't fade out boot logo after 2 minute of system uptime.
 		 * Actually get_monotonic_time() isn't specified to return the system uptime,
 		 * but Linux does so and vala doesn't offer a specific function to get it.
 		 */
-		if(get_monotonic_time() > 60000000) this.phase = 1;
+		if(get_monotonic_time() > 120000000) this.phase = 1;
 	}
 	
 	public uint8[] get_fps_range() {
