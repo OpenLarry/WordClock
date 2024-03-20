@@ -1,7 +1,21 @@
-# WordClock
+# WordClock Application
 
-## Requirements
-* Vala compiler (>= 0.46)
+This is the WordClock main application, which is build using the [WordClock Buildroot](https://github.com/OpenLarry/WordClock-Buildroot) image generator.
+
+## Features
+
+* Drives WS2812B LEDs using the integrated LCD controller of the NXP i.MX233 processor (inspired by [SpritesMods](https://spritesmods.com/?art=imx233-ws2811)).
+* Provides REST API for configuration and WebSockets for live monitoring.
+* Configurable interfaces, animations, and colors.
+* Intergrates Lua scripting language for advanced customizations.
+* Configures WiFi using wpa_supplicant.
+* Shows weather forecast using [Google Geolocation](https://developers.google.com/maps/documentation/geolocation/overview) and [OpenWeatherMap](https://openweathermap.org/api).
+* Allows IR remote control using LIRC.
+* Reads PIR and LDR sensors for motion detection and brightness control.
+* Initializes firmware update on demand.
+
+## Dependencies
+* [Vala](https://vala.dev/) compiler (>= 0.46)
 * CMake (>= 2.6)
 * libsoup-2.4
 * gio-unix-2.0
@@ -11,32 +25,3 @@
 * luajit
 * cairo
 * pango, pangocairo
-
-## Compilation
-
-1. Clone repository:
-   
-   `git clone git@github.com:OpenLarry/WordClock.git`
-   
-2. Change directory:
-   
-   `cd WordClock`
-3. Create build directory and change into (for out-of-source build, which is CMake default):
-   
-   `mkdir build`
-   
-   `cd build`
-4. Initialize CMake:
-   
-   `cmake ..`
-   
-5. Compile source code:
-  
-   `make`
-   
-   (append e.g. `-j8` to use 8 jobs in parallel)
-6. Change into generated folder
-   
-   `cd src`
-   
-7. Executable `wordclock` can be found here
