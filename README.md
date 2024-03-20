@@ -7,7 +7,7 @@ This is the WordClock main application, which is build using the [WordClock Buil
 * Drives WS2812B LEDs using the integrated LCD controller of the NXP i.MX233 processor (inspired by [SpritesMods](https://spritesmods.com/?art=imx233-ws2811)).
 * Provides REST API for configuration and WebSockets for live monitoring.
 * Configurable interfaces, animations, and colors.
-* Intergrates Lua scripting language for advanced customizations.
+* Intergrates [Lua](https://www.lua.org/) scripting language for advanced customizations.
 * Configures WiFi using wpa_supplicant.
 * Shows weather forecast using [Google Geolocation](https://developers.google.com/maps/documentation/geolocation/overview) and [OpenWeatherMap](https://openweathermap.org/api).
 * Allows IR remote control using LIRC.
