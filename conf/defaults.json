@@ -612,7 +612,7 @@
             "-type" : "WordClockBuzzer"
           }
         ],
-        "remote,rgb_remote-B" : [
+        "remote,B" : [
           {
             "settings" : [
               {
@@ -641,7 +641,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-B1" : [
+        "remote,B1" : [
           {
             "settings" : [
               {
@@ -693,7 +693,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-B2" : [
+        "remote,B2" : [
           {
             "settings" : [
               {
@@ -717,7 +717,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-B4" : [
+        "remote,B4" : [
           {
             "settings" : [
               1,
@@ -737,7 +737,7 @@
               "Blend OFF"
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/remote,rgb_remote-B4/2/text"
+              "/objects/signalrouter/sinks/remote,B4/2/text"
             ],
             "cyclic" : true,
             "synchronize" : true,
@@ -776,7 +776,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-DOWN" : [
+        "remote,DOWN" : [
           {
             "settings" : [
               6,
@@ -810,7 +810,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-FADE" : [
+        "remote,FADE" : [
           {
             "settings" : [
               "default",
@@ -841,7 +841,7 @@
               "Symbole"
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/remote,rgb_remote-FADE/2/text"
+              "/objects/signalrouter/sinks/remote,FADE/2/text"
             ],
             "cyclic" : true,
             "synchronize" : true,
@@ -854,7 +854,7 @@
             "-type" : "WordClockMessageSink"
           }
         ],
-        "remote,rgb_remote-FLASH" : [
+        "remote,FLASH" : [
           {
             "settings" : [
               {
@@ -906,7 +906,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-G" : [
+        "remote,G" : [
           {
             "settings" : [
               {
@@ -935,7 +935,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-G1" : [
+        "remote,G1" : [
           {
             "settings" : [
               {
@@ -987,7 +987,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-G2" : [
+        "remote,G2" : [
           {
             "settings" : [
               {
@@ -1011,7 +1011,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-G4" : [
+        "remote,G4" : [
           {
             "settings" : [
               "/usr/share/wordclock/weather_markus/01d.png",
@@ -1041,7 +1041,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-OFF" : [
+        "remote,OFF" : [
           {
             "settings" : [
               88888888,
@@ -1066,8 +1066,8 @@
               "off"
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/remote,rgb_remote-OFF/2/text",
-              "/objects/signalrouter/sinks/remote,rgb_remote-ON/2/text"
+              "/objects/signalrouter/sinks/remote,OFF/2/text",
+              "/objects/signalrouter/sinks/remote,ON/2/text"
             ],
             "cyclic" : false,
             "synchronize" : true,
@@ -1080,7 +1080,7 @@
             "-type" : "WordClockMessageSink"
           }
         ],
-        "remote,rgb_remote-ON" : [
+        "remote,ON" : [
           {
             "settings" : [
               1,
@@ -1105,8 +1105,8 @@
               "on"
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/remote,rgb_remote-ON/2/text",
-              "/objects/signalrouter/sinks/remote,rgb_remote-OFF/2/text"
+              "/objects/signalrouter/sinks/remote,ON/2/text",
+              "/objects/signalrouter/sinks/remote,OFF/2/text"
             ],
             "cyclic" : false,
             "synchronize" : true,
@@ -1119,7 +1119,7 @@
             "-type" : "WordClockMessageSink"
           }
         ],
-        "remote,rgb_remote-R" : [
+        "remote,R" : [
           {
             "settings" : [
               {
@@ -1148,7 +1148,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-R1" : [
+        "remote,R1" : [
           {
             "settings" : [
               {
@@ -1200,7 +1200,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-R2" : [
+        "remote,R2" : [
           {
             "settings" : [
               {
@@ -1224,17 +1224,17 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-R3" : [
+        "remote,R3" : [
           {
             "-type" : "WordClockInfoSink"
           }
         ],
-        "remote,rgb_remote-R3-10" : [
+        "remote,R3-10" : [
           {
             "-type" : "WordClockWirelessNetworkInputSink"
           }
         ],
-        "remote,rgb_remote-R4" : [
+        "remote,R4" : [
           {
             "delay" : 3,
             "sink" : {
@@ -1270,7 +1270,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-SMOOTH" : [
+        "remote,SMOOTH" : [
           {
             "settings" : [
               "RUHR",
@@ -1278,7 +1278,7 @@
               "OST"
             ],
             "paths" : [
-              "/objects/signalrouter/sinks/remote,rgb_remote-SMOOTH/2/text"
+              "/objects/signalrouter/sinks/remote,SMOOTH/2/text"
             ],
             "cyclic" : true,
             "synchronize" : true,
@@ -1305,7 +1305,7 @@
             "-type" : "WordClockMessageSink"
           }
         ],
-        "remote,rgb_remote-STROBE" : [
+        "remote,STROBE" : [
           {
             "settings" : [
               {
@@ -1329,7 +1329,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-UP" : [
+        "remote,UP" : [
           {
             "settings" : [
               0,
@@ -1363,7 +1363,7 @@
             "-type" : "WordClockJsonModifierSink"
           }
         ],
-        "remote,rgb_remote-W" : [
+        "remote,W" : [
           {
             "settings" : [
               {

@@ -178,8 +178,11 @@ public class WordClock.Main : GLib.Object {
 			debug("Init MainLoop");
 			loop = new MainLoop();
 			
-			debug("Init IR remote");
-			var remote = new IrRemote( loop.get_context() );
+			debug("Init RemoteControl");
+			var remote = new RemoteControl(port_config["remotecontrol"]["protocols"].get_string_array());
+			foreach( JsonWrapper.Entry entry in port_config["remotecontrol"]["keys"] ) {
+				remote.add_key(new RemoteControl.Key(entry.get_member_name(), entry.value.get_uint8_array()));
+			}
 			
 			debug("Init TimeObserver");
 			var timeobserver = new TimeObserver();

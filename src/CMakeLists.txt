@@ -123,8 +123,7 @@ set(VALA_SRC
 	Sensors/SensorsObserver.vala
 	Sensors/Gpio.vala
 	Sensors/FilteredGpio.vala
-	Sensors/Lirc.vala
-	Sensors/IrRemote.vala
+	Sensors/RemoteControl.vala
 	Sensors/TimeObserver.vala
 	Sensors/SystemSensor.vala
 	Sensors/CpuLoad.vala

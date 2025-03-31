@@ -246,6 +246,19 @@ public class JsonWrapper.Node : GLib.Object {
 		return vals;
 	}
 	
+	public string[] get_string_array() throws JsonWrapper.Error {
+		if( this.node.get_node_type() != Json.NodeType.ARRAY ) throw new JsonWrapper.Error.INVALID_NODE_TYPE("Expected array, got: %s".printf(this.node.get_node_type().to_string()));
+		
+		string[] vals = {};
+		foreach(unowned Json.Node node in this.node.get_array().get_elements()) {
+			Value val = Value(typeof(string));
+			new Node(node).to_value(ref val);
+			vals += (string) val;
+		}
+		
+		return vals;
+	}
+	
 	public Iterator iterator() throws JsonWrapper.Error {
 		switch(this.node.get_node_type()) {
 			case Json.NodeType.OBJECT:

@@ -10,7 +10,7 @@ This is the WordClock main application, which is build using the [WordClock Buil
 * Intergrates [Lua](https://www.lua.org/) scripting language for advanced customizations.
 * Configures WiFi using wpa_supplicant.
 * Shows weather forecast using [Google Geolocation](https://developers.google.com/maps/documentation/geolocation/overview) and [OpenWeatherMap](https://openweathermap.org/api).
-* Allows IR remote control using LIRC.
+* Supports IR remote control.
 * Reads PIR and LDR sensors for motion detection and brightness control.
 * Initializes firmware update on demand.
 
