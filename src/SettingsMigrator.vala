@@ -401,6 +401,52 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			JsonWrapper.Node defaults = new JsonWrapper.Node.from_json_file( get_settings_path("defaults") );
 			node["objects"]["weather"]["location"]["apikey"] = defaults["objects"]["weather"]["location"]["apikey"];
 		};
+
+		migration_funcs["v0.10.1"] = (node) => {
+			debug("Update $.objects.signalrouter.sinks: Replace signals 'remote,rgb_remote-' with 'remote,'");
+			JsonWrapper.Node sinks = node["objects"]["signalrouter"]["sinks"];
+			
+			foreach(Entry sink in sinks) {
+				MatchInfo info;
+				if(/^remote,rgb_remote-((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?)$/.match(sink.get_member_name(), 0, out info)) {
+					sinks["remote,"+info.fetch(1)] = sink.value;
+					sink.value.remove();
+				}else if(/^remote,rgb_remote_big-((?:UP|DOWN|PLAYPAUSE|POWER|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FLASH|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?)$/.match(sink.get_member_name(), 0, out info)) {
+					sinks["remote,"+info.fetch(1)] = sink.value;
+					sink.value.remove();
+				}
+			}
+			
+			debug("Update $.objects.signalrouter.sinks: Replace JsonModifierSink paths 'remote,rgb_remote-' with 'remote,'");
+			
+			RecursiveMigrationFunc updateJsonModifierSink = null;
+			updateJsonModifierSink = (sinks) => {
+				// modify path if JsonModifierSink is found
+				try {
+					if(sinks["-type"].to_string() == "WordClockJsonModifierSink") {
+						foreach(Entry path in sinks["paths"]) {
+							MatchInfo info;
+							if(/^\/objects\/signalrouter\/sinks\/remote,rgb_remote-((?:UP|DOWN|OFF|ON|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|FLASH|STROBE|FADE|SMOOTH)(?:-\d+)?(?:\/.+)?)$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/signalrouter/sinks/remote,"+info.fetch(1));
+							}else if(/^\/objects\/signalrouter\/sinks\/remote,rgb_remote_big-((?:UP|DOWN|PLAYPAUSE|POWER|R|R1|R2|R3|R4|G|G1|G2|G3|G4|B|B1|B2|B3|B4|W|W1|W2|W3|W4|RUP|RDOWN|DIY1|DIY4|DIY2|DIY5|DIY3|DIY6|GUP|GDOWN|BUP|BDOWN|QUICK|SLOW|AUTO|FLASH|FADE7|FADE3|JUMP7|JUMP3)(?:-\d+)?(?:\/.+)?)$/.match(path.value.to_string(), 0, out info)) {
+								path.value.set_value("/objects/signalrouter/sinks/remote,"+info.fetch(1));
+							}
+						}
+					}
+				} catch ( JsonWrapper.Error e ) { /* ignore errors */ }
+				
+				// go through sink nodes recursively
+				try {
+					foreach(Entry sink in sinks) {
+						updateJsonModifierSink(sink.value);
+					}
+				} catch ( JsonWrapper.Error e ) {
+					if( ! (e is JsonWrapper.Error.INVALID_NODE_TYPE) ) throw e; // skip node if not iterable
+				}
+			};
+			
+			updateJsonModifierSink(sinks);
+		};
 		
 		return migration_funcs;
 	}
