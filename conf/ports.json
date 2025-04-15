@@ -16,6 +16,12 @@
     "button2": 23,
     "motion": 7
   },
+  "button": {
+    "device": "/dev/input/event1"
+  },
+  "motion": {
+    "device": "/dev/input/event1"
+  },
   "lradc": {
     "brightness": 1,
     "vddio": 6,
@@ -53,6 +59,8 @@
       "FADE": [19, 239],
       "SMOOTH": [23, 239]
     },
+    "event-device": "/dev/input/event0",
+    "ir-device": "gpio-ir-receiver",
     "protocols": ["nec"]
   }
 }

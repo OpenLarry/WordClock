@@ -10,11 +10,16 @@ public class WordClock.ButtonHandler : GLib.Object, SignalSource, Jsonable {
 	private Cancellable? hold = null;
 	private bool hold_executed = false;
 	
-	public void add_button( string name, Gpio button ) {
-		button.action.connect( (val) => {
-			return this.button_action( name, val == "1" );
+	public void add_input( DevInput input ) {
+		input.action.connect( (val) => {
+			string[] parts = val.split("-");
+			if(parts.length == 1)
+				return this.button_action( parts[0], true );
+			else if(parts.length == 2 && parts[1] == "release")
+				return this.button_action( parts[0], false );
+			else
+				return false;
 		});
-		this.states[name] = false;
 	}
 	
 	public bool button_action( string name, bool pressed ) {

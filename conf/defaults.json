@@ -518,11 +518,6 @@
       },
       "-type" : "WordClockClockRenderer"
     },
-    "filteredmotion" : {
-      "min-high-time" : 0.050000000000000003,
-      "min-low-time" : -1.0,
-      "-type" : "WordClockFilteredGpio"
-    },
     "image" : {
       "background-color" : {
         "h" : 0,
@@ -577,7 +572,7 @@
     },
     "signalrouter" : {
       "sinks" : {
-        "buttonhandler,0" : [
+        "buttonhandler,left" : [
           {
             "years" : 0,
             "months" : 0,
@@ -588,7 +583,7 @@
             "-type" : "WordClockDateTimeModifierSink"
           }
         ],
-        "buttonhandler,1" : [
+        "buttonhandler,middle" : [
           {
             "years" : 0,
             "months" : 0,
@@ -599,12 +594,12 @@
             "-type" : "WordClockDateTimeModifierSink"
           }
         ],
-        "buttonhandler,2" : [
+        "buttonhandler,right" : [
           {
             "-type" : "WordClockWpsPbcSink"
           }
         ],
-        "motion,1-" : [
+        "motion,detection-" : [
           {
             "msec" : 300,
             "freq" : 1500,
@@ -1498,10 +1493,8 @@
         ]
       },
       "userevent-sources" : [
-        "button0",
-        "button1",
-        "button2",
-        "filteredmotion",
+        "button",
+        "motion",
         "remote",
         "timeobserver"
       ],

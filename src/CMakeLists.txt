@@ -122,7 +122,6 @@ set(VALA_SRC
 	Sensors/HardwareInfo.vala
 	Sensors/SensorsObserver.vala
 	Sensors/Gpio.vala
-	Sensors/FilteredGpio.vala
 	Sensors/RemoteControl.vala
 	Sensors/TimeObserver.vala
 	Sensors/SystemSensor.vala
@@ -135,6 +134,7 @@ set(VALA_SRC
 	SignalRouter/SignalDelayerSink.vala
 	System/WpsPbcSink.vala
 	System/DateTimeModifierSink.vala
+	System/DevInput.vala
 	System/MessageOverlay.vala
 	System/SystemInfo.vala
 	System/InfoSink.vala

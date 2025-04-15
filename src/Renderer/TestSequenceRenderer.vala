@@ -83,7 +83,7 @@ public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRender
 	
 	public void register() {
 		SignalRouter signalrouter = Main.settings.get<SignalRouter>();
-		signalrouter.add_signal_func(/^buttonhandler,012-1$/, (id,sig) => {
+		signalrouter.add_signal_func(/^buttonhandler,leftmiddleright-1$/, (id,sig) => {
 			this.toggle_test_sequence.begin();
 			return true; 
 		});
@@ -97,26 +97,26 @@ public class WordClock.TestSequenceRenderer : GLib.Object, Jsonable, ClockRender
 		
 		this.cancellable = new Cancellable();
 		SignalRouter signalrouter = Main.settings.get<SignalRouter>();
-		uint signalfunc = signalrouter.add_signal_func(/^buttonhandler,[0-2](-1)?$/, (id,sig) => {
+		uint signalfunc = signalrouter.add_signal_func(/^buttonhandler,(left|middle|right)(-1)?$/, (id,sig) => {
 			switch(sig) {
-				case "buttonhandler,0":
+				case "buttonhandler,left":
 					if(this.part == Part.MATRIX) this.part = Part.BACKLIGHT;
 					else if(this.part == Part.BACKLIGHT) this.part = Part.DOTS;
 					else if(this.part == Part.DOTS) this.part = Part.MATRIX | Part.BACKLIGHT | Part.DOTS;
 					else this.part = Part.MATRIX;
 				break;
-				case "buttonhandler,1":
+				case "buttonhandler,middle":
 					if(this.color == RGB.RED) this.color = RGB.GREEN;
 					else if(this.color == RGB.GREEN) this.color = RGB.BLUE;
 					else if(this.color == RGB.BLUE) this.color = RGB.RED | RGB.GREEN | RGB.BLUE;
 					else this.color = RGB.RED;
 				break;
-				case "buttonhandler,2":
+				case "buttonhandler,right":
 					if(this.brightness == 1 << 15) this.brightness = uint16.MAX;
 					else if(this.brightness == uint16.MAX) this.brightness = Ws2812bDriver.SUBFRAMEDIFF;
 					else this.brightness <<= 1;
 				break;
-				case "buttonhandler,2-1":
+				case "buttonhandler,right-1":
 					this.flicker = !this.flicker;
 				break;
 				default:

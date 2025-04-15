@@ -149,18 +149,25 @@ public class WordClock.Main : GLib.Object {
 			}
 			Lradc.start();
 			
+			// TODO: remove
 			debug("Init GPIOs");
 			foreach( JsonWrapper.Entry entry in port_config["gpio"] ) {
 				hwinfo.gpios[entry.get_member_name()] = new Gpio((uint8) entry.value.get_typed_value(typeof(uint8)));
 			}
-			
-			var filteredmotion = new FilteredGpio(hwinfo.gpios["motion"]);
+
+			debug("Init Buttons");
+			var buttons = new DevInput(port_config["button"]["device"].to_string());
+			buttons.add_code( "left", Linux.Input.BTN_LEFT );
+			buttons.add_code( "middle", Linux.Input.BTN_MIDDLE );
+			buttons.add_code( "right", Linux.Input.BTN_RIGHT );
+
+			debug("Init Motion");
+			var motion = new DevInput(port_config["motion"]["device"].to_string());
+			motion.add_code( "detection", Linux.Input.SW_FRONT_PROXIMITY, Linux.Input.EV_SW );
 			
 			debug("Init ButtonHandler");
 			var buttonhandler = new ButtonHandler();
-			buttonhandler.add_button( "0", hwinfo.gpios["button0"] );
-			buttonhandler.add_button( "1", hwinfo.gpios["button1"] );
-			buttonhandler.add_button( "2", hwinfo.gpios["button2"] );
+			buttonhandler.add_input(buttons);
 			
 			debug("Init CPU and memory monitors");
 			hwinfo.system["cpuload"] = new CpuLoad();
@@ -179,9 +186,9 @@ public class WordClock.Main : GLib.Object {
 			loop = new MainLoop();
 			
 			debug("Init RemoteControl");
-			var remote = new RemoteControl(port_config["remotecontrol"]["protocols"].get_string_array());
+			var remote = new RemoteControl(port_config["remotecontrol"]["event-device"].to_string(), port_config["remotecontrol"]["ir-device"].to_string(), port_config["remotecontrol"]["protocols"].get_string_array());
 			foreach( JsonWrapper.Entry entry in port_config["remotecontrol"]["keys"] ) {
-				remote.add_key(new RemoteControl.Key(entry.get_member_name(), entry.value.get_uint8_array()));
+				remote.add_scancode(entry.get_member_name(), entry.value.get_uint8_array());
 			}
 			
 			debug("Init TimeObserver");
@@ -189,12 +196,9 @@ public class WordClock.Main : GLib.Object {
 			
 			debug("Init SignalRouter");
 			var signalrouter = new SignalRouter();
-			signalrouter.add_source("button0", hwinfo.gpios["button0"]);
-			signalrouter.add_source("button1", hwinfo.gpios["button1"]);
-			signalrouter.add_source("button2", hwinfo.gpios["button2"]);
-			signalrouter.add_source("filteredmotion", filteredmotion);
-			signalrouter.add_source("motion", hwinfo.gpios["motion"]);
 			signalrouter.add_source("remote", remote);
+			signalrouter.add_source("button", buttons);
+			signalrouter.add_source("motion", motion);
 			signalrouter.add_source("sensorsobserver", sensorsobserver);
 			signalrouter.add_source("timeobserver", timeobserver);
 			signalrouter.add_source("buttonhandler", buttonhandler);
@@ -227,7 +231,6 @@ public class WordClock.Main : GLib.Object {
 			settings.set("timeobserver", timeobserver);
 			settings.set("weather", weather);
 			settings.set("lua", lua);
-			settings.set("filteredmotion", filteredmotion);
 			settings.set("wirelessnetworks", wirelessnetworks);
 			settings.set("bootsequence", bootsequence);
 			settings.objects.set_keys_immutable();
