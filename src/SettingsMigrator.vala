@@ -446,6 +446,47 @@ public class WordClock.SettingsMigrator : GLib.Object {
 			};
 			
 			updateJsonModifierSink(sinks);
+
+			debug("Update $.objects.signalrouter.sinks: Replace 'buttonhandler,0|1|2' with 'buttonhandler,left|middle|right'");
+
+			foreach(Entry sink in sinks) {
+				MatchInfo info;
+				if(/^buttonhandler,([012]+)(-\d+)?$/.match(sink.get_member_name(), 0, out info)) {
+					sinks["buttonhandler,"+info.fetch(1).replace("0","left").replace("1","middle").replace("2","right")+info.fetch(2)] = sink.value;
+					sink.value.remove();
+				}
+			}
+
+			debug("Update $.objects.signalrouter.sinks: Replace 'button0|1|2,1' with 'button,left|middle|right'");
+
+			try {
+				sinks["button,0"] = sinks["button0,1"];
+				sinks["button0,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+			try {
+				sinks["button,1"] = sinks["button1,1"];
+				sinks["button1,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+			try {
+				sinks["button,2"] = sinks["button2,1"];
+				sinks["button2,1"].remove();
+			} catch ( JsonWrapper.Error e ) {
+				if( ! (e is JsonWrapper.Error.NOT_FOUND) ) throw e; // ignore
+			}
+
+			debug("Remove $.objects.filteredmotion");
+			node["objects"]["filteredmotion"].remove();
+
+			debug("Update $.objects.signalrouter.userevent-sources: Replace 'filteredmotion' with 'motion'");
+			foreach(Entry entry in node["objects"]["signalrouter"]["userevent-sources"]) {
+				if(entry.value.to_string() == "filteredmotion") {
+					entry.value.set_value("motion");
+				}
+			}
 		};
 		
 		return migration_funcs;
