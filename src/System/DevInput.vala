@@ -9,18 +9,14 @@ public class WordClock.DevInput : GLib.Object, SignalSource {
 	protected IOChannel channel;
 	private uint8 repetition = 0;
 	
-	public DevInput( string device ) {
-		try {
-			this.channel = new IOChannel.file(device, "r");
-			this.channel.set_encoding(null);
-			
-			uint stat = this.channel.add_watch(IOCondition.IN, receive);
-			
-			if(stat == 0) {
-				warning("Cannot add watch on IOChannel");
-			}
-		} catch( Error e ) {
-			warning(e.message);
+	public DevInput( string device ) throws GLib.Error {
+		this.channel = new IOChannel.file(device, "r");
+		this.channel.set_encoding(null);
+		
+		uint stat = this.channel.add_watch(IOCondition.IN, receive);
+		
+		if(stat == 0) {
+			warning("Cannot add watch on IOChannel");
 		}
 	}
 

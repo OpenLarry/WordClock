@@ -1,0 +1,29 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "multi",
+            "displayName": "Multi Config",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "build/multi",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "../output/host/share/buildroot/toolchainfile.cmake",
+                "CMAKE_INSTALL_PREFIX": "/usr"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "configurePreset": "multi",
+            "configuration": "Debug"
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "configurePreset": "multi",
+            "configuration": "Release"
+        }
+    ]
+}

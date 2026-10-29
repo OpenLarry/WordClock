@@ -6,7 +6,7 @@ using WordClock;
  */
 public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 	const string DEVICE = "/dev/fb0";
-	public const uint8 SUBBITS = 3;
+	public const uint8 SUBBITS = 0;
 	public const uint8 SUBFRAMES = 1 << SUBBITS;
 	
 	public const uint8 SUBFRAMEDIFF = (0xFF / SUBFRAMES) + 1;
@@ -89,10 +89,10 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		this.fb_var.bits_per_pixel = 16; // 16 bits = min -> 16 strips
 		this.fb_var.pixclock = 208333; // picoseconds -> 4,8Mhz / 6 bit per "real pixel" = 800khz
 		this.fb_var.left_margin = 0;
-		this.fb_var.right_margin = 1; // can not be 0
-		this.fb_var.upper_margin = 1; // can not be 0
-		this.fb_var.lower_margin = 1; // can not be 0
-		this.fb_var.hsync_len = 1; // can not be 0
+		this.fb_var.right_margin = 0;
+		this.fb_var.upper_margin = 0;
+		this.fb_var.lower_margin = 0;
+		this.fb_var.hsync_len = 2;
 		this.fb_var.vsync_len = 1;
 		
 		// resolution
@@ -111,9 +111,9 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		
 		this.buffer_count = (uint8) ((this.fb_var.yres_virtual / this.fb_var.yres) * (this.fb_var.xres_virtual / this.fb_var.xres));
 		
-		// put frambuffer settings
-		ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
-		assert(ret==0);
+		//  // put frambuffer settings
+		//  ret = Posix.ioctl(this.fd, Linux.Framebuffer.FBIOPUT_VSCREENINFO, &this.fb_var);
+		//  assert(ret==0);
 		
 		// init LED array
 		this.leds = new Color[this.ports.length,leds];
@@ -210,7 +210,9 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 		uint16[] channel = new uint16[this.leds.length[0]];
 		
 		for(uint8 led=0; led<this.leds.length[1]; led++) {
+			debug("Led: %u", led);
 			for(uint8 color=0; color<3; color++) {
+				debug("color: %u", color);
 				for(int strip=0; strip<this.leds.length[0]; strip++) {
 					switch(color) {
 						case 0:
@@ -249,7 +251,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 							channel[strip] += channel[strip] <= MAXCHANNEL ? SUBFRAMEDIFF : 0;
 						}
 						this.fb32[pos[subframe]] = pix;
-						pos[subframe] += (color<2) ? 3 : 2; // TODO: xres_virtual
+						pos[subframe] += 3; // TODO: xres_virtual
 					}
 				}
 			}
@@ -319,6 +321,8 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			}else{
 				renderer.render();
 			}
+
+			debug("Got frame");
 			
 			this.frame++;
 			
@@ -347,6 +351,7 @@ public class WordClock.Ws2812bDriver : LedDriver, Jsonable, SystemSensor {
 			
 			if(Main.in_debug_mode()) {
 				performance.start();
+				debug("Enc frame");
 				this.encode_to_fb();
 				encode += performance.elapsed();
 			}else{

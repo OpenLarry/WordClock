@@ -7,30 +7,25 @@ using WordClock, Gee;
 public class WordClock.RemoteControl : DevInput {
 	const string INPUT_PROTOCOLS = "/sys/devices/soc0/%s/rc/rc0/protocols";
 	
-	public RemoteControl( string eventDevice, string irDevice, string[] protocols ) {
-		try {
-			base(eventDevice);
-			
-			// enable protocols
-			var dos = new GLib.DataOutputStream( GLib.File.new_for_path( INPUT_PROTOCOLS.printf(irDevice) ).append_to(FileCreateFlags.NONE) );
-			
-			dos.put_string("none\n");
-			foreach( string protocol in protocols ) {
-				dos.put_string("+%s\n".printf(protocol));
-			}
-
-			// delete scancodes
-			Linux.Input.KeymapEntry entry = {};
-			do {
-				entry.flags = 1;
-				entry.keycode = Linux.Input.KEY_RESERVED;
-				entry.index = 0;
-			}
-			while ( Linux.ioctl(this.channel.unix_get_fd(), Linux.Input.EVIOCSKEYCODE_V2, &entry) == 0 );
-
-		} catch( Error e ) {
-			warning(e.message);
+	public RemoteControl( string eventDevice, string irDevice, string[] protocols ) throws GLib.Error {
+		base(eventDevice);
+		
+		// enable protocols
+		var dos = new GLib.DataOutputStream( GLib.File.new_for_path( INPUT_PROTOCOLS.printf(irDevice) ).append_to(FileCreateFlags.NONE) );
+		
+		dos.put_string("none\n");
+		foreach( string protocol in protocols ) {
+			dos.put_string("+%s\n".printf(protocol));
 		}
+
+		// delete scancodes
+		Linux.Input.KeymapEntry entry = {};
+		do {
+			entry.flags = 1;
+			entry.keycode = Linux.Input.KEY_RESERVED;
+			entry.index = 0;
+		}
+		while ( Linux.ioctl(this.channel.unix_get_fd(), Linux.Input.EVIOCSKEYCODE_V2, &entry) == 0 );
 	}
 
 	public void add_scancode( string name, uint8[] scancode ) {
